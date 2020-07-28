@@ -76,8 +76,8 @@ def fill_trajectory(performance_list, time_list, replace_nan=np.NaN):
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--benchmark', default='101', type=str, nargs='?',
-                    choices=['101', '1shot1', '201', 'paramnet', 'svm',
-                             'countingones', 'rl', 'bnn', 'cc18'],
+                    choices=['101', '1shot1', '201', 'nas-hpo', 'paramnet', 'svm',
+                             'countingones', 'rl', 'bnn', 'cc18', 'speed'],
                     help='select benchmark to plot')
 parser.add_argument('--bench_type', default='protein', type=str, nargs='?',
                     help='select subset of benchmark to plot')
@@ -111,7 +111,10 @@ bench_type = args.bench_type
 
 # Checking benchmark specifications
 if benchmark == '101':
-    from dehb.examples.nas101 import create_plot
+    from dehb.examples.nas101 import create_plot_101 as create_plot
+
+elif benchmark == 'nas-hpo':
+    from dehb.examples.nas101 import create_plot_hpo as create_plot
 
 elif benchmark == '1shot1' and bench_type not in ["1", "2", "3"]:
     print("Specify \'--bench_type\' from {1, 2, 3} for choosing the search space for 1shot1.")
@@ -129,7 +132,7 @@ elif benchmark == 'paramnet':
 elif benchmark == 'svm':
     from dehb.examples.svm import create_plot
 
-elif benchmark == '201':
+elif benchmark == '201' or benchmark == 'speed':
     from dehb.examples.nas201 import create_plot
 
 elif benchmark == 'rl':
@@ -168,12 +171,12 @@ else:
                     colors, linestyles, marker, n_runs, limit)
 
 
-if True: #benchmark != 'cc18':
+if benchmark != 'cc18':
     plt.xscale("log")
 if benchmark != 'svm' and benchmark != 'bnn':
      plt.yscale("log")
 plt.tick_params(which='both', direction="in")
-if benchmark == 'svm':
+if benchmark == 'svm' or benchmark == 'bnn':
     plt.legend(loc='upper right', framealpha=1, prop={'size': 30, 'weight': 'bold'})
 else:
     plt.legend(loc='lower left', framealpha=1, prop={'size': 30, 'weight': 'bold'})
@@ -185,6 +188,8 @@ elif benchmark == 'bnn':
     plt.xlabel("MCMC steps", fontsize=50)
 elif benchmark == 'countingones':
     plt.xlabel("cummulative budget / $b_{max}$", fontsize=50)
+elif benchmark == 'speed':
+    plt.xlabel("Runtime sans function evalution")
 elif plot_type == "wallclock":
     plt.xlabel("estimated wallclock time $[s]$", fontsize=50)
 elif plot_type == "fevals":
@@ -197,18 +202,22 @@ elif benchmark == 'rl':
 elif benchmark == 'bnn':
     plt.ylabel("negative log-likelihood", fontsize=50)
 elif benchmark == 'countingones':
-    plt.ylabel("normalized {} regret".format(regret_type))
+    plt.ylabel("normalized {} regret".format(regret_type), fontsize=50)
+elif benchmark == 'countingones':
+    plt.ylabel("number of function evaluations", fontsize=50)
 else:
     plt.ylabel("{} regret".format(regret_type), fontsize=50)
 
 if benchmark == 'rl':
-    plt.xlim(1e1, 1e5)
+    plt.xlim(1e2, 1e5)
 elif benchmark == 'bnn':
-    plt.xlim(1e4, 1e6)
+    plt.xlim(1e4, min(max_time*10, limit))
 elif benchmark == 'countingones':
-    plt.xlim(max(min_time/10, 1e-1), min(max_time*10, 1e7))
+    # plt.xlim(max(min_time/10, 1e-1), min(max_time*10, 1e7))
+    plt.xlim(0.1, 1e4)
 elif benchmark == 'cc18':
-    plt.xlim(0, max_time)
+    # plt.xlim(0.01, max_time)
+    plt.xlim(0.01, 10)
 else:
     plt.xlim(max(min_time/10, 1e0), min(max_time*10, 1e7))
 
@@ -216,6 +225,10 @@ if benchmark == 'bnn':
     plt.ylim(3, 75)
 elif benchmark == 'rl':
     plt.ylim(1e2, 1e4)
+elif benchmark == 'cc18':
+    plt.ylim(0.1, max_regret)
+elif benchmark == 'svm':
+    plt.ylim(min_regret, 0.5)
 else:
     plt.ylim(min_regret, max_regret)
 

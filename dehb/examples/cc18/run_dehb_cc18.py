@@ -89,6 +89,8 @@ parser.add_argument('--mutation_factor', default=0.5, type=float, nargs='?',
                     help='mutation factor value')
 parser.add_argument('--crossover_prob', default=0.5, type=float, nargs='?',
                     help='probability of crossover')
+parser.add_argument('--boundary_fix_type', default='random', type=str, nargs='?',
+                    help="strategy to handle solutions outside range {'random', 'clip'}")
 parser.add_argument('--eta', default=3, type=int,
                     help='aggressive stopping rate (eta) for Hyperband')
 parser.add_argument('--min_budget', default=0.1, type=float,
@@ -136,7 +138,7 @@ DEHB = dehbs[args.version]
 dehb = DEHB(cs=cs, dimensions=dimensions, f=f, strategy=args.strategy,
             mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,
             eta=args.eta, min_budget=min_budget, max_budget=max_budget,
-            generations=args.gens)
+            generations=args.gens, boundary_fix_type=args.boundary_fix_type)
 # Initializing DE object
 de = DE(cs=cs, dimensions=dimensions, f=f, pop_size=10,
         mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,

@@ -96,7 +96,7 @@ parser.add_argument('--verbose', default='False', choices=['True', 'False'], nar
                     help='to print progress or not')
 parser.add_argument('--folder', default=None, type=str, nargs='?',
                     help='name of folder where files will be dumped')
-parser.add_argument('--async', default=None, type=str, nargs='?',
+parser.add_argument('--async_strategy', default=None, type=str, nargs='?',
                     choices=['deferred', 'immediate', 'random', 'worst'],
                     help='type of Asynchronous DE')
 
@@ -106,11 +106,11 @@ args.fix_seed = True if args.fix_seed == 'True' else False
 max_budget = args.max_budget
 
 # Directory where files will be written
-if args.async is None:
+if args.async_strategy is None:
     folder = "de_pop{}".format(args.pop_size)
 else:
-    folder = "ade_{}_pop{}".format(args.async, args.pop_size)
-output_path = os.path.join(args.output_path, args.dataset, args.folder)
+    folder = "ade_{}_pop{}".format(args.async_strategy, args.pop_size)
+output_path = os.path.join(args.output_path, args.dataset, folder)
 os.makedirs(output_path, exist_ok=True)
 
 # Parameter space to be used by DE
@@ -128,19 +128,19 @@ dimensions = len(cs.get_hyperparameters())
 
 
 # Initializing DE object
-if args.async is None:
+if args.async_strategy is None:
     de = DE(cs=cs, dimensions=dimensions, f=f, pop_size=args.pop_size,
             mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,
             strategy=args.strategy, budget=args.max_budget)
 else:
     de = AsyncDE(cs=cs, dimensions=dimensions, f=f, pop_size=args.pop_size,
                  mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,
-                 strategy=args.strategy, budget=args.max_budget, async_strategy=args.async)
+                 strategy=args.strategy, budget=args.max_budget, async_strategy=args.async_strategy)
 
 
 if args.runs is None:  # for a single run
     if not args.fix_seed:
-        np.random.seed(0)
+        np.random.seed(args.run_id)
     # Running DE iterations
     traj, runtime, history = de.run(generations=args.gens, verbose=args.verbose)
     valid_scores, test_scores = calc_regrets(history)

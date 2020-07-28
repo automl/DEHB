@@ -120,6 +120,8 @@ parser.add_argument('--mutation_factor', default=0.5, type=float, nargs='?',
                     help='mutation factor value')
 parser.add_argument('--crossover_prob', default=0.5, type=float, nargs='?',
                     help='probability of crossover')
+parser.add_argument('--boundary_fix_type', default='random', type=str, nargs='?',
+                    help="strategy to handle solutions outside range {'random', 'clip'}")
 parser.add_argument('--min_budget', default=11, type=int, nargs='?',
                     help='minimum budget')
 parser.add_argument('--max_budget', default=199, type=int, nargs='?',
@@ -142,7 +144,9 @@ dataset = args.dataset
 
 # Directory where files will be written
 if args.folder is None:
-    folder = "dehb_v{}".format(args.version)
+    folder = "dehb"
+    if args.version is not None:
+        folder = "dehb_v{}".format(args.version)
 else:
     folder = args.folder
 
@@ -195,7 +199,7 @@ DEHB = dehbs[args.version]
 dehb = DEHB(cs=cs, dimensions=dimensions, f=f, strategy=args.strategy,
             mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,
             eta=args.eta, min_budget=min_budget, max_budget=max_budget,
-            generations=args.gens)
+            generations=args.gens, boundary_fix_type=args.boundary_fix_type)
 # Initializing DE object
 de = DE(cs=cs, dimensions=dimensions, f=f, pop_size=10,
         mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,

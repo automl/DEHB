@@ -66,6 +66,8 @@ parser.add_argument('--mutation_factor', default=0.5, type=float, nargs='?',
                     help='mutation factor value')
 parser.add_argument('--crossover_prob', default=0.5, type=float, nargs='?',
                     help='probability of crossover')
+parser.add_argument('--boundary_fix_type', default='random', type=str, nargs='?',
+                    help="strategy to handle solutions outside range {'random', 'clip'}")
 parser.add_argument('--eta', default=3, type=int, nargs='?',
                     help='eta for Successive Halving')
 parser.add_argument('--verbose', default='False', choices=['True', 'False'], nargs='?', type=str,
@@ -148,7 +150,7 @@ DEHB = dehbs[args.version]
 dehb = DEHB(cs=cs, dimensions=dimensions, f=f, strategy=args.strategy,
             mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,
             eta=args.eta, min_budget=min_budget, max_budget=max_budget,
-            generations=args.gens)
+            generations=args.gens, boundary_fix_type=args.boundary_fix_type)
 
 if args.runs is None:  # for a single run
     if not args.fix_seed:

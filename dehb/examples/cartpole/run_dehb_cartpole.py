@@ -91,6 +91,8 @@ parser.add_argument('--mutation_factor', default=0.5, type=float, nargs='?',
                     help='mutation factor value')
 parser.add_argument('--crossover_prob', default=0.5, type=float, nargs='?',
                     help='probability of crossover')
+parser.add_argument('--boundary_fix_type', default='random', type=str, nargs='?',
+                    help="strategy to handle solutions outside range {'random', 'clip'}")
 parser.add_argument('--min_budget', default=1, type=int, nargs='?',
                     help='minimum budget')
 parser.add_argument('--max_budget', default=9, type=int, nargs='?',
@@ -133,7 +135,7 @@ DEHB = dehbs[args.version]
 dehb = DEHB(cs=cs, dimensions=dimensions, f=f, strategy=args.strategy,
             mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,
             eta=args.eta, min_budget=min_budget, max_budget=max_budget,
-            generations=args.gens)
+            generations=args.gens, boundary_fix_type=args.boundary_fix_type)
 
 # Helper DE object for vector to config mapping
 de = DE(cs=cs, b=b, f=f)
@@ -141,7 +143,7 @@ de = DE(cs=cs, b=b, f=f)
 
 if args.runs is None:  # for a single run
     if not args.fix_seed:
-        np.random.seed(0)
+        np.random.seed(args.run_id)
     # Running DE iterations
     traj, runtime, history = dehb.run(iterations=args.iter, verbose=args.verbose)
     valid_scores, test_scores = calc_regrets(history)

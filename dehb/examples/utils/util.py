@@ -1,6 +1,6 @@
 import os
+import json
 import pickle
-
 import numpy as np
 
 import hpbandster.core.nameserver as hpns
@@ -130,6 +130,19 @@ def extract_results_to_pickle(results_object):
 	return (return_dict)
 
 
+def convert_to_json(results):
+	all_runs = results.get_all_runs(only_largest_budget=False)
+	all_runs.sort(key=lambda r: r.time_stamps['finished'])
+	# ignoring first entry
+	traj = np.arange(start=2, stop=len(all_runs)+1, step=1)
+	runtime = []
+	for i in range(len(all_runs)):
+		runtime.append(all_runs[i].info['cost'])
+	res = {}
+	res['regret_validation'] = traj.tolist()
+	# ignoring first entry
+	res['runtime'] = np.cumsum(runtime[1:]).tolist()
+	return res
 
 
 def run_experiment(args, worker, dest_dir, smac_deterministic, store_all_runs=False):
@@ -189,12 +202,16 @@ def run_experiment(args, worker, dest_dir, smac_deterministic, store_all_runs=Fa
 	if result is None:
 		raise ValueError("Unknown method %s!"%args.method)
 
-	with open(os.path.join(dest_dir, '{}_run_{}.pkl'.format(args.method, args.run_id)), 'wb') as fh:
-		pickle.dump(extract_results_to_pickle(result), fh)
+	fh = open(os.path.join(dest_dir, 'run_{}.json'.format(args.run_id)), 'w')
+	json.dump(convert_to_json(result), fh)
+	fh.close()
 
-	if store_all_runs:
-		with open(os.path.join(dest_dir, '{}_full_run_{}.pkl'.format(args.method, args.run_id)), 'wb') as fh:
-			pickle.dump(extract_results_to_pickle(result), fh)
+	# with open(os.path.join(dest_dir, '{}_run_{}.pkl'.format(args.method, args.run_id)), 'wb') as fh:
+	# 	pickle.dump(extract_results_to_pickle(result), fh)
+    #
+	# if store_all_runs:
+	# 	with open(os.path.join(dest_dir, '{}_full_run_{}.pkl'.format(args.method, args.run_id)), 'wb') as fh:
+	# 		pickle.dump(extract_results_to_pickle(result), fh)
 
 	# in case one wants to inspect the complete run
 	return(result)
