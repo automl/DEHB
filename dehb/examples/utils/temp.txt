@@ -1,0 +1,1 @@
+[('randomsearch', 'RS'), ('hyperband', 'HB'), ('bohb', 'BOHB'), ('tpe', 'TPE'), ('de_pop20', 'DE'), ('dehb', 'DEHB')]
