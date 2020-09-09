@@ -202,13 +202,13 @@ def run_experiment(args, worker, dest_dir, smac_deterministic, store_all_runs=Fa
 	if result is None:
 		raise ValueError("Unknown method %s!"%args.method)
 
-	fh = open(os.path.join(dest_dir, 'run_{}.json'.format(args.run_id)), 'w')
-	json.dump(convert_to_json(result), fh)
-	fh.close()
+	# fh = open(os.path.join(dest_dir, 'run_{}.json'.format(args.run_id)), 'w')
+	# json.dump(convert_to_json(result), fh)
+	# fh.close()
 
-	# with open(os.path.join(dest_dir, '{}_run_{}.pkl'.format(args.method, args.run_id)), 'wb') as fh:
-	# 	pickle.dump(extract_results_to_pickle(result), fh)
-    #
+	with open(os.path.join(dest_dir, '{}_run_{}.pkl'.format(args.method, args.run_id)), 'wb') as fh:
+		pickle.dump(extract_results_to_pickle(result), fh)
+
 	# if store_all_runs:
 	# 	with open(os.path.join(dest_dir, '{}_full_run_{}.pkl'.format(args.method, args.run_id)), 'wb') as fh:
 	# 		pickle.dump(extract_results_to_pickle(result), fh)
