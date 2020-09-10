@@ -42,7 +42,7 @@ parser.add_argument('--max_feval', default=4, type=int, nargs='?',
 parser.add_argument('--output_path', default="./experiments", type=str, nargs='?',
                     help='specifies the path where the results will be saved')
 parser.add_argument('--data_dir',
-                    default="../nasbench_analysis/nasbench_data/108_e/nasbench_only108.tfrecord",
+                    default="../nasbench-1shot1/nasbench_analysis/nasbench_data/108_e/nasbench_only108.tfrecord",
                     type=str, nargs='?', help='specifies the path to the nasbench data')
 parser.add_argument('--seed', default=0, type=int,
                     help='random seed')
