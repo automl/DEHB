@@ -109,7 +109,7 @@ for run_id in range(runs):
     else:
         res = b.get_results()
 
-    fh = open(os.path.join(output_path, 'run_%d.json' % args.run_id), 'w')
+    fh = open(os.path.join(output_path, 'run_%d.json' % run_id), 'w')
     json.dump(res, fh)
     fh.close()
     print("Run saved. Resetting...")
