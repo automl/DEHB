@@ -52,7 +52,7 @@ args = parser.parse_args()
 
 nasbench = api.NASBench(args.data_dir)
 
-output_path = os.path.join(args.output_path, "discrete_optimizers", 'SMAC')
+output_path = os.path.join(args.output_path, "SMAC")
 os.makedirs(os.path.join(output_path), exist_ok=True)
 
 if args.search_space is None:
