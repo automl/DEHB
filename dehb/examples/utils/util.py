@@ -197,7 +197,7 @@ def run_experiment(args, worker, dest_dir, smac_deterministic, store_all_runs=Fa
 		result = worker.run_tpe(bb_iterations)
 
 	if args.method == 'smac':
-		result = worker.run_smac(bb_iterations, deterministic=smac_deterministic)
+		result = worker.run_smac(bb_iterations, deterministic=smac_deterministic, working_directory=args.working_directory)
 
 	if result is None:
 		raise ValueError("Unknown method %s!"%args.method)
