@@ -15,6 +15,12 @@ from smac.facade.smac_facade import SMAC
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_func import ExecuteTAFuncDict
 
+sys.path.append('dehb/examples/')
+from utils import util
+
+sys.path.append(os.path.join(os.getcwd(), '../HpBandSter/icml_2018_experiments/experiments/workers'))
+from base_worker import BaseWorker
+
 sys.path.append(os.path.join(os.getcwd(), '../nas201/'))
 sys.path.append(os.path.join(os.getcwd(), '../AutoDL-Projects/lib/'))
 from nas_201_api import NASBench201API as API
@@ -100,6 +106,8 @@ dataset = args.dataset
 
 output_path = os.path.join(args.output_path, args.dataset, args.folder)
 os.makedirs(os.path.join(output_path), exist_ok=True)
+args.working_directory = output_path
+args.method = "smac"
 
 # Loading NAS-201
 api = API(args.data_dir)
@@ -120,52 +128,62 @@ scenario = Scenario({"run_obj": "quality",
                      "initial_incumbent": "RANDOM",
                      "output_dir": ""})
 
+class NAS201Worker(BaseWorker):
+    def __init__(self, api, cs):
+        super().__init__(benchmark=api, configspace=cs, **kwargs)
+        self.api = api
+        self.cs = cs
 
-def objective_function(config, **kwargs):
-    global dataset, api
-    structure = config2structure(config)
-    arch_index = api.query_index_by_arch(structure)
-    # From https://github.com/D-X-Y/AutoDL-Projects/blob/master/exps/algos/R_EA.py
-    ## Author: https://github.com/D-X-Y [Xuanyi.Dong@student.uts.edu.au]
-    info = api.get_more_info(arch_index, dataset, #iepoch=budget,
-                             use_12epochs_result=False, is_random=True)
-    try:
-        fitness = info['valid-accuracy']
-    except:
-        fitness = info['valtest-accuracy']
+    def compute(self, config, **kwargs):
+        # global dataset, api
+        structure = config2structure(config)
+        arch_index = self.api.query_index_by_arch(structure)
+        # From https://github.com/D-X-Y/AutoDL-Projects/blob/master/exps/algos/R_EA.py
+        ## Author: https://github.com/D-X-Y [Xuanyi.Dong@student.uts.edu.au]
+        info = self.api.get_more_info(arch_index, dataset, #iepoch=budget,
+                                    use_12epochs_result=False, is_random=True)
+        try:
+            fitness = info['valid-accuracy']
+        except:
+            fitness = info['valtest-accuracy']
 
-    cost = info['train-all-time']
-    try:
-        cost += info['valid-all-time']
-    except:
-        cost += info['valtest-all-time']
+        cost = info['train-all-time']
+        try:
+            cost += info['valid-all-time']
+        except:
+            cost += info['valtest-all-time']
 
-    fitness = 1 - fitness / 100
+        fitness = 1 - fitness / 100
 
-    # info = api.get_more_info(arch_index, dataset, #iepoch=max_budget,
-    #                          use_12epochs_result=False, is_random=False)
-    test_score = 1 - info['test-accuracy'] / 100
-    return ({
-        'loss': float(fitness),
-        'info': {'cost': float(cost), 'test_loss': float(test_score)}
-    })
+        # info = api.get_more_info(arch_index, dataset, #iepoch=max_budget,
+        #                          use_12epochs_result=False, is_random=False)
+        test_score = 1 - info['test-accuracy'] / 100
+
+        return ({
+            'loss': float(fitness),
+            'info': {'cost': float(cost), 'test_loss': float(test_score)}
+        })
 
 runs = args.runs
 for run_id in range(runs):
     print("Run {:>3}/{:>3}".format(run_id+1, runs))
-    tae = ExecuteTAFuncDict(objective_function, use_pynisher=False)
-    smac = SMAC(scenario=scenario, tae_runner=tae)
 
-    # probability for random configurations
-    smac.solver.random_configuration_chooser.prob = args.random_fraction
-    smac.solver.model.rf_opts.num_trees = args.n_trees
-    # only 1 configuration per SMBO iteration
-    smac.solver.scenario.intensification_percentage = 1e-10
-    smac.solver.intensifier.min_chall = 1
-    # maximum number of function evaluations per configuration
-    smac.solver.intensifier.maxR = args.max_feval
+    worker = Worker(api=api, cs=cs, measure_test_loss=False, run_id=run_id)
 
-    smac.optimize()
+    result = util.run_experiment(args, worker, output_path, smac_deterministic=False)
+    # tae = ExecuteTAFuncDict(objective_function, use_pynisher=False)
+    # smac = SMAC(scenario=scenario, tae_runner=tae)
+    #
+    # # probability for random configurations
+    # smac.solver.random_configuration_chooser.prob = args.random_fraction
+    # smac.solver.model.rf_opts.num_trees = args.n_trees
+    # # only 1 configuration per SMBO iteration
+    # smac.solver.scenario.intensification_percentage = 1e-10
+    # smac.solver.intensifier.min_chall = 1
+    # # maximum number of function evaluations per configuration
+    # smac.solver.intensifier.maxR = args.max_feval
+    #
+    # smac.optimize()
 
     # fh = open(os.path.join(output_path, 'run_%d.json' % run_id), 'w')
     # json.dump(res, fh)
