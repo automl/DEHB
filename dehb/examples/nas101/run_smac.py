@@ -35,27 +35,16 @@ parser.add_argument('--random_fraction', default=.33, type=float, nargs='?', hel
 parser.add_argument('--max_feval', default=4, type=int, nargs='?',
                     help='maximum number of function evaluation per configuration')
 
-# parser.add_argument('--run_id', default=0, type=int, nargs='?', help='unique number to identify this run')
-# parser.add_argument('--benchmark', default="protein_structure", type=str, nargs='?', help='specifies the benchmark')
-# parser.add_argument('--n_iters', default=100, type=int, nargs='?', help='number of iterations for optimization method')
-# parser.add_argument('--output_path', default="./", type=str, nargs='?',
-#                     help='specifies the path where the results will be saved')
-# parser.add_argument('--data_dir', default="./", type=str, nargs='?', help='specifies the path to the tabular data')
-# parser.add_argument('--n_trees', default=10, type=int, nargs='?', help='number of trees for the random forest')
-# parser.add_argument('--random_fraction', default=.33, type=float, nargs='?', help='fraction of random configurations')
-# parser.add_argument('--max_feval', default=4, type=int, nargs='?',
-#                     help='maximum number of function evaluation per configuration')
-
 args = parser.parse_args()
 
 if args.benchmark == "nas_cifar10a":
-    b = NASCifar10A(data_dir=args.data_dir)
+    b = NASCifar10A(data_dir=args.data_dir, multi_fidelity=False)
 
 elif args.benchmark == "nas_cifar10b":
-    b = NASCifar10B(data_dir=args.data_dir)
+    b = NASCifar10B(data_dir=args.data_dir, multi_fidelity=False)
 
 elif args.benchmark == "nas_cifar10c":
-    b = NASCifar10C(data_dir=args.data_dir)
+    b = NASCifar10C(data_dir=args.data_dir, multi_fidelity=False)
 
 elif args.benchmark == "protein_structure":
     b = FCNetProteinStructureBenchmark(data_dir=args.data_dir)
