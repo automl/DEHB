@@ -108,6 +108,10 @@ output_path = os.path.join(args.output_path, args.dataset, args.folder)
 os.makedirs(os.path.join(output_path), exist_ok=True)
 args.working_directory = output_path
 args.method = "smac"
+args.min_budget = 11
+args.max_budget = 199
+args.eta = 3
+args.num_iterations = args.n_iters
 
 # Loading NAS-201
 api = API(args.data_dir)
@@ -129,7 +133,7 @@ scenario = Scenario({"run_obj": "quality",
                      "output_dir": ""})
 
 class NAS201Worker(BaseWorker):
-    def __init__(self, api, cs):
+    def __init__(self, api, cs, **kwargs):
         super().__init__(benchmark=api, configspace=cs, **kwargs)
         self.api = api
         self.cs = cs
@@ -168,8 +172,8 @@ runs = args.runs
 for run_id in range(runs):
     print("Run {:>3}/{:>3}".format(run_id+1, runs))
 
-    worker = Worker(api=api, cs=cs, measure_test_loss=False, run_id=run_id)
-
+    worker = NAS201Worker(api=api, cs=cs, measure_test_loss=False, run_id=run_id, max_budget=199)
+    args.run_id = run_id
     result = util.run_experiment(args, worker, output_path, smac_deterministic=False)
     # tae = ExecuteTAFuncDict(objective_function, use_pynisher=False)
     # smac = SMAC(scenario=scenario, tae_runner=tae)
