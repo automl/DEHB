@@ -305,8 +305,6 @@ else:  # bench_type == 'nas-hpo'
             reporter(budget=budget, score=-fitness, test_score=-test_fitness, cost=cost)
 
 
-print("Starting scheduler...")
-
 scheduler = ag.scheduler.HyperbandScheduler(
     f,  # train_fn,
     searcher='bayesopt',
