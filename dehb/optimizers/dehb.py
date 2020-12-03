@@ -6,7 +6,7 @@ from .de import DE, AsyncDE
 class DEHBBase():
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=None,
                  crossover_prob=None, strategy=None, min_budget=None,
-                 max_budget=None, eta=None, min_clip=3, max_clip=None, configspace=True,
+                 max_budget=None, eta=None, min_clip=None, max_clip=None, configspace=True,
                  boundary_fix_type='random', max_age=np.inf, **kwargs):
         # Benchmark related variables
         self.cs = cs
