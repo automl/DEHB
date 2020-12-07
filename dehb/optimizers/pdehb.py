@@ -104,6 +104,9 @@ class PDEHB(DEHBBase):
         run_info = {
             'fitness': fitness,
             'cost': cost
+            'config': config,
+            'budget': budget,
+            'parent_idx': parent_idx
         }
         return run_info
 
@@ -178,10 +181,9 @@ class PDEHB(DEHBBase):
     def is_worker_available(self):
         """ Checks if at least one worker is available to run a job
         """
+        if len(self.futures) >= sum(self.client.nthreads().values()):
+            return False
         return True
-        # if np.random.uniform() > 0.5:
-        #     return True
-        # return False
 
     def _get_promotion_candidate(self, low_budget, high_budget, n_configs):
         """ Manages the population to be promoted from the lower to the higher budget.
