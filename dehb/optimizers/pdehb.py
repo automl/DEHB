@@ -1,4 +1,5 @@
 import numpy as np
+from distributed import client, Client
 
 from .de import DE, AsyncDE
 from .dehb import DEHB, DEHBBase
@@ -57,27 +58,67 @@ class PDEHB(DEHBBase):
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=0.5,
                  crossover_prob=0.5, strategy='rand1_bin', min_budget=None,
                  max_budget=None, eta=3, min_clip=None, max_clip=None, configspace=True,
-                 boundary_fix_type='random', max_age=np.inf, **kwargs):
+                 boundary_fix_type='random', max_age=np.inf, n_workers=1, **kwargs):
         super().__init__(cs=cs, f=f, dimensions=dimensions, mutation_factor=mutation_factor,
                          crossover_prob=crossover_prob, strategy=strategy, min_budget=min_budget,
                          max_budget=max_budget, eta=eta, min_clip=min_clip, max_clip=max_clip,
                          configspace=configspace, boundary_fix_type=boundary_fix_type,
-                         max_age=max_age, **kwargs)
+                         max_age=max_age, n_workers=1, **kwargs)
         self.iteration_counter = -1
         self.de = {}
         self._max_pop_size = None
         self.active_brackets = []  # list of SHBracketManager objects
-        self.futures = []
         self.traj = []
         self.runtime = []
         self.history = []
-        self.reset()
+
+        # Dask variables
+        self.n_workers = n_workers
+        self.client = Client(
+            n_workers=self.n_workers, processes=True, threads_per_worker=1, scheduler_port=0
+        )
+        self.futures = []
+
+        # Initializing DE subpopulations
+        self._get_pop_sizes()
+        self._init_subpop()
+
+    def __getstate__(self):
+        """ Allows the object to picklable while having Dask client as a class attribute.
+        """
+        d = dict(self.__dict__)
+        d["client"] = None  # hack to allow Dask client to be a class attribute
+        return d
+
+    def __del__(self):
+        """ Ensures a clean kill of the Dask client and frees up a port.
+        """
+        if isinstance(self.client, Client):
+            self.client.close()
+
+    def _f_objective(self, job_info):
+        """ Wrapper to call DE's objective function.
+        """
+        config, budget, parent_idx = job_info['config'], job_info['budget'], job_info['parent_idx']
+        fitness, cost = self.de[budget].f_objective(config, budget)
+        run_info = {
+            'fitness': fitness,
+            'cost': cost
+        }
+        return run_info
 
     def reset(self):
         super().reset()
-        self.iteration_counter = -1
-        self.active_brackets = []
+        if isinstance(self.client, Client):
+            self.client.close()
+        self.client = Client(
+            n_workers=self.n_workers, processes=True, threads_per_worker=1, scheduler_port=0
+        )
         self.futures = []
+        self.iteration_counter = -1
+        self.de = {}
+        self._max_pop_size = None
+        self.active_brackets = []
         self.traj = []
         self.runtime = []
         self.history = []
@@ -215,7 +256,6 @@ class PDEHB(DEHBBase):
             if budget != bracket.budgets[0]:
                 # TODO: check if generalizes to all budget spacings
                 config = self._get_promotion_candidate(lower_budget, budget, num_configs)
-                print(budget, "promote")
                 return config, parent_idx
 
         # DE evolution occurs when either all individuals in the subpopulation have been evaluated
@@ -241,7 +281,6 @@ class PDEHB(DEHBBase):
         # perform crossover with selected parent
         config = self.de[budget].crossover(target=target, mutant=mutant)
         config = self.de[budget].boundary_check(config)
-        print(budget, "evolve")
         return config, parent_idx
 
     def _get_next_job(self):
@@ -277,22 +316,21 @@ class PDEHB(DEHBBase):
     def submit_job(self, job_info):
         """ Asks a free worker to run the objective function on config and budget
         """
-        # access to Dask client
-        budget = job_info["budget"]
-        fitness, cost = self.de[budget].f_objective(job_info["config"], budget)
-        job_info["fitness"] = fitness
-        job_info["cost"] = cost
-        self.futures.append(job_info)
+        # submit to to Dask client
+        self.futures.append(
+            self.client.submit(self._f_objective, job_info)
+        )
 
     def _fetch_results_from_workers(self):
         """ Iterate over futures and collect results from finished workers
         """
-        # access to futures and iteration and collection
-        while len(self.futures):
-            job_info = self.futures.pop(0)
-            fitness, cost = job_info["fitness"], job_info["cost"]
-            budget, parent_idx = job_info["budget"], job_info["parent_idx"]
-            config = job_info["config"]
+        done_list = [future for future in self.futures if future.done()]
+        for future in done_list:
+            run_info = future.result()
+            self.futures.remove(future)
+            fitness, cost = run_info["fitness"], run_info["cost"]
+            budget, parent_idx = run_info["budget"], run_info["parent_idx"]
+            config = run_info["config"]
 
             # carry out DE selection
             if fitness <= self.de[budget].fitness[parent_idx]:

@@ -30,8 +30,8 @@ class DEHBBase():
             "configspace": self.configspace,
             "boundary_fix_type": self.fix_type,
             "max_age": self.max_age,
-            "cs": cs,
-            "dimensions": dimensions,
+            "cs": self.cs,
+            "dimensions": self.dimensions,
             "f": f
         }
 
