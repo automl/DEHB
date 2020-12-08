@@ -1,3 +1,4 @@
+import time
 import numpy as np
 from distributed import client, Client
 
@@ -74,9 +75,10 @@ class PDEHB(DEHBBase):
 
         # Dask variables
         self.n_workers = n_workers
-        self.client = Client(
-            n_workers=self.n_workers, processes=True, threads_per_worker=1, scheduler_port=0
-        )
+        if self.n_workers > 1:
+            self.client = Client(
+                n_workers=self.n_workers, processes=True, threads_per_worker=1, scheduler_port=0
+            )  # port 0 makes Dask select a random free port
         self.futures = []
 
         # Initializing DE subpopulations
@@ -93,7 +95,7 @@ class PDEHB(DEHBBase):
     def __del__(self):
         """ Ensures a clean kill of the Dask client and frees up a port.
         """
-        if isinstance(self.client, Client):
+        if hasattr(self, "client") and isinstance(self.client, Client):
             self.client.close()
 
     def _f_objective(self, job_info):
@@ -103,7 +105,7 @@ class PDEHB(DEHBBase):
         fitness, cost = self.de[budget].f_objective(config, budget)
         run_info = {
             'fitness': fitness,
-            'cost': cost
+            'cost': cost,
             'config': config,
             'budget': budget,
             'parent_idx': parent_idx
@@ -112,11 +114,12 @@ class PDEHB(DEHBBase):
 
     def reset(self):
         super().reset()
-        if isinstance(self.client, Client):
+        if hasattr(self, "client") and isinstance(self.client, Client):
             self.client.close()
-        self.client = Client(
-            n_workers=self.n_workers, processes=True, threads_per_worker=1, scheduler_port=0
-        )
+        if self.n_workers > 1:
+            self.client = Client(
+                n_workers=self.n_workers, processes=True, threads_per_worker=1, scheduler_port=0
+            )
         self.futures = []
         self.iteration_counter = -1
         self.de = {}
@@ -181,6 +184,8 @@ class PDEHB(DEHBBase):
     def is_worker_available(self):
         """ Checks if at least one worker is available to run a job
         """
+        if self.n_workers == 1:
+            return True
         if len(self.futures) >= sum(self.client.nthreads().values()):
             return False
         return True
@@ -319,16 +324,28 @@ class PDEHB(DEHBBase):
         """ Asks a free worker to run the objective function on config and budget
         """
         # submit to to Dask client
-        self.futures.append(
-            self.client.submit(self._f_objective, job_info)
-        )
+        if self.n_workers > 1:
+            self.futures.append(
+                self.client.submit(self._f_objective, job_info)
+            )
+        else:
+            # skipping scheduling to Dask worker to avoid added overheads in the synchronous case
+            self.futures.append(self._f_objective(job_info))
 
     def _fetch_results_from_workers(self):
         """ Iterate over futures and collect results from finished workers
         """
-        done_list = [future for future in self.futures if future.done()]
+        if self.n_workers > 1:
+            done_list = [future for future in self.futures if future.done()]
+        else:
+            # Dask not invoked in the synchronous case
+            done_list = self.futures
         for future in done_list:
-            run_info = future.result()
+            if self.n_workers > 1:
+                run_info = future.result()
+            else:
+                # Dask not invoked in the synchronous case
+                run_info = future
             self.futures.remove(future)
             fitness, cost = run_info["fitness"], run_info["cost"]
             budget, parent_idx = run_info["budget"], run_info["parent_idx"]
@@ -362,7 +379,9 @@ class PDEHB(DEHBBase):
             if self.iteration_counter >= brackets:
                 return True
         else:
-            if np.sum(self.runtime) >= total_cost:
+            if time.time() - self.start >= total_cost:
+                return True
+            if len(self.runtime) > 0 and self.runtime[-1] - self.start >= total_cost:
                 return True
         return False
 
@@ -380,6 +399,7 @@ class PDEHB(DEHBBase):
         2) Number of Successive Halving brackets run under Hyperband (brackets)
         3) Total computational cost aggregated by all function evaluations (total_cost)
         """
+        self.start = time.time()
         while True:
             if self._is_run_budget_exhausted(fevals, brackets, total_cost):
                 break
@@ -387,9 +407,13 @@ class PDEHB(DEHBBase):
                 job_info = self._get_next_job()
                 if verbose:
                     budget = job_info['budget']
-                    print("{}, {}, {}".format(self.iteration_counter, budget, self.inc_score))
+                    print("{}, {}, {}".format(
+                        self.iteration_counter, budget, self.inc_score
+                    ))
                 self.submit_job(job_info)
             self._fetch_results_from_workers()
             self.clean_inactive_brackets()
         if verbose:
             print("End of optimisation!")
+        self.runtime = np.array(self.runtime) - self.start
+        return np.array(self.traj), np.array(self.runtime), np.array(self.history)
