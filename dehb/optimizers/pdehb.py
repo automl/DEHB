@@ -7,21 +7,39 @@ from .dehb import DEHB, DEHBBase
 
 
 class SHBracketManager(object):
-    def __init__(self, n_configs, budgets):
+    """ Synchronous Successive Halving utilities
+    """
+    def __init__(self, n_configs, budgets, bracket_id=None):
         assert len(n_configs) == len(budgets)
         self.n_configs = n_configs
         self.budgets = budgets
+        self.bracket_id = bracket_id
         self.sh_bracket = {}
+        self._sh_bracket = {}
+        self._config_map = {}
         for i, budget in enumerate(budgets):
-            self.sh_bracket[budget] = n_configs[i]
+            # sh_bracket keeps track of jobs/configs that are still to be scheduled/allocatted
+            # _sh_bracket keeps track of jobs/configs that have been run and results retrieved for
+            # (sh_bracket[i] + _sh_bracket[i]) == n_configs[i] is when no jobs have been scheduled
+            #   or all jobs for that budget/rung are over
+            # (sh_bracket[i] + _sh_bracket[i]) < n_configs[i] indicates a job has been scheduled
+            #   and is queued/running and the bracket needs to be paused till results are retrieved
+            self.sh_bracket[budget] = n_configs[i]  # each scheduled job does -= 1
+            self._sh_bracket[budget] = 0  # each retrieved job does +=1
         self.n_rungs = len(budgets)
         self.current_rung = 0
 
-    def get_current_budget(self):
+    def get_budget(self, rung=None):
+        """ Returns the exact budget that rung is pointing to.
+
+        Returns current rung's budget if no rung is passed.
+        """
+        if rung is not None:
+            return self.budgets[rung]
         return self.budgets[self.current_rung]
 
     def get_lower_budget_promotions(self, budget):
-        """ Returns the lower budget and the number of configs to be promoted from there
+        """ Returns the immediate lower budget and the number of configs to be promoted from there
         """
         assert budget in self.budgets
         rung = np.where(budget == self.budgets)[0][0]
@@ -31,29 +49,76 @@ class SHBracketManager(object):
         return lower_budget, num_promote_configs
 
     def get_next_job_budget(self):
-        if self.sh_bracket[self.get_current_budget()] > 0:
-            return self.get_current_budget()
+        """ Returns the budget that will be selected if current_rung is incremented by 1
+        """
+        if self.sh_bracket[self.get_budget()] > 0:
+            # the current rung still has unallocated jobs (>0)
+            return self.get_budget()
         else:
-            self.current_rung = (self.current_rung + 1) % self.n_rungs
-            if self.sh_bracket[self.get_current_budget()] > 0:
-                return self.get_current_budget()
+            # the current rung has no more jobs to allocate, increment it
+            rung = (self.current_rung + 1) % self.n_rungs
+            if self.sh_bracket[self.get_budget(rung)] > 0:
+                # the incremented rung has unallocated jobs (>0)
+                return self.get_budget(rung)
+            else:
+                # all jobs for this bracket has been allocated/bracket is complete
+                # no more budgets to evaluate and can return None
+                pass
             return None
 
-    def register_job(self, budget=None):
-        if budget is None:
-            budget = self.get_next_job_budget()
+    def register_job(self, budget):
+        """ Registers the allocation of a configuration for the budget and updates current rung
+
+        This function must be called when scheduling a job in order to allow the bracket manager
+        to continue job and budget allocation without waiting for jobs to finish and return
+        results necessarily. This feature can be leveraged to run brackets asynchronously.
+        """
         assert budget in self.budgets
+        assert self.sh_bracket[budget] > 0
         self.sh_bracket[budget] -= 1
-        assert self.sh_bracket[budget] >= 0
+        if not self._is_rung_pending(self.current_rung):
+            # increment current rung if no jobs left in the rung
+            self.current_rung = (self.current_rung + 1) % self.n_rungs
+
+    def complete_job(self, budget):
+        """ Notifies the bracket that a job for a budget has been completed
+        """
+        assert budget in self.budgets
+        _max_configs = self.n_configs[list(self.budgets).index(budget)]
+        assert self._sh_bracket[budget] < _max_configs
+        self._sh_bracket[budget] += 1
+
+    def _is_rung_waiting(self, rung):
+        """ Returns True if at least one job is still pending/running and waits for results
+        """
+        if self._sh_bracket[self.budgets[rung]] < self.n_configs[rung]:
+            return True
+        return False
+
+    def _is_rung_pending(self, rung):
+        """ Returns True if at least one job pending to be allocatted in the rung
+        """
+        if self.sh_bracket[self.budgets[rung]] > 0:
+            return True
+        return False
 
     def is_bracket_done(self):
-        return ~self.is_pending()
+        """ Returns True if all configs in all rungs in the bracket have been allocated
+        """
+        return ~self.is_pending() and ~self.is_waiting()
 
     def is_pending(self):
         """ Returns True if any of the rungs/budgets have still a configuration to submit
         """
         return np.any([self.sh_bracket[budget] > 0 for budget in self.budgets])
 
+    def is_waiting(self):
+        """ Returns True if any of the rungs/budgets have a configuration pending/running
+        """
+        return np.any(
+            [self._sh_bracket[budget] + self.sh_bracket[budget] < self.n_configs[i]
+             for i, budget in enumerate(self.budgets)]
+        )
 
 class PDEHB(DEHBBase):
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=0.5,
@@ -79,7 +144,10 @@ class PDEHB(DEHBBase):
             self.client = Client(
                 n_workers=self.n_workers, processes=True, threads_per_worker=1, scheduler_port=0
             )  # port 0 makes Dask select a random free port
+        else:
+            self.client = None
         self.futures = []
+        self.stop_scheduling = False
 
         # Initializing DE subpopulations
         self._get_pop_sizes()
@@ -101,14 +169,16 @@ class PDEHB(DEHBBase):
     def _f_objective(self, job_info):
         """ Wrapper to call DE's objective function.
         """
-        config, budget, parent_idx = job_info['config'], job_info['budget'], job_info['parent_idx']
+        config, budget, parent_id = job_info['config'], job_info['budget'], job_info['parent_id']
+        bracket_id = job_info['bracket_id']
         fitness, cost = self.de[budget].f_objective(config, budget)
         run_info = {
             'fitness': fitness,
             'cost': cost,
             'config': config,
             'budget': budget,
-            'parent_idx': parent_idx
+            'parent_id': parent_id,
+            'bracket_id': bracket_id
         }
         return run_info
 
@@ -120,7 +190,10 @@ class PDEHB(DEHBBase):
             self.client = Client(
                 n_workers=self.n_workers, processes=True, threads_per_worker=1, scheduler_port=0
             )
+        else:
+            self.client = None
         self.futures = []
+        self.stop_scheduling = False
         self.iteration_counter = -1
         self.de = {}
         self._max_pop_size = None
@@ -184,6 +257,8 @@ class PDEHB(DEHBBase):
     def is_worker_available(self):
         """ Checks if at least one worker is available to run a job
         """
+        if self.stop_scheduling:
+            return False
         if self.n_workers == 1:
             return True
         if len(self.futures) >= sum(self.client.nthreads().values()):
@@ -216,6 +291,7 @@ class PDEHB(DEHBBase):
                 individual = promotion_candidate_pop[idx]
                 # checks if the candidate individual already exists in the high budget population
                 if np.any(np.all(individual == self.de[high_budget].population, axis=1)):
+                    # skipping already present individual to allow diversity and reduce redundancy
                     continue
                 self.de[high_budget].promotion_pop = np.append(
                     self.de[high_budget].promotion_pop, [individual], axis=0
@@ -234,24 +310,24 @@ class PDEHB(DEHBBase):
             self.de[high_budget].promotion_fitness = self.de[high_budget].promotion_fitness[1:]
         else:
             # in case of an edge failure case where all high budget individuals are same
-            # just choose the best performing individual from the lowest budget
+            # just choose the best performing individual from the lower budget (again)
             config = self.de[low_budget].population[pop_idx[0]]
         return config
 
     def _get_next_parent_for_subpop(self, budget):
         """ Maintains a looping counter over a subpopulation, to iteratively select a parent
         """
-        parent_idx = self.de[budget].parent_counter
+        parent_id = self.de[budget].parent_counter
         self.de[budget].parent_counter += 1
         self.de[budget].parent_counter = self.de[budget].parent_counter % self._max_pop_size[budget]
-        return parent_idx
+        return parent_id
 
     def _acquire_config(self, bracket, budget):
         """ Generates/chooses a configuration based on the budget and iteration number
         """
         # select a parent/target
-        parent_idx = self._get_next_parent_for_subpop(budget)
-        target = self.de[budget].population[parent_idx]
+        parent_id = self._get_next_parent_for_subpop(budget)
+        target = self.de[budget].population[parent_id]
         # identify lower budget/fidelity to transfer information from
         lower_budget, num_configs = bracket.get_lower_budget_promotions(budget)
 
@@ -263,7 +339,7 @@ class PDEHB(DEHBBase):
             if budget != bracket.budgets[0]:
                 # TODO: check if generalizes to all budget spacings
                 config = self._get_promotion_candidate(lower_budget, budget, num_configs)
-                return config, parent_idx
+                return config, parent_id
 
         # DE evolution occurs when either all individuals in the subpopulation have been evaluated
         # at least once, i.e., has fitness < np.inf, which can happen if
@@ -288,7 +364,7 @@ class PDEHB(DEHBBase):
         # perform crossover with selected parent
         config = self.de[budget].crossover(target=target, mutant=mutant)
         config = self.de[budget].boundary_check(config)
-        return config, parent_idx
+        return config, parent_id
 
     def _get_next_job(self):
         """ Loads a configuration and budget to be evaluated next by a free worker
@@ -296,27 +372,30 @@ class PDEHB(DEHBBase):
         # if no bracket started/active OR all currently active brackets are waiting for results
         # then begin preparations to start next bracket
         if len(self.active_brackets) == 0 or \
-                np.all([~bracket.is_pending() for bracket in self.active_brackets]):
+                np.all([bracket.is_bracket_done() for bracket in self.active_brackets]):
             self.iteration_counter += 1  # iteration counter gives the bracket count or bracket ID
             n_configs, budgets = self.get_next_iteration(self.iteration_counter)
             self.active_brackets.append(SHBracketManager(
-                n_configs=n_configs, budgets=budgets
+                n_configs=n_configs, budgets=budgets, bracket_id=self.iteration_counter
             ))
 
         # at least one bracket has pending jobs or all active_brackets have is_pending() as False
         # in the latter case, the latest added bracket will have pending jobs to run
         for bracket in self.active_brackets:
+            # if the bracket has a rung waiting for results, ignore the bracket and move on
+            if bracket.is_waiting():
+                continue
             # in the order of brackets added, find the first such bracket with pending jobs
             if bracket.is_pending():
                 break
         budget = bracket.get_next_job_budget()
-        config, parent_idx = self._acquire_config(bracket, budget)
+        config, parent_id = self._acquire_config(bracket, budget)
         # notifies the Bracket Manager that a single config is to run for the budget chosen
-        bracket.register_job(budget)  # IMPORTANT for Bracket Manager to perform SH
         job_info = {
             "config": config,
             "budget": budget,
-            "parent_idx": parent_idx
+            "parent_id": parent_id,
+            "bracket_id": bracket.bracket_id
         }
         return job_info
 
@@ -331,6 +410,13 @@ class PDEHB(DEHBBase):
         else:
             # skipping scheduling to Dask worker to avoid added overheads in the synchronous case
             self.futures.append(self._f_objective(job_info))
+
+        # pass information of job submission to Bracket Manager
+        for bracket in self.active_brackets:
+            if bracket.bracket_id == job_info['bracket_id']:
+                # IMPORTANT for Bracket Manager to perform SH
+                bracket.register_job(job_info['budget'])
+                break
 
     def _fetch_results_from_workers(self):
         """ Iterate over futures and collect results from finished workers
@@ -348,20 +434,28 @@ class PDEHB(DEHBBase):
                 run_info = future
             self.futures.remove(future)
             fitness, cost = run_info["fitness"], run_info["cost"]
-            budget, parent_idx = run_info["budget"], run_info["parent_idx"]
+            budget, parent_id = run_info["budget"], run_info["parent_id"]
             config = run_info["config"]
 
             # carry out DE selection
-            if fitness <= self.de[budget].fitness[parent_idx]:
-                self.de[budget].population[parent_idx] = config
-                self.de[budget].fitness[parent_idx] = fitness
+            if fitness <= self.de[budget].fitness[parent_id]:
+                self.de[budget].population[parent_id] = config
+                self.de[budget].fitness[parent_id] = fitness
             # updating incumbents
-            if self.de[budget].fitness[parent_idx] < self.inc_score:
-                self.inc_score = self.de[budget].fitness[parent_idx]
-                self.inc_config = self.de[budget].population[parent_idx]
+            if self.de[budget].fitness[parent_id] < self.inc_score:
+                self.inc_score = self.de[budget].fitness[parent_id]
+                self.inc_config = self.de[budget].population[parent_id]
             # book-keeping
             self._update_trackers(traj=self.inc_score, runtime=cost, budget=budget,
                                   history=(config.tolist(), float(fitness), float(budget)))
+
+            # update bracket information
+            bracket_id = run_info["bracket_id"]
+            for bracket in self.active_brackets:
+                if bracket.bracket_id == bracket_id:
+                    # bracket job complete
+                    bracket.complete_job(budget)  # IMPORTANT to perform synchronous SH
+                    break
 
     def _is_run_budget_exhausted(self, fevals=None, brackets=None, total_cost=None):
         """ Checks if the DEHB run should be terminated or continued
@@ -377,6 +471,10 @@ class PDEHB(DEHBBase):
                 return True
         elif brackets is not None:
             if self.iteration_counter >= brackets:
+                self.stop_scheduling = True
+                for bracket in self.active_brackets:
+                    if bracket.bracket_id < self.iteration_counter and not bracket.is_bracket_done():
+                        return False
                 return True
         else:
             if time.time() - self.start >= total_cost:
@@ -415,5 +513,9 @@ class PDEHB(DEHBBase):
             self.clean_inactive_brackets()
         if verbose:
             print("End of optimisation!")
-        self.runtime = np.array(self.runtime) - self.start
+        # self.runtime = np.array(self.runtime) - self.start
         return np.array(self.traj), np.array(self.runtime), np.array(self.history)
+
+# TODO: don't stop until all self.iteration_counter < self.brackets are complete
+# TODO: fevals will be outweighed by lower fidelity evaluations especially for large n_workers
+# TODO: solve bug in n=10 for optdigits (occurs for high workers) --> no unevaluated configs to select promotion from
