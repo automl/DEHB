@@ -513,7 +513,7 @@ class PDEHB(DEHBBase):
             self.clean_inactive_brackets()
         if verbose:
             print("End of optimisation!")
-        # self.runtime = np.array(self.runtime) - self.start
+        self.runtime = np.array(self.runtime) - self.start
         return np.array(self.traj), np.array(self.runtime), np.array(self.history)
 
 # TODO: don't stop until all self.iteration_counter < self.brackets are complete
