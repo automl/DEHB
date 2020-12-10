@@ -132,10 +132,8 @@ if __name__ == "__main__":
                 mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,
                 eta=args.eta, min_budget=min_budget, max_budget=max_budget,
                 n_workers=args.n_workers)
-
     # Helper DE object for vector to config mapping
     de = DE(cs=cs, b=b, f=f)
-
 
     if args.runs is None:  # for a single run
         if not args.fix_seed:

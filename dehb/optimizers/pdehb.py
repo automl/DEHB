@@ -158,7 +158,6 @@ class PDEHB(DEHBBase):
         else:
             self.client = None
         self.futures = []
-        self.stop_scheduling = False  # used only when DEHB runs delimited by number of brackets
 
         # Initializing DE subpopulations
         self._get_pop_sizes()
@@ -204,7 +203,6 @@ class PDEHB(DEHBBase):
         else:
             self.client = None
         self.futures = []
-        self.stop_scheduling = False
         self.iteration_counter = -1
         self.de = {}
         self._max_pop_size = None
@@ -280,9 +278,6 @@ class PDEHB(DEHBBase):
     def is_worker_available(self):
         """ Checks if at least one worker is available to run a job
         """
-        if self.stop_scheduling:
-            # disables job allocation if number of brackets allocated exceeds the run argument
-            return False
         if self.n_workers == 1:
             # in the synchronous case, one worker is always available
             return True
@@ -492,9 +487,10 @@ class PDEHB(DEHBBase):
                 return True
         elif brackets is not None:
             if self.iteration_counter >= brackets:
-                self.stop_scheduling = True  # variable used by worker availability check
                 for bracket in self.active_brackets:
-                    if bracket.bracket_id < self.iteration_counter and not bracket.is_bracket_done():
+                    # waits for all brackets < iteration_counter to finish by collecting results
+                    if bracket.bracket_id < self.iteration_counter and \
+                            not bracket.is_bracket_done():
                         return False
                 return True
         else:
@@ -524,14 +520,26 @@ class PDEHB(DEHBBase):
                 break
             if self.is_worker_available():
                 job_info = self._get_next_job()
-                if verbose:
-                    budget = job_info['budget']
-                    print("{}, {}, {}".format(
-                        job_info['bracket_id'], budget, self.inc_score
-                    ))
-                self.submit_job(job_info)
-                for bracket in self.active_brackets:
-                    print('    ', bracket.bracket_id, bracket.sh_bracket, bracket._sh_bracket)
+                if brackets is not None and job_info['bracket_id'] >= brackets:
+                    # ignore submission and only collect results
+                    # when brackets are chosen as run budget, an extra bracket is created
+                    # since iteration_counter is incremented in _get_next_job() and then checked
+                    # in _is_run_budget_exhausted(), therefore, need to skip suggestions
+                    # coming from the extra allocated bracket
+                    # _is_run_budget_exhausted() will not return True until all the lower brackets
+                    # have finished computation and returned its results
+                    pass
+                else:
+                    self.submit_job(job_info)
+                    if verbose:
+                        budget = job_info['budget']
+                        print("BracketID: {}; Budget: {}; Best score: {}".format(
+                            job_info['bracket_id'], budget, self.inc_score
+                        ))
+                        for bracket in self.active_brackets:
+                            print('=> BracketID: {}; Submit: {}; Collect: {}'.format(
+                                bracket.bracket_id, bracket.sh_bracket, bracket._sh_bracket
+                            ))
             self._fetch_results_from_workers()
             self.clean_inactive_brackets()
 
