@@ -125,7 +125,7 @@ if __name__ == "__main__":
         'poker': (81, 2187),
     }
     min_budget, max_budget = budgets[args.dataset]
-
+    # min_budget, max_budget = (1, 9)
 
     # Initializing DE object
     dehb = PDEHB(cs=cs, dimensions=dimensions, f=f, strategy=args.strategy,

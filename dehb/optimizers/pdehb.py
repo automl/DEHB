@@ -526,17 +526,18 @@ class PDEHB(DEHBBase):
                 job_info = self._get_next_job()
                 if verbose:
                     budget = job_info['budget']
-                    for bracket in self.active_brackets:
-                        if bracket.bracket_id == job_info['bracket_id']:
-                            break
-                    print("{}, {}, {}, {}".format(
-                        self.iteration_counter, budget, self.inc_score, bracket.is_waiting()
+                    print("{}, {}, {}".format(
+                        job_info['bracket_id'], budget, self.inc_score
                     ))
                 self.submit_job(job_info)
+                for bracket in self.active_brackets:
+                    print('    ', bracket.bracket_id, bracket.sh_bracket, bracket._sh_bracket)
             self._fetch_results_from_workers()
             self.clean_inactive_brackets()
+
         while len(self.futures) > 0:
             self._fetch_results_from_workers()
+            time.sleep(self.min_budget)
             if verbose:
                 print("DEHB optimisation over! Waiting to collect results from workers running...")
         if verbose:
