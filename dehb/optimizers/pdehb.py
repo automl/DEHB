@@ -108,10 +108,10 @@ class SHBracketManager(object):
         return False
 
     def previous_rung_waits(self):
-        """ Returns True if none of the rungs <= current rung is waiting for results
+        """ Returns True if none of the rungs < current rung is waiting for results
         """
-        for rung in range(self.current_rung+1):
-            if self._is_rung_waiting(rung):
+        for rung in range(self.current_rung):
+            if self._is_rung_waiting(rung) and not self._is_rung_pending(rung):
                 return True
         return False
 
@@ -174,7 +174,7 @@ class PDEHB(DEHBBase):
     def __del__(self):
         """ Ensures a clean kill of the Dask client and frees up a port.
         """
-        if hasattr(self, "client") and isinstance(self.client, Client):
+        if hasattr(self, "client") and isinstance(self, Client):
             self.client.close()
 
     def _f_objective(self, job_info):
@@ -444,20 +444,25 @@ class PDEHB(DEHBBase):
         """ Iterate over futures and collect results from finished workers
         """
         if self.n_workers > 1:
-            done_list = [future for future in self.futures if future.done()]
+            done_list = [(i, future) for i, future in enumerate(self.futures) if future.done()]
         else:
             # Dask not invoked in the synchronous case
-            done_list = self.futures
-        for future in done_list:
+            done_list = [(i, future) for i, future in enumerate(self.futures)]
+        for _, future in done_list:
             if self.n_workers > 1:
                 run_info = future.result()
             else:
                 # Dask not invoked in the synchronous case
                 run_info = future
-            self.futures.remove(future)
+            # update bracket information
             fitness, cost = run_info["fitness"], run_info["cost"]
             budget, parent_id = run_info["budget"], run_info["parent_id"]
             config = run_info["config"]
+            bracket_id = run_info["bracket_id"]
+            for bracket in self.active_brackets:
+                if bracket.bracket_id == bracket_id:
+                    # bracket job complete
+                    bracket.complete_job(budget)  # IMPORTANT to perform synchronous SH
 
             # carry out DE selection
             if fitness <= self.de[budget].fitness[parent_id]:
@@ -470,14 +475,8 @@ class PDEHB(DEHBBase):
             # book-keeping
             self._update_trackers(traj=self.inc_score, runtime=cost, budget=budget,
                                   history=(config.tolist(), float(fitness), float(budget)))
-
-            # update bracket information
-            bracket_id = run_info["bracket_id"]
-            for bracket in self.active_brackets:
-                if bracket.bracket_id == bracket_id:
-                    # bracket job complete
-                    bracket.complete_job(budget)  # IMPORTANT to perform synchronous SH
-                    break
+        # remove processed future
+        self.futures = np.delete(self.futures, [i for i, _ in done_list]).tolist()
 
     def _is_run_budget_exhausted(self, fevals=None, brackets=None, total_cost=None):
         """ Checks if the DEHB run should be terminated or continued
@@ -536,6 +535,10 @@ class PDEHB(DEHBBase):
                 self.submit_job(job_info)
             self._fetch_results_from_workers()
             self.clean_inactive_brackets()
+        while len(self.futures) > 0:
+            self._fetch_results_from_workers()
+            if verbose:
+                print("DEHB optimisation over! Waiting to collect results from workers running...")
         if verbose:
             print("End of optimisation!")
         self.runtime = np.array(self.runtime) - self.start
