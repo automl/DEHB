@@ -82,6 +82,10 @@ class SHBracketManager(object):
 
     def complete_job(self, budget):
         """ Notifies the bracket that a job for a budget has been completed
+
+        This function must be called when a config for a budget has finished evaluation to inform
+        the Bracket Manager that no job needs to be waited for and the next rung can begin for the
+        synchronous Successive Halving case.
         """
         assert budget in self.budgets
         _max_configs = self.n_configs[list(self.budgets).index(budget)]
@@ -91,7 +95,8 @@ class SHBracketManager(object):
     def _is_rung_waiting(self, rung):
         """ Returns True if at least one job is still pending/running and waits for results
         """
-        if self._sh_bracket[self.budgets[rung]] < self.n_configs[rung]:
+        job_count = self._sh_bracket[self.budgets[rung]] + self.sh_bracket[self.budgets[rung]]
+        if job_count < self.n_configs[rung]:
             return True
         return False
 
@@ -102,6 +107,14 @@ class SHBracketManager(object):
             return True
         return False
 
+    def previous_rung_waits(self):
+        """ Returns True if none of the rungs <= current rung is waiting for results
+        """
+        for rung in range(self.current_rung+1):
+            if self._is_rung_waiting(rung):
+                return True
+        return False
+
     def is_bracket_done(self):
         """ Returns True if all configs in all rungs in the bracket have been allocated
         """
@@ -110,15 +123,13 @@ class SHBracketManager(object):
     def is_pending(self):
         """ Returns True if any of the rungs/budgets have still a configuration to submit
         """
-        return np.any([self.sh_bracket[budget] > 0 for budget in self.budgets])
+        return np.any([self._is_rung_pending(i) > 0 for i, _ in enumerate(self.budgets)])
 
     def is_waiting(self):
         """ Returns True if any of the rungs/budgets have a configuration pending/running
         """
-        return np.any(
-            [self._sh_bracket[budget] + self.sh_bracket[budget] < self.n_configs[i]
-             for i, budget in enumerate(self.budgets)]
-        )
+        return np.any([self._is_rung_waiting(i) > 0 for i, _ in enumerate(self.budgets)])
+
 
 class PDEHB(DEHBBase):
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=0.5,
@@ -147,7 +158,7 @@ class PDEHB(DEHBBase):
         else:
             self.client = None
         self.futures = []
-        self.stop_scheduling = False
+        self.stop_scheduling = False  # used only when DEHB runs delimited by number of brackets
 
         # Initializing DE subpopulations
         self._get_pop_sizes()
@@ -254,14 +265,29 @@ class PDEHB(DEHBBase):
             pop.extend(self.de[budget].population.tolist())
         return np.array(pop)
 
+    def _start_new_bracket(self):
+        """ Starts a new bracket based on Hyperband
+        """
+        # start new bracket
+        self.iteration_counter += 1  # iteration counter gives the bracket count or bracket ID
+        n_configs, budgets = self.get_next_iteration(self.iteration_counter)
+        bracket = SHBracketManager(
+            n_configs=n_configs, budgets=budgets, bracket_id=self.iteration_counter
+        )
+        self.active_brackets.append(bracket)
+        return bracket
+
     def is_worker_available(self):
         """ Checks if at least one worker is available to run a job
         """
         if self.stop_scheduling:
+            # disables job allocation if number of brackets allocated exceeds the run argument
             return False
         if self.n_workers == 1:
+            # in the synchronous case, one worker is always available
             return True
         if len(self.futures) >= sum(self.client.nthreads().values()):
+            # pause/wait if active worker count greater allocated workers
             return False
         return True
 
@@ -369,25 +395,21 @@ class PDEHB(DEHBBase):
     def _get_next_job(self):
         """ Loads a configuration and budget to be evaluated next by a free worker
         """
-        # if no bracket started/active OR all currently active brackets are waiting for results
-        # then begin preparations to start next bracket
+        bracket = None
         if len(self.active_brackets) == 0 or \
                 np.all([bracket.is_bracket_done() for bracket in self.active_brackets]):
-            self.iteration_counter += 1  # iteration counter gives the bracket count or bracket ID
-            n_configs, budgets = self.get_next_iteration(self.iteration_counter)
-            self.active_brackets.append(SHBracketManager(
-                n_configs=n_configs, budgets=budgets, bracket_id=self.iteration_counter
-            ))
-
-        # at least one bracket has pending jobs or all active_brackets have is_pending() as False
-        # in the latter case, the latest added bracket will have pending jobs to run
-        for bracket in self.active_brackets:
-            # if the bracket has a rung waiting for results, ignore the bracket and move on
-            if bracket.is_waiting():
-                continue
-            # in the order of brackets added, find the first such bracket with pending jobs
-            if bracket.is_pending():
-                break
+            # start new bracket when list no pending jobs from existing brackets or empty list
+            bracket = self._start_new_bracket()
+        else:
+            for _bracket in self.active_brackets:
+                if not _bracket.previous_rung_waits() and _bracket.is_pending():
+                    # bracket eligible for job scheduling
+                    bracket = _bracket
+                    break
+            if bracket is None:
+                # start new bracket when existing list has all waiting brackets
+                bracket = self._start_new_bracket()
+        # budget that the SH bracket allots
         budget = bracket.get_next_job_budget()
         config, parent_id = self._acquire_config(bracket, budget)
         # notifies the Bracket Manager that a single config is to run for the budget chosen
@@ -471,7 +493,7 @@ class PDEHB(DEHBBase):
                 return True
         elif brackets is not None:
             if self.iteration_counter >= brackets:
-                self.stop_scheduling = True
+                self.stop_scheduling = True  # variable used by worker availability check
                 for bracket in self.active_brackets:
                     if bracket.bracket_id < self.iteration_counter and not bracket.is_bracket_done():
                         return False
@@ -505,8 +527,11 @@ class PDEHB(DEHBBase):
                 job_info = self._get_next_job()
                 if verbose:
                     budget = job_info['budget']
-                    print("{}, {}, {}".format(
-                        self.iteration_counter, budget, self.inc_score
+                    for bracket in self.active_brackets:
+                        if bracket.bracket_id == job_info['bracket_id']:
+                            break
+                    print("{}, {}, {}, {}".format(
+                        self.iteration_counter, budget, self.inc_score, bracket.is_waiting()
                     ))
                 self.submit_job(job_info)
             self._fetch_results_from_workers()
