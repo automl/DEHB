@@ -117,50 +117,51 @@ b = surrogate()
 cs = b.get_configuration_space()
 dimensions = len(cs.get_hyperparameters())
 
-# Initializing DEHB object
-dehb = PDEHB(cs=cs, dimensions=dimensions, f=f, strategy=args.strategy,
-            mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,
-            eta=args.eta, min_budget=min_budget, max_budget=max_budget,
-            n_workers=args.n_workers)
-# Helper DE object for vector to config mapping
-de = DE(cs=cs, b=b, f=f)
+if __name__ == "__main__":
+    # Initializing DEHB object
+    dehb = PDEHB(cs=cs, dimensions=dimensions, f=f, strategy=args.strategy,
+                mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,
+                eta=args.eta, min_budget=min_budget, max_budget=max_budget,
+                n_workers=args.n_workers)
+    # Helper DE object for vector to config mapping
+    de = DE(cs=cs, b=b, f=f)
 
 
-if args.runs is None:  # for a single run
-    if not args.fix_seed:
-        np.random.seed(0)
-    # Running DE iterations
-    traj, runtime, history = dehb.run(
-            fevals=args.fevals,
-            brackets=args.brackets,
-            total_cost=args.total_cost,
-            verbose=args.verbose
-        )
-    valid_scores, test_scores = calc_regrets(history)
-
-    save_json(valid_scores, test_scores, runtime, output_path, args.run_id)
-
-else:  # for multiple runs
-    for run_id, _ in enumerate(range(args.runs), start=args.run_start):
+    if args.runs is None:  # for a single run
         if not args.fix_seed:
-            np.random.seed(run_id)
-        if args.verbose:
-            print("\nRun #{:<3}\n{}".format(run_id + 1, '-' * 8))
+            np.random.seed(0)
         # Running DE iterations
         traj, runtime, history = dehb.run(
-            fevals=args.fevals,
-            brackets=args.brackets,
-            total_cost=args.total_cost,
-            verbose=args.verbose
-        )
+                fevals=args.fevals,
+                brackets=args.brackets,
+                total_cost=args.total_cost,
+                verbose=args.verbose
+            )
         valid_scores, test_scores = calc_regrets(history)
 
-        save_json(valid_scores, test_scores, runtime, output_path, run_id)
+        save_json(valid_scores, test_scores, runtime, output_path, args.run_id)
 
-        if args.verbose:
-            print("Run saved. Resetting...")
-        # essential step to not accumulate consecutive runs
+    else:  # for multiple runs
+        for run_id, _ in enumerate(range(args.runs), start=args.run_start):
+            if not args.fix_seed:
+                np.random.seed(run_id)
+            if args.verbose:
+                print("\nRun #{:<3}\n{}".format(run_id + 1, '-' * 8))
+            # Running DE iterations
+            traj, runtime, history = dehb.run(
+                fevals=args.fevals,
+                brackets=args.brackets,
+                total_cost=args.total_cost,
+                verbose=args.verbose
+            )
+            valid_scores, test_scores = calc_regrets(history)
 
-        dehb.reset()
+            save_json(valid_scores, test_scores, runtime, output_path, run_id)
 
-save_configspace(cs, output_path)
+            if args.verbose:
+                print("Run saved. Resetting...")
+            # essential step to not accumulate consecutive runs
+
+            dehb.reset()
+
+    save_configspace(cs, output_path)
