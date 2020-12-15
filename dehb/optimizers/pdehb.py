@@ -5,6 +5,8 @@ from distributed import client, Client
 from .de import DE, AsyncDE
 from .dehb import DEHB, DEHBBase
 
+import psutil
+
 
 class SHBracketManager(object):
     """ Synchronous Successive Halving utilities
@@ -194,12 +196,8 @@ class PDEHB(DEHBBase):
 
     def reset(self):
         super().reset()
-        if hasattr(self, "client") and isinstance(self.client, Client):
-            self.client.close()
-        if self.n_workers > 1:
-            self.client = Client(
-                n_workers=self.n_workers, processes=True, threads_per_worker=1, scheduler_port=0
-            )
+        if self.n_workers > 1 and hasattr(self, "client") and isinstance(self.client, Client):
+            self.client.restart()
         else:
             self.client = None
         self.futures = []
@@ -533,8 +531,9 @@ class PDEHB(DEHBBase):
                     self.submit_job(job_info)
                     if verbose:
                         budget = job_info['budget']
-                        print("BracketID: {}; Budget: {}; Best score: {}".format(
-                            job_info['bracket_id'], budget, self.inc_score
+                        print("BracketID: {}; Budget: {}; Best score: {}; Mem: {}".format(
+                            job_info['bracket_id'], budget, self.inc_score,
+                            psutil.Process().memory_info().rss / 1024 ** 3
                         ))
                         for bracket in self.active_brackets:
                             print('=> BracketID: {}; Submit: {}; Collect: {}'.format(
