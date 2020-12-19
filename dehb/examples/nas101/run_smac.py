@@ -9,9 +9,11 @@ sys.path.append(os.path.join(os.getcwd(), '../nas_benchmarks-development/'))
 import json
 import argparse
 
-from smac.facade.smac_facade import SMAC
+# from smac.facade.smac_facade import SMAC
+from smac.stats.stats import Stats
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_func import ExecuteTAFuncDict
+from smac.facade.smac_hpo_facade import SMAC4HPO as SMAC
 
 from tabular_benchmarks import FCNetProteinStructureBenchmark, FCNetSliceLocalizationBenchmark,\
     FCNetNavalPropulsionBenchmark, FCNetParkinsonsTelemonitoringBenchmark
@@ -83,7 +85,7 @@ runs = args.runs
 assert runs > start
 for run_id in range(start, runs):
     print("Run {:>3}/{:>3}".format(run_id+1, runs))
-    tae = ExecuteTAFuncDict(objective_function, use_pynisher=False)
+    tae = ExecuteTAFuncDict(ta=objective_function, stats=Stats, use_pynisher=False)
     smac = SMAC(scenario=scenario, tae_runner=tae)
 
     # probability for random configurations

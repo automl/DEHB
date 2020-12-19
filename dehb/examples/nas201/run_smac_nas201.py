@@ -11,9 +11,10 @@ import ConfigSpace
 
 logging.basicConfig(level=logging.ERROR)
 
-from smac.facade.smac_facade import SMAC
+from smac.stats.stats import Stats
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_func import ExecuteTAFuncDict
+from smac.facade.smac_hpo_facade import SMAC4HPO as SMAC
 
 sys.path.append('dehb/examples/')
 from utils import util
@@ -178,23 +179,6 @@ for run_id in range(start, runs):
     worker = NAS201Worker(api=api, cs=cs, measure_test_loss=False, run_id=run_id, max_budget=199)
     args.run_id = run_id
     result = util.run_experiment(args, worker, output_path, smac_deterministic=False)
-    # tae = ExecuteTAFuncDict(objective_function, use_pynisher=False)
-    # smac = SMAC(scenario=scenario, tae_runner=tae)
-    #
-    # # probability for random configurations
-    # smac.solver.random_configuration_chooser.prob = args.random_fraction
-    # smac.solver.model.rf_opts.num_trees = args.n_trees
-    # # only 1 configuration per SMBO iteration
-    # smac.solver.scenario.intensification_percentage = 1e-10
-    # smac.solver.intensifier.min_chall = 1
-    # # maximum number of function evaluations per configuration
-    # smac.solver.intensifier.maxR = args.max_feval
-    #
-    # smac.optimize()
-
-    # fh = open(os.path.join(output_path, 'run_%d.json' % run_id), 'w')
-    # json.dump(res, fh)
-    # fh.close()
 
     with open(os.path.join(output_path, 'smac_run_{}.pkl'.format(run_id)), "rb") as f:
         result = pickle.load(f)

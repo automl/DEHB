@@ -13,9 +13,11 @@ import numpy as np
 import ConfigSpace
 logging.basicConfig(level=logging.INFO)
 
-from smac.facade.smac_facade import SMAC
+from smac.stats.stats import Stats
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_func import ExecuteTAFuncDict
+from smac.facade.smac_hpo_facade import SMAC4HPO as SMAC
+
 from nasbench import api
 
 from nasbench_analysis.search_spaces.search_space_1 import SearchSpace1
@@ -86,7 +88,7 @@ for space in spaces:
         "output_dir": output_path
     })
 
-    tae = ExecuteTAFuncDict(objective_function, use_pynisher=False)
+    tae = ExecuteTAFuncDict(ta=objective_function, stats=Stats, use_pynisher=False)
     smac = SMAC(scenario=scenario, tae_runner=tae)
 
     # probability for random configurations
