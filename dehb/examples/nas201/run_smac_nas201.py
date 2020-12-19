@@ -78,6 +78,8 @@ def find_nas201_best(api, dataset):
 
 parser = argparse.ArgumentParser()
 
+parser.add_argument('--start', default=0, type=int, nargs='?',
+                    help='unique number to start run_id')
 parser.add_argument('--runs', default=1, type=int, nargs='?',
                     help='unique number to identify this run')
 parser.add_argument('--dataset', default='cifar10-valid', type=str, nargs='?',
@@ -168,8 +170,9 @@ class NAS201Worker(BaseWorker):
             'info': {'cost': float(cost), 'test_loss': float(test_score)}
         })
 
+start = args.start
 runs = args.runs
-for run_id in range(runs):
+for run_id in range(start, runs):
     print("Run {:>3}/{:>3}".format(run_id+1, runs))
 
     worker = NAS201Worker(api=api, cs=cs, measure_test_loss=False, run_id=run_id, max_budget=199)
@@ -192,4 +195,12 @@ for run_id in range(runs):
     # fh = open(os.path.join(output_path, 'run_%d.json' % run_id), 'w')
     # json.dump(res, fh)
     # fh.close()
+
+    with open(os.path.join(output_path, 'smac_run_{}.pkl'.format(run_id)), "rb") as f:
+        result = pickle.load(f)
+    fh = open(os.path.join(output_path, 'run_{}.json'.format(run_id)), 'w')
+    json.dump(convert_to_json(result), fh)
+    fh.close()
+    os.remove(os.path.join(output_path, 'smac_run_{}.pkl'.format(run_id)))
+
     print("Run saved. Resetting...")

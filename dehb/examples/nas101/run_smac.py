@@ -19,6 +19,8 @@ from tabular_benchmarks import NASCifar10A, NASCifar10B, NASCifar10C
 
 parser = argparse.ArgumentParser()
 
+parser.add_argument('--start', default=0, type=int, nargs='?',
+                    help='unique number to start the run_id')
 parser.add_argument('--runs', default=1, type=int, nargs='?',
                     help='unique number to identify this run')
 parser.add_argument('--benchmark', default="nas_cifar10a", type=str, nargs='?',
@@ -76,8 +78,10 @@ def objective_function(config, **kwargs):
     return float(y)
 
 
+start = args.start
 runs = args.runs
-for run_id in range(runs):
+assert runs > start
+for run_id in range(start, runs):
     print("Run {:>3}/{:>3}".format(run_id+1, runs))
     tae = ExecuteTAFuncDict(objective_function, use_pynisher=False)
     smac = SMAC(scenario=scenario, tae_runner=tae)
