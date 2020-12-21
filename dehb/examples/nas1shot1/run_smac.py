@@ -14,8 +14,6 @@ import numpy as np
 import ConfigSpace
 logging.basicConfig(level=logging.INFO)
 
-from smac.scenario.scenario import Scenario
-
 from nasbench import api
 
 from nasbench_analysis.search_spaces.search_space_1 import SearchSpace1
@@ -40,7 +38,7 @@ def convert_to_json(results, y_star_valid, y_star_test):
 
 class NAS1shot1Worker(BaseWorker):
     def __init__(self, benchmark, **kwargs):
-        super().__init__(max_budget=108, **kwargs)
+        super().__init__(benchmark=benchmark, max_budget=108, **kwargs)
         self.b = benchmark
         self.cs = self.b.get_configuration_space()
 
@@ -80,6 +78,7 @@ os.makedirs(os.path.join(output_path), exist_ok=True)
 args.working_directory = output_path
 args.method = "smac"
 args.num_iterations = args.n_iters
+args.max_budget = 108
 
 
 if args.search_space is None:
