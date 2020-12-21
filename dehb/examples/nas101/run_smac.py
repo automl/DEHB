@@ -9,10 +9,7 @@ sys.path.append(os.path.join(os.getcwd(), '../nas_benchmarks-development/'))
 import json
 import argparse
 
-# from smac.facade.smac_facade import SMAC
-from smac.stats.stats import Stats
 from smac.scenario.scenario import Scenario
-from smac.tae.execute_func import ExecuteTAFuncDict
 from smac.facade.smac_hpo_facade import SMAC4HPO as SMAC
 
 from tabular_benchmarks import FCNetProteinStructureBenchmark, FCNetSliceLocalizationBenchmark,\
@@ -34,11 +31,6 @@ parser.add_argument('--output_path', default="./results", type=str, nargs='?',
 parser.add_argument('--data_dir', default="../nas_benchmarks-development/"
                                           "tabular_benchmarks/fcnet_tabular_benchmarks/",
                     type=str, nargs='?', help='specifies the path to the tabular data')
-parser.add_argument('--n_trees', default=10, type=int, nargs='?', help='number of trees for the random forest')
-parser.add_argument('--random_fraction', default=.33, type=float, nargs='?', help='fraction of random configurations')
-parser.add_argument('--max_feval', default=4, type=int, nargs='?',
-                    help='maximum number of function evaluation per configuration')
-
 args = parser.parse_args()
 
 if args.benchmark == "nas_cifar10a":
@@ -85,18 +77,8 @@ runs = args.runs
 assert runs > start
 for run_id in range(start, runs):
     print("Run {:>3}/{:>3}".format(run_id+1, runs))
-    tae = ExecuteTAFuncDict(ta=objective_function, stats=Stats, use_pynisher=False)
-    smac = SMAC(scenario=scenario, tae_runner=tae)
 
-    # probability for random configurations
-    smac.solver.random_configuration_chooser.prob = args.random_fraction
-    smac.solver.model.rf_opts.num_trees = args.n_trees
-    # only 1 configuration per SMBO iteration
-    smac.solver.scenario.intensification_percentage = 1e-10
-    smac.solver.intensifier.min_chall = 1
-    # maximum number of function evaluations per configuration
-    smac.solver.intensifier.maxR = args.max_feval
-
+    smac = SMAC(scenario=scenario, tae_runner=objective_function)
     smac.optimize()
 
     if 'cifar' in args.benchmark:

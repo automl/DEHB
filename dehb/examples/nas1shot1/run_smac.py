@@ -6,6 +6,7 @@ import sys
 sys.path.append(os.path.join(os.getcwd(), '../nasbench/'))
 sys.path.append(os.path.join(os.getcwd(), '../nasbench-1shot1/'))
 
+import json
 import pickle
 import argparse
 import logging
@@ -13,10 +14,7 @@ import numpy as np
 import ConfigSpace
 logging.basicConfig(level=logging.INFO)
 
-from smac.stats.stats import Stats
 from smac.scenario.scenario import Scenario
-from smac.tae.execute_func import ExecuteTAFuncDict
-from smac.facade.smac_hpo_facade import SMAC4HPO as SMAC
 
 from nasbench import api
 
@@ -25,7 +23,36 @@ from nasbench_analysis.search_spaces.search_space_2 import SearchSpace2
 from nasbench_analysis.search_spaces.search_space_3 import SearchSpace3
 from nasbench_analysis.utils import INPUT, OUTPUT, CONV1X1, CONV3X3, MAXPOOL3X3
 
-from IPython import embed
+sys.path.append('dehb/examples/')
+from utils import util
+
+sys.path.append(os.path.join(os.getcwd(), '../HpBandSter/icml_2018_experiments/experiments/workers'))
+from base_worker import BaseWorker
+
+
+def convert_to_json(results, y_star_valid, y_star_test):
+    res = {}
+    res['regret_validation'] = np.array(results['losses'] - y_star_valid).tolist()
+    res['regret_test'] = np.array(results['test_losses'] - y_star_test).tolist()
+    res['runtime'] = np.array(results['cummulative_cost']).tolist()
+    return res
+
+
+class NAS1shot1Worker(BaseWorker):
+    def __init__(self, benchmark, **kwargs):
+        super().__init__(max_budget=108, **kwargs)
+        self.b = benchmark
+        self.cs = self.b.get_configuration_space()
+
+    def compute(self, config, **kwargs):
+        c = ConfigSpace.Configuration(self.cs, values=config)
+        y, cost = self.b.objective_function(nasbench, c, budget=108)
+        y_test, _ = self.b.objective_function_test(nasbench, c, budget=108)
+
+        return ({
+            'loss': 1 - float(y),
+            'info': {'cost': float(cost), 'test_loss': 1 - float(y_test)}
+        })
 
 
 parser = argparse.ArgumentParser()
@@ -35,12 +62,6 @@ parser.add_argument('--search_space', default=None, type=str, nargs='?',
                     help='specifies the benchmark')
 parser.add_argument('--n_iters', default=280, type=int, nargs='?',
                     help='number of iterations for optimization method')
-parser.add_argument('--random_fraction', default=.33, type=float, nargs='?',
-                    help='fraction of random configurations')
-parser.add_argument('--n_trees', default=10, type=int, nargs='?',
-                    help='number of trees for the random forest')
-parser.add_argument('--max_feval', default=4, type=int, nargs='?',
-                    help='maximum number of function evaluation per configuration')
 parser.add_argument('--output_path', default="./experiments", type=str, nargs='?',
                     help='specifies the path where the results will be saved')
 parser.add_argument('--data_dir',
@@ -56,59 +77,34 @@ nasbench = api.NASBench(args.data_dir)
 
 output_path = os.path.join(args.output_path, "SMAC")
 os.makedirs(os.path.join(output_path), exist_ok=True)
+args.working_directory = output_path
+args.method = "smac"
+args.num_iterations = args.n_iters
+
 
 if args.search_space is None:
     spaces = [1, 2, 3]
 else:
     spaces = [int(args.search_space)]
 
-#embed()
-
-def objective_function(config, **kwargs):
-    c = ConfigSpace.Configuration(cs, values=config)
-    y, cost = search_space.objective_function(nasbench, c, budget=108)
-    return 1 - float(y)
-
 for space in spaces:
     print('##### Search Space {} #####'.format(space))
+    print('##### Seed {} #####'.format(args.seed))
+    np.random.seed(args.seed)
+    run_id = args.run_id
+    y_star_valid, y_star_test, inc_config = (search_space.valid_min_error,
+                                             search_space.test_min_error, None)
+
     search_space = eval('SearchSpace{}()'.format(space))
     cs = search_space.get_configuration_space()
 
-    #for seed in range(args.n_repetitions):
-    print('##### Seed {} #####'.format(args.seed))
-    # Set random_seed
-    np.random.seed(args.seed)
-
-    scenario = Scenario({
-        "run_obj": "quality",
-        "runcount-limit": args.n_iters,
-        "cs": cs,
-        "deterministic": "false",
-        "initial_incumbent": "RANDOM",
-        "output_dir": output_path
-    })
-
-    tae = ExecuteTAFuncDict(ta=objective_function, stats=Stats, use_pynisher=False)
-    smac = SMAC(scenario=scenario, tae_runner=tae)
-
-    # probability for random configurations
-    smac.solver.random_configuration_chooser.prob = args.random_fraction
-    smac.solver.model.rf_opts.num_trees = args.n_trees
-    # only 1 configuration per SMBO iteration
-    smac.solver.scenario.intensification_percentage = 1e-10
-    smac.solver.intensifier.min_chall = 1
-    # maximum number of function evaluations per configuration
-    smac.solver.intensifier.maxR = args.max_feval
-
-    smac.optimize()
-
-    fh = open(os.path.join(output_path,
-                           'algo_{}_{}_ssp_{}_seed_{}.obj'.format('SMAC',
-                                                                  args.run_id,
-                                                                  space,
-                                                                  args.seed)), 'wb')
-    pickle.dump(search_space.run_history, fh)
+    worker = NAS1shot1Worker(
+        benchmark=search_space, measure_test_loss=False, run_id=run_id, max_budget=108
+    )
+    result = util.run_experiment(args, worker, output_path, smac_deterministic=False)
+    with open(os.path.join(output_path, 'smac_run_{}.pkl'.format(run_id)), "rb") as f:
+        result = pickle.load(f)
+    fh = open(os.path.join(output_path, 'run_{}.json'.format(run_id)), 'w')
+    json.dump(convert_to_json(result, y_star_valid, y_star_test), fh)
     fh.close()
-
-    print(min([1 - arch.test_accuracy - search_space.test_min_error for
-               arch in search_space.run_history]))
+    os.remove(os.path.join(output_path, 'smac_run_{}.pkl'.format(run_id)))
