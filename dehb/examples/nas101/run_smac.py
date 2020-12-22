@@ -23,14 +23,17 @@ from tabular_benchmarks import NASCifar10A, NASCifar10B, NASCifar10C
 def objective_function(config, **kwargs):
     global b
     fitness, _ = b.objective_function(config)
-    return fitness
+    return float(fitness)
 
 
 def benchmark_wrapper(benchmark, **kwargs):
     obj = benchmark(**kwargs)
-    if hasattr(obj, "y_star_valid"):
-        obj.get_y_star_valid = lambda x: obj.y_star_valid
-        obj.get_y_star_valid = lambda x: obj.y_star_valid
+    # the AutoProxy wrapper around benchmark, created by BaseManager doesn't expose attributes
+    # the lambda function below creates a function that can be used to access attributes
+    # obj.get_y_star_valid() becomes equivalent to obj.y_star_valid
+    if hasattr(obj, "y_star_valid"):  # True only for NASCifar10X benchmarks
+        obj.get_y_star_valid = lambda: obj.y_star_valid
+        obj.get_y_star_test = lambda: obj.y_star_valid
     return obj
 
 
@@ -79,35 +82,25 @@ elif args.benchmark == "nas_cifar10c":
 elif args.benchmark == "protein_structure":
     min_budget = 3
     max_budget = 100
-    b = manager.benchmark(
-        benchmark=FCNetProteinStructureBenchmark, data_dir=args.data_dir, multi_fidelity=False
-    )
+    b = manager.benchmark(benchmark=FCNetProteinStructureBenchmark, data_dir=args.data_dir)
     _, y_star_valid, y_star_test = b.get_best_configuration()
 
 elif args.benchmark == "slice_localization":
     min_budget = 3
     max_budget = 100
-    b = manager.benchmark(
-        benchmark=FCNetSliceLocalizationBenchmark, data_dir=args.data_dir, multi_fidelity=False
-    )
+    b = manager.benchmark(benchmark=FCNetSliceLocalizationBenchmark, data_dir=args.data_dir)
     _, y_star_valid, y_star_test = b.get_best_configuration()
 
 elif args.benchmark == "naval_propulsion":
     min_budget = 3
     max_budget = 100
-    b = manager.benchmark(
-        benchmark=FCNetNavalPropulsionBenchmark, data_dir=args.data_dir, multi_fidelity=False
-    )
+    b = manager.benchmark(benchmark=FCNetNavalPropulsionBenchmark, data_dir=args.data_dir)
     _, y_star_valid, y_star_test = b.get_best_configuration()
 
 elif args.benchmark == "parkinsons_telemonitoring":
     min_budget = 3
     max_budget = 100
-    b = manager.benchmark(
-        benchmark=FCNetParkinsonsTelemonitoringBenchmark,
-        data_dir=args.data_dir,
-        multi_fidelity=False
-    )
+    b = manager.benchmark(benchmark=FCNetParkinsonsTelemonitoringBenchmark, data_dir=args.data_dir)
     _, y_star_valid, y_star_test = b.get_best_configuration()
 
 output_path = os.path.join(args.output_path, "smac")

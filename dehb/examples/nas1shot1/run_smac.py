@@ -30,12 +30,17 @@ def objective_function(config, **kwargs):
     global search_space, nasbench
     fitness, cost = search_space.objective_function(nasbench, config, budget=108)
     fitness = 1 - fitness
-    return fitness
+    return float(fitness)
 
 
 def benchmark_wrapper(space, *args, **kwargs):
     obj = eval('SearchSpace{}()'.format(space))(*args, **kwargs)
+    # the AutoProxy wrapper around benchmark, created by BaseManager doesn't expose attributes
+    # the lambda function below creates a function that can be used to access attributes
+    # obj.get_run_history() becomes equivalent to obj.run_history
     obj.get_run_history = lambda: obj.run_history
+    obj.get_valid_min_error = lambda: obj.valid_min_error
+    obj.get_test_min_error = lambda: obj.test_min_error
     return obj
 
 
@@ -79,8 +84,8 @@ for space in spaces:
     search_space = manager.benchmark(space=space)
 
     cs = search_space.get_configuration_space()
-    y_star_valid, y_star_test, inc_config = (search_space.valid_min_error,
-                                             search_space.test_min_error, None)
+    y_star_valid, y_star_test, inc_config = (search_space.get_valid_min_error(),
+                                             search_space.get_test_min_error(), None)
 
     scenario = Scenario({"run_obj": "quality",
                          "runcount-limit": args.n_iters,
