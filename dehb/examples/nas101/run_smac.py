@@ -18,33 +18,37 @@ from tabular_benchmarks import FCNetProteinStructureBenchmark, FCNetSliceLocaliz
     FCNetNavalPropulsionBenchmark, FCNetParkinsonsTelemonitoringBenchmark
 from tabular_benchmarks import NASCifar10A, NASCifar10B, NASCifar10C
 
-sys.path.append('dehb/examples/')
-from utils import util
-
-sys.path.append(os.path.join(os.getcwd(), '../HpBandSter/icml_2018_experiments/experiments/workers'))
-from base_worker import BaseWorker
-
 
 def convert_to_json(results, y_star_valid, y_star_test):
-    res = {}
-    res['regret_validation'] = np.array(np.array(results['losses']) - y_star_valid).tolist()
-    res['regret_test'] = np.array(np.array(results['test_losses']) - y_star_test).tolist()
-    res['runtime'] = np.array(results['cummulative_cost']).tolist()
+    valid_scores = np.array([])
+    test_scores = np.array([])
+    runtimes = np.array([])
+    valid_inc = np.inf
+    test_inc = np.inf
+    for k, v in results.items():
+        if v.cost < valid_inc:
+            valid_inc = v.cost
+        if v.additional_info['test_score'] < test_inc:
+            test_inc = v.additional_info['test_score']
+        valid_scores = np.append(valid_scores, valid_inc)
+        test_scores = np.append(test_scores, test_inc)
+        runtimes = np.append(runtimes, v.additional_info['cost'])
+    res = dict()
+    res['regret_validation'] = np.array(valid_scores - y_star_valid).tolist()
+    res['regret_test'] = np.array(test_scores - y_star_test).tolist()
+    res['runtime'] = np.cumsum(runtimes).tolist()
     return res
 
 
-class NAS101Worker(BaseWorker):
-    def __init__(self, benchmark, cs, **kwargs):
-        super().__init__(benchmark=benchmark, configspace=cs, **kwargs)
-        self.b = benchmark
-
-    def compute(self, config, **kwargs):
-        valid_score, cost = self.b.objective_function(config)
-        test_score, _ = self.b.objective_function_test(config)
-        return ({
-            'loss': float(valid_score),
-            'info': {'cost': float(cost), 'test_loss': float(test_score)}
-        })
+def compute(config, **kwargs):
+    global b
+    valid_score, _ = b.objective_function(config)
+    test_score = b.y_test[-1]
+    cost = b.costs[-1]
+    return float(valid_score), {
+        "test_score": float(test_score),
+        "cost": float(cost)
+    }
 
 
 parser = argparse.ArgumentParser()
@@ -127,21 +131,12 @@ assert runs > start
 for run_id in range(start, runs):
     print("Run {:>3}/{:>3}".format(run_id+1, runs))
 
-    worker = NAS101Worker(
-        benchmark=b, cs=cs, measure_test_loss=False, run_id=run_id, max_budget=max_budget
-    )
-    args.run_id = run_id
-    args.min_budget = min_budget
-    args.max_budget = max_budget
-    args.eta = 3
-    result = util.run_experiment(args, worker, output_path, smac_deterministic=False)
+    smac = SMAC(scenario=scenario, tae_runner=compute)
+    smac.optimize()
 
-    with open(os.path.join(output_path, 'smac_run_{}.pkl'.format(run_id)), "rb") as f:
-        result = pickle.load(f)
     fh = open(os.path.join(output_path, 'run_{}.json'.format(run_id)), 'w')
-    json.dump(convert_to_json(result, y_star_valid, y_star_test), fh)
+    json.dump(convert_to_json(smac.runhistory.data, y_star_valid, y_star_test), fh)
     fh.close()
-    os.remove(os.path.join(output_path, 'smac_run_{}.pkl'.format(run_id)))
 
     print("Run saved. Resetting...")
     b.reset_tracker()
