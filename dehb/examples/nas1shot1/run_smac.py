@@ -34,8 +34,13 @@ def objective_function(config, **kwargs):
 
 
 def benchmark_wrapper(space, *args, **kwargs):
-    obj = eval('SearchSpace{}()'.format(space))(*args, **kwargs)
-    # the AutoProxy wrapper around benchmark, created by BaseManager doesn't expose attributes
+    if space == 1:
+        obj = SearchSpace1(*args, **kwargs)
+    elif space == 2:
+        obj = SearchSpace2(*args, **kwargs)
+    else:
+        obj = SearchSpace3(*args, **kwargs)
+    # the AutoProxy wrapper around search_space, created by BaseManager doesn't expose attributes
     # the lambda function below creates a function that can be used to access attributes
     # obj.get_run_history() becomes equivalent to obj.run_history
     obj.get_run_history = lambda: obj.run_history
