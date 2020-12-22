@@ -14,6 +14,10 @@ import numpy as np
 import ConfigSpace
 logging.basicConfig(level=logging.INFO)
 
+from smac.scenario.scenario import Scenario
+from smac.facade.smac_hpo_facade import SMAC4HPO as SMAC
+from multiprocessing.managers import BaseManager
+
 from nasbench import api
 
 from nasbench_analysis.search_spaces.search_space_1 import SearchSpace1
@@ -21,36 +25,18 @@ from nasbench_analysis.search_spaces.search_space_2 import SearchSpace2
 from nasbench_analysis.search_spaces.search_space_3 import SearchSpace3
 from nasbench_analysis.utils import INPUT, OUTPUT, CONV1X1, CONV3X3, MAXPOOL3X3
 
-sys.path.append('dehb/examples/')
-from utils import util
 
-sys.path.append(os.path.join(os.getcwd(), '../HpBandSter/icml_2018_experiments/experiments/workers'))
-from base_worker import BaseWorker
-
-
-def convert_to_json(results, y_star_valid, y_star_test):
-    res = {}
-    res['regret_validation'] = np.array(results['losses'] - y_star_valid).tolist()
-    res['regret_test'] = np.array(results['test_losses'] - y_star_test).tolist()
-    res['runtime'] = np.array(results['cummulative_cost']).tolist()
-    return res
+def objective_function(config, **kwargs):
+    global search_space, nasbench
+    fitness, cost = search_space.objective_function(nasbench, config, budget=108)
+    fitness = 1 - fitness
+    return fitness
 
 
-class NAS1shot1Worker(BaseWorker):
-    def __init__(self, benchmark, **kwargs):
-        super().__init__(benchmark=benchmark, max_budget=108, **kwargs)
-        self.b = benchmark
-        self.cs = self.b.get_configuration_space()
-
-    def compute(self, config, **kwargs):
-        c = ConfigSpace.Configuration(self.cs, values=config)
-        y, cost = self.b.objective_function(nasbench, c, budget=108)
-        y_test, _ = self.b.objective_function_test(nasbench, c, budget=108)
-
-        return ({
-            'loss': 1 - float(y),
-            'info': {'cost': float(cost), 'test_loss': 1 - float(y_test)}
-        })
+def benchmark_wrapper(space, *args, **kwargs):
+    obj = eval('SearchSpace{}()'.format(space))(*args, **kwargs)
+    obj.get_run_history = lambda: obj.run_history
+    return obj
 
 
 parser = argparse.ArgumentParser()
@@ -58,7 +44,7 @@ parser.add_argument('--run_id', default=0, type=int, nargs='?',
                     help='unique number to identify this run')
 parser.add_argument('--search_space', default=None, type=str, nargs='?',
                     help='specifies the benchmark')
-parser.add_argument('--n_iters', default=280, type=int, nargs='?',
+parser.add_argument('--n_iters', default=10, type=int, nargs='?',
                     help='number of iterations for optimization method')
 parser.add_argument('--output_path', default="./experiments", type=str, nargs='?',
                     help='specifies the path where the results will be saved')
@@ -67,19 +53,15 @@ parser.add_argument('--data_dir',
                     type=str, nargs='?', help='specifies the path to the nasbench data')
 parser.add_argument('--seed', default=0, type=int,
                     help='random seed')
-parser.add_argument('--n_repetitions', default=500, type=int,
-                    help='number of repetitions')
 args = parser.parse_args()
 
 nasbench = api.NASBench(args.data_dir)
 
 output_path = os.path.join(args.output_path, "SMAC")
 os.makedirs(os.path.join(output_path), exist_ok=True)
-args.working_directory = output_path
-args.method = "smac"
-args.num_iterations = args.n_iters
-args.max_budget = 108
 
+BaseManager.register('benchmark', benchmark_wrapper)
+manager = BaseManager()
 
 if args.search_space is None:
     spaces = [1, 2, 3]
@@ -91,19 +73,28 @@ for space in spaces:
     print('##### Seed {} #####'.format(args.seed))
     np.random.seed(args.seed)
     run_id = args.run_id
+
+    # important to let SMAC workers access the shared object
+    manager.start()
+    search_space = manager.benchmark(space=space)
+
+    cs = search_space.get_configuration_space()
     y_star_valid, y_star_test, inc_config = (search_space.valid_min_error,
                                              search_space.test_min_error, None)
 
-    search_space = eval('SearchSpace{}()'.format(space))
-    cs = search_space.get_configuration_space()
-
-    worker = NAS1shot1Worker(
-        benchmark=search_space, measure_test_loss=False, run_id=run_id, max_budget=108
-    )
-    result = util.run_experiment(args, worker, output_path, smac_deterministic=False)
-    with open(os.path.join(output_path, 'smac_run_{}.pkl'.format(run_id)), "rb") as f:
-        result = pickle.load(f)
-    fh = open(os.path.join(output_path, 'run_{}.json'.format(run_id)), 'w')
-    json.dump(convert_to_json(result, y_star_valid, y_star_test), fh)
+    scenario = Scenario({"run_obj": "quality",
+                         "runcount-limit": args.n_iters,
+                         "cs": cs,
+                         "deterministic": "false",
+                         "initial_incumbent": "RANDOM",
+                         "output_dir": ""})
+    smac = SMAC(scenario=scenario, tae_runner=objective_function)
+    smac.optimize()
+    # collects the optimization trace from the search_space object which kept track of evaluations
+    run_history = search_space.get_run_history()
+    # important to reset the tracker or re-initialize the search_space object
+    manager.shutdown()
+    fh = open(os.path.join(output_path,
+                           'SMAC_{}_ssp_{}_seed_{}.obj'.format(run_id, space, run_id)), 'wb')
+    pickle.dump(run_history, fh)
     fh.close()
-    os.remove(os.path.join(output_path, 'smac_run_{}.pkl'.format(run_id)))

@@ -13,42 +13,25 @@ import numpy as np
 
 from smac.scenario.scenario import Scenario
 from smac.facade.smac_hpo_facade import SMAC4HPO as SMAC
+from multiprocessing.managers import BaseManager
 
 from tabular_benchmarks import FCNetProteinStructureBenchmark, FCNetSliceLocalizationBenchmark,\
     FCNetNavalPropulsionBenchmark, FCNetParkinsonsTelemonitoringBenchmark
 from tabular_benchmarks import NASCifar10A, NASCifar10B, NASCifar10C
 
 
-def convert_to_json(results, y_star_valid, y_star_test):
-    valid_scores = np.array([])
-    test_scores = np.array([])
-    runtimes = np.array([])
-    valid_inc = np.inf
-    test_inc = np.inf
-    for k, v in results.items():
-        if v.cost < valid_inc:
-            valid_inc = v.cost
-        if v.additional_info['test_score'] < test_inc:
-            test_inc = v.additional_info['test_score']
-        valid_scores = np.append(valid_scores, valid_inc)
-        test_scores = np.append(test_scores, test_inc)
-        runtimes = np.append(runtimes, v.additional_info['cost'])
-    res = dict()
-    res['regret_validation'] = np.array(valid_scores - y_star_valid).tolist()
-    res['regret_test'] = np.array(test_scores - y_star_test).tolist()
-    res['runtime'] = np.cumsum(runtimes).tolist()
-    return res
-
-
-def compute(config, **kwargs):
+def objective_function(config, **kwargs):
     global b
-    valid_score, _ = b.objective_function(config)
-    test_score = b.y_test[-1]
-    cost = b.costs[-1]
-    return float(valid_score), {
-        "test_score": float(test_score),
-        "cost": float(cost)
-    }
+    fitness, _ = b.objective_function(config)
+    return fitness
+
+
+def benchmark_wrapper(benchmark, **kwargs):
+    obj = benchmark(**kwargs)
+    if hasattr(obj, "y_star_valid"):
+        obj.get_y_star_valid = lambda x: obj.y_star_valid
+        obj.get_y_star_valid = lambda x: obj.y_star_valid
+    return obj
 
 
 parser = argparse.ArgumentParser()
@@ -68,49 +51,63 @@ parser.add_argument('--data_dir', default="../nas_benchmarks-development/"
                     type=str, nargs='?', help='specifies the path to the tabular data')
 args = parser.parse_args()
 
+BaseManager.register('benchmark', benchmark_wrapper)
+manager = BaseManager()
+manager.start()
+
 if args.benchmark == "nas_cifar10a":
     min_budget = 4
     max_budget = 108
-    b = NASCifar10A(data_dir=args.data_dir, multi_fidelity=False)
-    y_star_valid = b.y_star_valid
-    y_star_test = b.y_star_test
+    b = manager.benchmark(benchmark=NASCifar10A, data_dir=args.data_dir, multi_fidelity=False)
+    y_star_valid = b.get_y_star_valid()
+    y_star_test = b.get_y_star_test()
 
 elif args.benchmark == "nas_cifar10b":
     min_budget = 4
     max_budget = 108
-    b = NASCifar10B(data_dir=args.data_dir, multi_fidelity=False)
-    y_star_valid = b.y_star_valid
-    y_star_test = b.y_star_test
+    b = manager.benchmark(benchmark=NASCifar10B, data_dir=args.data_dir, multi_fidelity=False)
+    y_star_valid = b.get_y_star_valid()
+    y_star_test = b.get_y_star_test()
 
 elif args.benchmark == "nas_cifar10c":
     min_budget = 4
     max_budget = 108
-    b = NASCifar10C(data_dir=args.data_dir, multi_fidelity=False)
-    y_star_valid = b.y_star_valid
-    y_star_test = b.y_star_test
+    b = manager.benchmark(benchmark=NASCifar10C, data_dir=args.data_dir, multi_fidelity=False)
+    y_star_valid = b.get_y_star_valid()
+    y_star_test = b.get_y_star_test()
 
 elif args.benchmark == "protein_structure":
     min_budget = 3
     max_budget = 100
-    b = FCNetProteinStructureBenchmark(data_dir=args.data_dir)
+    b = manager.benchmark(
+        benchmark=FCNetProteinStructureBenchmark, data_dir=args.data_dir, multi_fidelity=False
+    )
     _, y_star_valid, y_star_test = b.get_best_configuration()
 
 elif args.benchmark == "slice_localization":
     min_budget = 3
     max_budget = 100
-    b = FCNetSliceLocalizationBenchmark(data_dir=args.data_dir)
+    b = manager.benchmark(
+        benchmark=FCNetSliceLocalizationBenchmark, data_dir=args.data_dir, multi_fidelity=False
+    )
     _, y_star_valid, y_star_test = b.get_best_configuration()
 
 elif args.benchmark == "naval_propulsion":
     min_budget = 3
     max_budget = 100
-    b = FCNetNavalPropulsionBenchmark(data_dir=args.data_dir)
+    b = manager.benchmark(
+        benchmark=FCNetNavalPropulsionBenchmark, data_dir=args.data_dir, multi_fidelity=False
+    )
     _, y_star_valid, y_star_test = b.get_best_configuration()
 
 elif args.benchmark == "parkinsons_telemonitoring":
     min_budget = 3
     max_budget = 100
-    b = FCNetParkinsonsTelemonitoringBenchmark(data_dir=args.data_dir)
+    b = manager.benchmark(
+        benchmark=FCNetParkinsonsTelemonitoringBenchmark,
+        data_dir=args.data_dir,
+        multi_fidelity=False
+    )
     _, y_star_valid, y_star_test = b.get_best_configuration()
 
 output_path = os.path.join(args.output_path, "smac")
@@ -131,12 +128,17 @@ assert runs > start
 for run_id in range(start, runs):
     print("Run {:>3}/{:>3}".format(run_id+1, runs))
 
-    smac = SMAC(scenario=scenario, tae_runner=compute)
+    smac = SMAC(scenario=scenario, tae_runner=objective_function)
     smac.optimize()
 
+    if 'cifar' in args.benchmark:
+        res = b.get_results(ignore_invalid_configs=True)
+    else:
+        res = b.get_results()
     fh = open(os.path.join(output_path, 'run_{}.json'.format(run_id)), 'w')
-    json.dump(convert_to_json(smac.runhistory.data, y_star_valid, y_star_test), fh)
+    json.dump(res, fh)
     fh.close()
-
     print("Run saved. Resetting...")
     b.reset_tracker()
+
+manager.shutdown()
