@@ -8,6 +8,9 @@ To install HpBandSter:
 `pip install hpbandster`
 
 
+SMAC needed: 0.13.1
+
+
 SciPy needed: 1.2.1
 
 
