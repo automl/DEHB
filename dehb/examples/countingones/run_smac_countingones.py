@@ -33,7 +33,6 @@ def calc_regrets(data):
     for k, v in data.items():
         if v.cost < val_inc:
             val_inc = v.cost
-        if v.additional_info["test_score"] < test_inc:
             test_inc = v.additional_info["test_score"]
         valid_regret.append(val_inc - global_best)
         test_regret.append(test_inc - global_best)
