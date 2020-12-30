@@ -31,11 +31,13 @@ def calc_regrets(data):
     val_inc = np.inf
     test_inc = np.inf
     for k, v in data.items():
-        if v.cost < val_inc:
-            val_inc = v.cost
-            test_inc = v.additional_info["test_score"]
-        valid_regret.append(val_inc - global_best)
-        test_regret.append(test_inc - global_best)
+        curr_regret = (v.cost + dimensions) / dimensions
+        curr_test_regret = (v.additional_info["test_score"] + dimensions) / dimensions
+        if curr_regret < val_inc:
+            val_inc = curr_regret
+            test_inc = curr_test_regret
+        valid_regret.append(val_inc)
+        test_regret.append(test_inc)
         runtimes.append(v.additional_info["runtime"])
     return valid_regret, test_regret, runtimes
 
