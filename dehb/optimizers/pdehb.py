@@ -391,10 +391,13 @@ class PDEHB(DEHBBase):
         bracket = None
         if len(self.active_brackets) == 0 or \
                 np.all([bracket.is_bracket_done() for bracket in self.active_brackets]):
-            # start new bracket when list no pending jobs from existing brackets or empty list
+            # start new bracket when no pending jobs from existing brackets or empty bracket list
             bracket = self._start_new_bracket()
         else:
             for _bracket in self.active_brackets:
+                # check if _bracket is not waiting for previous rung results of same bracket
+                # _bracket is not waiting on the last rung results
+                # these 2 checks allow DEHB to have a "synchronous" Successive Halving
                 if not _bracket.previous_rung_waits() and _bracket.is_pending():
                     # bracket eligible for job scheduling
                     bracket = _bracket
@@ -429,7 +432,7 @@ class PDEHB(DEHBBase):
         # pass information of job submission to Bracket Manager
         for bracket in self.active_brackets:
             if bracket.bracket_id == job_info['bracket_id']:
-                # IMPORTANT for Bracket Manager to perform SH
+                # registering is IMPORTANT for Bracket Manager to perform SH
                 bracket.register_job(job_info['budget'])
                 break
 
@@ -551,7 +554,3 @@ class PDEHB(DEHBBase):
             print("End of optimisation!")
         self.runtime = np.array(self.runtime) - self.start
         return np.array(self.traj), np.array(self.runtime), np.array(self.history)
-
-# TODO: don't stop until all self.iteration_counter < self.brackets are complete
-# TODO: fevals will be outweighed by lower fidelity evaluations especially for large n_workers
-# TODO: solve bug in n=10 for optdigits (occurs for high workers) --> no unevaluated configs to select promotion from

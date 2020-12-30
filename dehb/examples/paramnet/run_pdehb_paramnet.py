@@ -6,25 +6,24 @@ import pickle
 import argparse
 import numpy as np
 
-import ConfigSpace
-
 from hpolib.benchmarks.surrogates.paramnet import SurrogateReducedParamNetTime
 
 from dehb import DE
 from dehb import DEHB, PDEHB
 
+from multiprocessing.managers import BaseManager
+
 
 # Common objective function for DE & DEHB representing SVM Surrogates benchmark
 def f(config, budget=None):
-    global max_budget
-    time.sleep(float(budget or 0))
+    global max_budget, b
     if budget is not None:
         fitness = b.objective_function(config, budget=budget)
     else:
         fitness = b.objective_function(config)
         budget = max_budget
     fitness = fitness['function_value']
-    # cost = budget
+    time.sleep(float(budget or 0))
     cost = time.time()
     return fitness, cost
 
@@ -110,7 +109,10 @@ if __name__ == "__main__":
     os.makedirs(output_path, exist_ok=True)
 
     # Loading benchmark
-    b = SurrogateReducedParamNetTime(dataset=args.dataset)
+    BaseManager.register('benchmark', SurrogateReducedParamNetTime)
+    manager = BaseManager()
+    manager.start()
+    b = manager.benchmark(dataset=args.dataset)
 
     # Parameter space to be used by DE
     cs = b.get_configuration_space()
@@ -132,6 +134,7 @@ if __name__ == "__main__":
                 mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,
                 eta=args.eta, min_budget=min_budget, max_budget=max_budget,
                 n_workers=args.n_workers)
+
     # Helper DE object for vector to config mapping
     de = DE(cs=cs, b=b, f=f)
 
@@ -173,3 +176,4 @@ if __name__ == "__main__":
             dehb.reset()
 
     save_configspace(cs, output_path)
+    manager.shutdown()
