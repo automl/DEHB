@@ -20,6 +20,10 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
     frame_dict = collections.OrderedDict()
     available_models = []
 
+    # for table and ranking plot
+    mean_df = {}
+    std_df = {}
+
     # finding best found incumbent to be global incumbent
     min_max_time = []
     global_inc = np.inf
@@ -124,36 +128,20 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
             min_regret = min(min_regret, np.mean(te, axis=1)[idx][-1])
             max_regret = max(max_regret, np.mean(te, axis=1)[idx][0])
 
-    rank_stats = pd.DataFrame(frame_dict)
-    rank_stats = rank_stats.ffill()
+            # For final score table
+            mean_df[label] = pd.Series(data=np.mean(te, axis=1)[idx], index=time[idx])
+            std_df[label] = pd.Series(data=np.std(te, axis=1)[idx], index=time[idx])
 
-    # dividing log-scale range of [0, 1e6] into 1000 even buckets
-    buckets = 50
-    max_limit = 7.0
-    t = 10 ** np.arange(start=0, stop=max_limit, step=max_limit/buckets)
-    # creating dummy filler data to create the data frame
-    d = np.random.uniform(size=(len(t), rank_stats.shape[-1]))
-    d.fill(np.nan)
-    # getting complete time range
-    index = np.concatenate((t, rank_stats.index.to_numpy()))
-    # concatenating actual and dummy data
-    data = np.vstack((d, rank_stats))
-    # ordering time
-    idx = np.argsort(index)
-    # creating new ordered data frame
-    rank_stats = pd.DataFrame(data=data[idx], index=index[idx])
-    rank_stats = rank_stats.ffill().loc[t]
-    # replacing scores with the relative ranks
-    rank_stats = rank_stats.apply(np.argsort, axis=1)
-    # to start ranks from '1'
-    rank_stats += 1
-    # assigning an equal average rank to all agorithms at the beginning
-    rank_stats = rank_stats.replace(0, np.mean(np.arange(rank_stats.shape[-1]) + 1))
-    # adding model/column names
-    rank_stats.columns = available_models
-
-    dataset = path.replace('/', ' ').strip().split(' ')[-1]
-    with open('{}.pkl'.format(dataset), 'wb') as f:
-        pickle.dump(rank_stats, f)
+    mean_df = pd.DataFrame(mean_df)
+    std_df = pd.DataFrame(std_df)
+    cutoff_idx = min(
+        list(map(lambda x: np.where(~mean_df.isna()[x] == True)[0][-1], mean_df.columns))
+    )
+    mean_df = mean_df.iloc[:cutoff_idx + 1].ffill()
+    std_df = std_df.iloc[:cutoff_idx + 1].ffill()
+    rank_df = mean_df.apply(stats.rankdata, axis=1, result_type='broadcast')
+    mean_df.iloc[-1].to_pickle(os.path.join(path, 'mean_df.pkl'))
+    std_df.iloc[-1].to_pickle(os.path.join(path, 'std_df.pkl'))
+    rank_df.to_pickle(os.path.join(path, 'rank_df.pkl'))
 
     return plt, min_time, max_time, min_regret, max_regret

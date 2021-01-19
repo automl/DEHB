@@ -11,7 +11,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
                 colors, linestyles, marker, n_runs=500, limit=1e7):
 
     # plot limits
-    min_time = np.inf
+    min_time = 0  #np.inf
     max_time = 0
     min_regret = 1
     max_regret = 0
@@ -19,6 +19,10 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
     # stats for rank plot
     frame_dict = collections.OrderedDict()
     available_models = []
+
+    # for table and ranking plot
+    mean_df = {}
+    std_df = {}
 
     no_runs_found = False
     # looping and plotting for all methods
@@ -52,9 +56,11 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
 
         if not no_runs_found:
             # finds the latest time where the first measurement was made across runs
+            ## unlike other benchmarks, this benchmark has stochastic and noisy signals
+            ## taking the minimum of the first recorded measurements across runs as starting point
             t = np.max([runtimes[i][0] for i in range(len(runtimes))])
-            min_time = min(min_time, t)
-            te, time = fill_trajectory(regret, runtimes, replace_nan=1)
+            min_time = max(min_time, t)
+            te, time = fill_trajectory(regret, runtimes, replace_nan=3000)
 
             idx = time.tolist().index(t)
             te = te[idx:, :]
@@ -87,35 +93,20 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
             min_regret = min(min_regret, np.mean(te, axis=1)[idx][-1])
             max_regret = max(max_regret, np.mean(te, axis=1)[idx][0])
 
-    rank_stats = pd.DataFrame(frame_dict)
-    rank_stats = rank_stats.ffill()
+            # For final score table
+            mean_df[label] = pd.Series(data=np.mean(te, axis=1)[idx], index=time[idx])
+            std_df[label] = pd.Series(data=np.std(te, axis=1)[idx], index=time[idx])
 
-    # dividing log-scale range of [0, 1e6] into 1000 even buckets
-    buckets = 50
-    max_limit = 7.0
-    t = 10 ** np.arange(start=0, stop=max_limit, step=max_limit/buckets)
-    # creating dummy filler data to create the data frame
-    d = np.random.uniform(size=(len(t), rank_stats.shape[-1]))
-    d.fill(np.nan)
-    # getting complete time range
-    index = np.concatenate((t, rank_stats.index.to_numpy()))
-    # concatenating actual and dummy data
-    data = np.vstack((d, rank_stats))
-    # ordering time
-    idx = np.argsort(index)
-    # creating new ordered data frame
-    rank_stats = pd.DataFrame(data=data[idx], index=index[idx])
-    rank_stats = rank_stats.ffill().loc[t]
-    # replacing scores with the relative ranks
-    rank_stats = rank_stats.apply(np.argsort, axis=1)
-    # to start ranks from '1'
-    rank_stats += 1
-    # assigning an equal average rank to all agorithms at the beginning
-    rank_stats = rank_stats.replace(0, np.mean(np.arange(rank_stats.shape[-1]) + 1))
-    # adding model/column names
-    rank_stats.columns = available_models
-
-    with open('cartpole.pkl', 'wb') as f:
-        pickle.dump(rank_stats, f)
+    mean_df = pd.DataFrame(mean_df)
+    std_df = pd.DataFrame(std_df)
+    cutoff_idx = min(
+        list(map(lambda x: np.where(~mean_df.isna()[x] == True)[0][-1], mean_df.columns))
+    )
+    mean_df = mean_df.iloc[:cutoff_idx + 1].ffill()
+    std_df = std_df.iloc[:cutoff_idx + 1].ffill()
+    rank_df = mean_df.apply(stats.rankdata, axis=1, result_type='broadcast')
+    mean_df.iloc[-1].to_pickle(os.path.join(path, 'mean_df.pkl'))
+    std_df.iloc[-1].to_pickle(os.path.join(path, 'std_df.pkl'))
+    rank_df.to_pickle(os.path.join(path, 'rank_df.pkl'))
 
     return plt, min_time, max_time, min_regret, max_regret
