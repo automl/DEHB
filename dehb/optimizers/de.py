@@ -178,12 +178,27 @@ class DE(DEBase):
             self.mutation_strategy = self.crossover_strategy = None
         self.encoding = encoding
         self.dim_map = dim_map
+        self._set_min_pop_size()
 
     def reset(self):
         super().reset()
         self.traj = []
         self.runtime = []
         self.history = []
+
+    def _set_min_pop_size(self):
+        if self.mutation_strategy in ['rand1', 'rand2dir', 'randtobest1']:
+            self._min_pop_size = 3
+        elif self.mutation_strategy in ['currenttobest1', 'best1']:
+            self._min_pop_size = 2
+        elif self.mutation_strategy in ['best2']:
+            self._min_pop_size = 4
+        elif self.mutation_strategy in ['rand2']:
+            self._min_pop_size = 5
+        else:
+            self._min_pop_size = 1
+
+        return self._min_pop_size
 
     def map_to_original(self, vector):
         dimensions = len(self.dim_map.keys())
@@ -476,21 +491,6 @@ class AsyncDE(DE):
         self.async_strategy = async_strategy
         assert self.async_strategy in ['immediate', 'random', 'worst', 'deferred'], \
                 "{} is not a valid choice for type of DE".format(self.async_strategy)
-        self._set_min_pop_size()
-
-    def _set_min_pop_size(self):
-        if self.mutation_strategy in ['rand1', 'rand2dir', 'randtobest1']:
-            self._min_pop_size = 3
-        elif self.mutation_strategy in ['currenttobest1', 'best1']:
-            self._min_pop_size = 2
-        elif self.mutation_strategy in ['best2']:
-            self._min_pop_size = 4
-        elif self.mutation_strategy in ['rand2']:
-            self._min_pop_size = 5
-        else:
-            self._min_pop_size = 1
-
-        return self._min_pop_size
 
     def _add_random_population(self, pop_size, population=None, fitness=[], age=[]):
         '''Adds random individuals to the population

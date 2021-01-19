@@ -127,7 +127,7 @@ budgets = {  # (min, max)-budget (seconds) for the different data sets
     'higgs': (9, 243),
     'letter': (3, 81),
     'mnist': (9, 243),
-    'optdigits': (1, 27) ,
+    'optdigits': (1, 27),
     'poker': (81, 2187),
 }
 
