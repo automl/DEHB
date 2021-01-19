@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # for a clean master branch
 dehb/examples/*
 dehb/utils/
@@ -7,6 +6,7 @@ dehb/utils/
 # files dumped at base directory
 *.json
 *.pdf
+*.pkl
 
 
 # folders created from imports
@@ -23,10 +23,3 @@ workflow/
 dask-worker-space/
 dehb/examples/*/results
 dehb/examples/*/*/results
-=======
-slurm*
-
-__pycache__/
-*/__pycache__/
->>>>>>> experiments
-
