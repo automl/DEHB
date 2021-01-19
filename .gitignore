@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # for a clean master branch
 dehb/examples/*
 dehb/utils/
@@ -22,4 +23,10 @@ workflow/
 dask-worker-space/
 dehb/examples/*/results
 dehb/examples/*/*/results
+=======
+slurm*
+
+__pycache__/
+*/__pycache__/
+>>>>>>> experiments
 
