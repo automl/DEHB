@@ -2,6 +2,7 @@ import os
 import json
 import pickle
 import numpy as np
+import pandas as pd
 from scipy import stats
 
 
@@ -20,6 +21,10 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
     d = int(dim1) + int(dim2)
     max_budget = 93312 / d
 
+    # for table and ranking plot
+    mean_df = {}
+    std_df = {}
+
     no_runs_found = False
     # looping and plotting for all methods
     for index, (m, label) in enumerate(methods):
@@ -28,7 +33,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
         runtimes = []
         for k, i in enumerate(np.arange(n_runs)):
             try:
-                if 'de' in m or 'evolution' in m:
+                if 'de' in m or 'evolution' in m or ('smac' in m and d == 64):
                     res = json.load(open(os.path.join(path, m, "run_{}.json".format(i))))
                 else:
                     res = pickle.load(open(os.path.join(path, m,
@@ -38,7 +43,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
                 print(m, i, e)
                 no_runs_found = True
                 continue
-            if 'de' in m or 'evolution' in m:
+            if 'de' in m or 'evolution' in m or ('smac' in m and d == 64):
                 regret_key = "regret_validation" if regret_type == 'validation' else "regret_test"
                 runtime_key = "runtime"
                 curr_regret = np.array(res[regret_key])
@@ -86,5 +91,21 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
             max_time = max(max_time, time[idx][-1])
             min_regret = min(min_regret, np.mean(te, axis=1)[idx][-1])
             max_regret = max(max_regret, np.mean(te, axis=1)[idx][0])
+
+            # For final score table
+            mean_df[label] = pd.Series(data=np.mean(te, axis=1)[idx], index=time[idx])
+            std_df[label] = pd.Series(data=np.std(te, axis=1)[idx], index=time[idx])
+
+    mean_df = pd.DataFrame(mean_df)
+    std_df = pd.DataFrame(std_df)
+    cutoff_idx = min(
+        list(map(lambda x: np.where(~mean_df.isna()[x] == True)[0][-1], mean_df.columns))
+    )
+    mean_df = mean_df.iloc[:cutoff_idx + 1].ffill()
+    std_df = std_df.iloc[:cutoff_idx + 1].ffill()
+    rank_df = mean_df.apply(stats.rankdata, axis=1, result_type='broadcast')
+    mean_df.iloc[-1].to_pickle(os.path.join(path, 'mean_df.pkl'))
+    std_df.iloc[-1].to_pickle(os.path.join(path, 'std_df.pkl'))
+    rank_df.to_pickle(os.path.join(path, 'rank_df.pkl'))
 
     return plt, min_time, max_time, min_regret, max_regret

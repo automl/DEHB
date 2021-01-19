@@ -14,8 +14,8 @@ import matplotlib.pyplot as plt
 #seaborn.set_style("ticks")
 
 from matplotlib import rcParams
-rcParams["font.size"] = "30"
-rcParams['text.usetex'] = True
+rcParams["font.size"] = "25"
+rcParams['text.usetex'] = False
 rcParams['font.family'] = 'serif'
 rcParams['figure.figsize'] = (16.0, 9.0)
 rcParams['figure.frameon'] = True
@@ -177,36 +177,36 @@ if benchmark != 'svm' and benchmark != 'bnn':
      plt.yscale("log")
 plt.tick_params(which='both', direction="in")
 if benchmark == 'svm' or benchmark == 'bnn':
-    plt.legend(loc='upper right', framealpha=1, prop={'size': 30, 'weight': 'bold'})
+    plt.legend(loc='upper right', framealpha=1, prop={'size': 30, 'weight': 'normal'})
 else:
-    plt.legend(loc='lower left', framealpha=1, prop={'size': 30, 'weight': 'bold'})
+    plt.legend(loc='lower left', framealpha=1, prop={'size': 30, 'weight': 'normal'})
 plt.title(args.title)
 
 if benchmark == 'rl':
-    plt.xlabel("time $[s]$", fontsize=50)
+    plt.xlabel("time $[s]$", fontsize=30)
 elif benchmark == 'bnn':
-    plt.xlabel("MCMC steps", fontsize=50)
+    plt.xlabel("MCMC steps", fontsize=30)
 elif benchmark == 'countingones':
-    plt.xlabel("cummulative budget / $b_{max}$", fontsize=50)
+    plt.xlabel("cummulative budget / $b_{max}$", fontsize=30)
 elif benchmark == 'speed':
     plt.xlabel("Runtime sans function evalution")
 elif plot_type == "wallclock":
-    plt.xlabel("estimated wallclock time $[s]$", fontsize=50)
+    plt.xlabel("estimated wallclock time $[s]$", fontsize=30)
 elif plot_type == "fevals":
-    plt.xlabel("number of function evaluations", fontsize=50)
+    plt.xlabel("number of function evaluations", fontsize=30)
 
 if benchmark == 'svm':
-    plt.ylabel("{} error".format(regret_type), fontsize=50)
+    plt.ylabel("{} error".format(regret_type), fontsize=30)
 elif benchmark == 'rl':
-    plt.ylabel("epochs until convergence", fontsize=50)
+    plt.ylabel("epochs until convergence", fontsize=30)
 elif benchmark == 'bnn':
-    plt.ylabel("negative log-likelihood", fontsize=50)
+    plt.ylabel("negative log-likelihood", fontsize=30)
 elif benchmark == 'countingones':
-    plt.ylabel("normalized {} regret".format(regret_type), fontsize=50)
+    plt.ylabel("normalized {} regret".format(regret_type), fontsize=30)
 elif benchmark == 'countingones':
-    plt.ylabel("number of function evaluations", fontsize=50)
+    plt.ylabel("number of function evaluations", fontsize=30)
 else:
-    plt.ylabel("{} regret".format(regret_type), fontsize=50)
+    plt.ylabel("{} regret".format(regret_type), fontsize=30)
 
 if benchmark == 'rl':
     plt.xlim(1e2, 1e5)
@@ -214,6 +214,7 @@ elif benchmark == 'bnn':
     plt.xlim(1e4, min(max_time*10, limit))
 elif benchmark == 'countingones':
     # plt.xlim(max(min_time/10, 1e-1), min(max_time*10, 1e7))
+    # plt.xlim(0.1, min(max_time * 10, 1e7))
     plt.xlim(0.1, 1e4)
 elif benchmark == 'cc18':
     # plt.xlim(0.01, max_time)
@@ -233,6 +234,6 @@ else:
     plt.ylim(min_regret, max_regret)
 
 plt.grid(which='both', alpha=0.5, linewidth=0.5)
-print(os.path.join(args.output_path, '{}.png'.format(plot_name)))
-plt.savefig(os.path.join(args.output_path, '{}.png'.format(plot_name)),
-            bbox_inches='tight', dpi=300)
+print(os.path.join(args.output_path, '{}.pdf'.format(plot_name)))
+plt.savefig(os.path.join(args.output_path, '{}.pdf'.format(plot_name)),
+            bbox_inches='tight')
