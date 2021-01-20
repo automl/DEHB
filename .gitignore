@@ -1,5 +1,21 @@
-slurm*
+# files dumped at base directory
+*.json
+*.pdf
+*.pkl
+*.out
 
+
+# folders created from imports
 __pycache__/
 */__pycache__/
+*/*/__pycache__/
 
+
+# folders as artefacts
+.idea/
+results/
+plots/
+workflow/
+dask-worker-space/
+dehb/examples/*/results
+dehb/examples/*/*/results
