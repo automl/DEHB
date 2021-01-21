@@ -33,7 +33,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
         runtimes = []
         for k, i in enumerate(np.arange(n_runs)):
             try:
-                if 'de' in m or 'evolution' in m or ('smac' in m and d == 64):
+                if 'de' in m or 'evolution' in m or ('smac' in m and d == 64) or m == 'rs':
                     res = json.load(open(os.path.join(path, m, "run_{}.json".format(i))))
                 else:
                     res = pickle.load(open(os.path.join(path, m,
@@ -43,7 +43,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
                 print(m, i, e)
                 no_runs_found = True
                 continue
-            if 'de' in m or 'evolution' in m or ('smac' in m and d == 64):
+            if 'de' in m or 'evolution' in m or ('smac' in m and d == 64) or m == 'rs':
                 regret_key = "regret_validation" if regret_type == 'validation' else "regret_test"
                 runtime_key = "runtime"
                 curr_regret = np.array(res[regret_key])

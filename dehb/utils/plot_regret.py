@@ -98,6 +98,8 @@ parser.add_argument('--title', default="benchmark", type=str,
 parser.add_argument('--limit', default=1e7, type=float, help='wallclock limit')
 parser.add_argument('--regret', default='test', type=str, choices=['validation', 'test'],
                     help='type of regret')
+parser.add_argument('--output', default='pdf', type=str, choices=['pdf', 'png'],
+                    help='type of plot file')
 
 args = parser.parse_args()
 path = args.path
@@ -108,6 +110,7 @@ plot_name = args.name
 regret_type = args.regret
 benchmark = args.benchmark
 bench_type = args.bench_type
+output = args.output
 
 # Checking benchmark specifications
 if benchmark == '101':
@@ -233,7 +236,7 @@ elif benchmark == 'svm':
 else:
     plt.ylim(min_regret, max_regret)
 
-plt.grid(which='both', alpha=0.5, linewidth=0.5)
-print(os.path.join(args.output_path, '{}.pdf'.format(plot_name)))
-plt.savefig(os.path.join(args.output_path, '{}.pdf'.format(plot_name)),
+plt.grid(which='both', alpha=0.2, linewidth=0.5)
+print(os.path.join(args.output_path, '{}.{}'.format(plot_name, output)))
+plt.savefig(os.path.join(args.output_path, '{}.{}'.format(plot_name, output)),
             bbox_inches='tight')

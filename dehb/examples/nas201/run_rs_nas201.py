@@ -156,13 +156,13 @@ def convert_to_json(history):
 
     for i in range(len(history)):
         architecture, cost = history[i]
-        validation_regret = (1 - (architecture.accuracy / 100)) - y_star_valid
+        validation_regret = max(0, (1 - (architecture.accuracy / 100)) - y_star_valid)
         # validation_regret = architecture.accuracy - y_star_valid
         if validation_regret <= inc:
             inc = validation_regret
             arch_index = nas_bench.query_index_by_arch(architecture.arch)
             info = nas_bench.get_more_info(arch_index, dataset, max_budget, False, False)
-            test_regret = (1 - (info['test-accuracy'] / 100)) - y_star_test
+            test_regret = max((1 - (info['test-accuracy'] / 100)) - y_star_test, 0)
         regret_validation.append(inc)
         regret_test.append(test_regret)
         runtime.append(cost)

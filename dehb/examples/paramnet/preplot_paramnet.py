@@ -31,7 +31,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
         runtimes = []
         for k, i in enumerate(np.arange(n_runs)):
             try:
-                if 'de' in m or 'evolution' in m:
+                if 'de' in m or 'evolution' in m or m == 'rs':
                     res = json.load(open(os.path.join(path, m, "run_{}.json".format(i))))
                 else:
                     res = pickle.load(open(os.path.join(path, m,
@@ -40,7 +40,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
                 print(m, i, e)
                 runtimes.append(limit)
                 continue
-            if 'de' in m:
+            if 'de' in m or m == 'rs':
                 regret_key =  "validation_score" if regret_type == 'validation' else "test_score"
                 runtime_key = "runtime"
             elif 'evolution' in m:
