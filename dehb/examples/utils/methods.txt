@@ -1,1 +1,2 @@
-[('randomsearch', 'RS'), ('hyperband', 'HB'), ('bohb', 'BOHB'), ('tpe', 'TPE'), ('regularized_evolution', 'RE'), ('de_pop20', 'DE'), ('dehb', 'DEHB')]
+[('randomsearch', 'RS'), ('hyperband', 'HB'), ('bohb', 'BOHB'), ('tpe', 'TPE'), ('smac', 'SMAC'), ('regularized_evolution', 'RE'), ('de_pop20', 'DE'), ('dehb', 'DEHB')]
+
