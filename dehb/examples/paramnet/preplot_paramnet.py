@@ -8,7 +8,7 @@ from scipy import stats
 
 
 def create_plot(plt, methods, path, regret_type, fill_trajectory,
-                colors, linestyles, marker, n_runs=500, limit=1e7):
+                colors, linestyles, marker, n_runs=500, limit=1e7, **Kwargs):
 
     # plot limits
     min_time = np.inf
@@ -31,7 +31,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
         runtimes = []
         for k, i in enumerate(np.arange(n_runs)):
             try:
-                if 'de' in m or 'evolution' in m or m == 'rs':
+                if 'de' in m or 'evolution' in m or m == 'randomsearch':
                     res = json.load(open(os.path.join(path, m, "run_{}.json".format(i))))
                 else:
                     res = pickle.load(open(os.path.join(path, m,
@@ -40,7 +40,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
                 print(m, i, e)
                 runtimes.append(limit)
                 continue
-            if 'de' in m or m == 'rs':
+            if 'de' in m or m == 'randomsearch':
                 regret_key =  "validation_score" if regret_type == 'validation' else "test_score"
                 runtime_key = "runtime"
             elif 'evolution' in m:
@@ -65,7 +65,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
         runtimes = []
         for k, i in enumerate(np.arange(n_runs)):
             try:
-                if 'de' in m or 'evolution' in m:
+                if 'de' in m or 'evolution' in m or m == 'randomsearch':
                     res = json.load(open(os.path.join(path, m, "run_{}.json".format(i))))
                 else:
                     res = pickle.load(open(os.path.join(path, m,
@@ -75,7 +75,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
                 print(m, i, e)
                 no_runs_found = True
                 continue
-            if 'de' in m:
+            if 'de' in m or m == 'randomsearch':
                 regret_key =  "validation_score" if regret_type == 'validation' else "test_score"
                 runtime_key = "runtime"
             elif 'evolution' in m:
@@ -102,15 +102,12 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
             time = time[idx:]
 
             # Clips off all measurements after 10^7s
-            idx = np.where(time < limit)[0]
+            idx = np.where(time <= limit)[0]
 
             print("{}. Plotting for {}".format(index, m))
             print(len(regret), len(runtimes))
             print("\nMean: {}; Std: {}\n".format(np.mean(te, axis=1)[idx][-1],
                                                  stats.sem(te[idx], axis=1)[-1]))
-
-            # stats for rank plot
-            frame_dict[str(m)] = pd.Series(data=np.mean(te, axis=1)[idx], index=time[idx])
 
             # The mean plot
             plt.plot(time[idx], np.mean(te, axis=1)[idx], color=colors[index],
@@ -134,12 +131,14 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
 
     mean_df = pd.DataFrame(mean_df)
     std_df = pd.DataFrame(std_df)
+    # minimum of the maximum time limit recorded for each algorithm
     cutoff_idx = min(
         list(map(lambda x: np.where(~mean_df.isna()[x] == True)[0][-1], mean_df.columns))
     )
     mean_df = mean_df.iloc[:cutoff_idx + 1].ffill()
     std_df = std_df.iloc[:cutoff_idx + 1].ffill()
     rank_df = mean_df.apply(stats.rankdata, axis=1, result_type='broadcast')
+    mean_df.to_pickle(os.path.join(path, 'all_mean_df.pkl'))
     mean_df.iloc[-1].to_pickle(os.path.join(path, 'mean_df.pkl'))
     std_df.iloc[-1].to_pickle(os.path.join(path, 'std_df.pkl'))
     rank_df.to_pickle(os.path.join(path, 'rank_df.pkl'))
