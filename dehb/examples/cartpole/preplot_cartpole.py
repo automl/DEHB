@@ -58,7 +58,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
             # finds the latest time where the first measurement was made across runs
             ## unlike other benchmarks, this benchmark has stochastic and noisy signals
             ## taking the minimum of the first recorded measurements across runs as starting point
-            t = np.max([runtimes[i][0] for i in range(len(runtimes))])
+            t = np.min([runtimes[i][0] for i in range(len(runtimes))])
             min_time = max(min_time, t)
             te, time = fill_trajectory(regret, runtimes, replace_nan=3000)
 
