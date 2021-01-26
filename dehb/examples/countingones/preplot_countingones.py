@@ -33,7 +33,8 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
         runtimes = []
         for k, i in enumerate(np.arange(n_runs)):
             try:
-                if 'de' in m or 'evolution' in m or ('smac' in m and d == 64) or m == 'rs':
+                if 'de' in m or 'evolution' in m or \
+                        ('smac' in m and d == 64) or m == 'randomsearch':
                     res = json.load(open(os.path.join(path, m, "run_{}.json".format(i))))
                 else:
                     res = pickle.load(open(os.path.join(path, m,
@@ -43,7 +44,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
                 print(m, i, e)
                 no_runs_found = True
                 continue
-            if 'de' in m or 'evolution' in m or ('smac' in m and d == 64) or m == 'rs':
+            if 'de' in m or 'evolution' in m or ('smac' in m and d == 64) or m == 'randomsearch':
                 regret_key = "regret_validation" if regret_type == 'validation' else "regret_test"
                 runtime_key = "runtime"
                 curr_regret = np.array(res[regret_key])
@@ -105,7 +106,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
     mean_df = mean_df.iloc[:cutoff_idx + 1].ffill()
     std_df = std_df.iloc[:cutoff_idx + 1].ffill()
     rank_df = mean_df.apply(stats.rankdata, axis=1, result_type='broadcast')
-    mean_df.iloc.to_pickle(os.path.join(path, 'all_mean_df.pkl'))
+    mean_df.to_pickle(os.path.join(path, 'all_mean_df.pkl'))
     mean_df.iloc[-1].to_pickle(os.path.join(path, 'mean_df.pkl'))
     std_df.iloc[-1].to_pickle(os.path.join(path, 'std_df.pkl'))
     rank_df.to_pickle(os.path.join(path, 'rank_df.pkl'))

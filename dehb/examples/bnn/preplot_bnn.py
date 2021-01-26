@@ -85,9 +85,6 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
             print("\nMean: {}; Std: {}\n".format(np.mean(te, axis=1)[idx][-1],
                                                  stats.sem(te[idx], axis=1)[-1]))
 
-            # stats for rank plot
-            frame_dict[str(m)] = pd.Series(data=np.mean(te, axis=1)[idx], index=time[idx])
-
             # The mean plot
             plt.plot(time[idx], np.mean(te, axis=1)[idx], color=colors[index],
                      linewidth=4, label=label, linestyle=linestyles[index % len(linestyles)],
@@ -117,7 +114,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
     mean_df = mean_df.iloc[:cutoff_idx + 1].ffill()
     std_df = std_df.iloc[:cutoff_idx + 1].ffill()
     rank_df = mean_df.apply(stats.rankdata, axis=1, result_type='broadcast')
-    mean_df.iloc.to_pickle(os.path.join(path, 'all_mean_df.pkl'))
+    mean_df.to_pickle(os.path.join(path, 'all_mean_df.pkl'))
     mean_df.iloc[-1].to_pickle(os.path.join(path, 'mean_df.pkl'))
     std_df.iloc[-1].to_pickle(os.path.join(path, 'std_df.pkl'))
     rank_df.to_pickle(os.path.join(path, 'rank_df.pkl'))
