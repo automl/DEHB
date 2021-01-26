@@ -179,7 +179,7 @@ else:
 if benchmark != 'cc18':
     plt.xscale("log")
 if benchmark != 'svm' and benchmark != 'bnn':
-     plt.yscale("log")
+    plt.yscale("log")
 plt.tick_params(which='both', direction="in")
 if benchmark == 'svm' or benchmark == 'bnn':
     plt.legend(loc='upper right', framealpha=1, prop={'size': 30, 'weight': 'normal'})
@@ -214,7 +214,8 @@ else:
     plt.ylabel("{} regret".format(regret_type), fontsize=30)
 
 if benchmark == 'rl':
-    plt.xlim(1e2, 1e5)
+    # plt.xlim(1e2, 1e5)
+    plt.xlim(min_time, max_time)
 elif benchmark == 'bnn':
     plt.xlim(min_limit, max_time)
     # plt.xlim(1e4, min(max_time*10, limit))
@@ -224,7 +225,8 @@ elif benchmark == 'cc18':
     # plt.xlim(0.01, max_time)
     plt.xlim(0.01, 10)
 else:
-    plt.xlim(max(min_time/10, 1e0), min(max_time*10, 1e7))
+    plt.xlim(min_time, max_time)
+    # plt.xlim(max(min_time/10, 1e0), min(max_time*10, 1e7))
 
 if benchmark == 'bnn':
     plt.ylim(3, 75)

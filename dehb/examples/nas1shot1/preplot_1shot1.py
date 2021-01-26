@@ -92,9 +92,9 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
     mean_df = mean_df.iloc[:cutoff_idx + 1].ffill()
     std_df = std_df.iloc[:cutoff_idx + 1].ffill()
     rank_df = mean_df.apply(stats.rankdata, axis=1, result_type='broadcast')
-    mean_df.to_pickle(os.path.join(path, 'all_mean_df.pkl'))
-    mean_df.iloc[-1].to_pickle(os.path.join(path, ssp, 'mean_df.pkl'))
-    std_df.iloc[-1].to_pickle(os.path.join(path, ssp, 'std_df.pkl'))
-    rank_df.to_pickle(os.path.join(path, ssp, 'rank_df.pkl'))
+    mean_df.to_pickle(os.path.join(path, 'all_mean_df_{}.pkl'.format(ssp)))
+    mean_df.iloc[-1].to_pickle(os.path.join(path, 'mean_df_{}.pkl'.format(ssp)))
+    std_df.iloc[-1].to_pickle(os.path.join(path, 'std_df_{}.pkl'.format(ssp)))
+    rank_df.to_pickle(os.path.join(path, 'rank_df_{}.pkl'.format(ssp)))
 
     return plt, min_time, max_time, min_regret, max_regret
