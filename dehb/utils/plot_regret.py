@@ -95,7 +95,8 @@ parser.add_argument('--name', default="comparison", type=str,
                     help='file name for the PNG plot to be saved')
 parser.add_argument('--title', default="benchmark", type=str,
                     help='title name for the plot')
-parser.add_argument('--limit', default=1e7, type=float, help='wallclock limit')
+parser.add_argument('--limit', default=1e7, type=float, help='wallclock limit for plot')
+parser.add_argument('--min_limit', default=1e4, type=float, help='minimum wallclock limit for plot')
 parser.add_argument('--regret', default='test', type=str, choices=['validation', 'test'],
                     help='type of regret')
 parser.add_argument('--output', default='pdf', type=str, choices=['pdf', 'png'],
@@ -105,6 +106,7 @@ args = parser.parse_args()
 path = args.path
 n_runs = args.n_runs
 limit = args.limit
+min_limit = args.min_limit
 plot_type = args.type
 plot_name = args.name
 regret_type = args.regret
@@ -171,7 +173,7 @@ if benchmark == '1shot1':
 else:
     plt, min_time, max_time, min_regret, max_regret = \
         create_plot(plt, methods, path, regret_type, fill_trajectory,
-                    colors, linestyles, marker, n_runs, limit)
+                    colors, linestyles, marker, n_runs, limit, min_limit=min_limit)
 
 
 if benchmark != 'cc18':
@@ -214,11 +216,10 @@ else:
 if benchmark == 'rl':
     plt.xlim(1e2, 1e5)
 elif benchmark == 'bnn':
-    plt.xlim(1e4, min(max_time*10, limit))
+    plt.xlim(min_limit, max_time)
+    # plt.xlim(1e4, min(max_time*10, limit))
 elif benchmark == 'countingones':
-    # plt.xlim(max(min_time/10, 1e-1), min(max_time*10, 1e7))
-    # plt.xlim(0.1, min(max_time * 10, 1e7))
-    plt.xlim(0.1, 1e4)
+    plt.xlim(min_time, max_time)
 elif benchmark == 'cc18':
     # plt.xlim(0.01, max_time)
     plt.xlim(0.01, 10)

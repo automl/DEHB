@@ -7,7 +7,7 @@ from scipy import stats
 
 
 def create_plot(plt, methods, path, regret_type, fill_trajectory,
-                colors, linestyles, marker, n_runs=500, limit=1e7):
+                colors, linestyles, marker, n_runs=500, limit=1e7, **kwargs):
 
     # plot limits
     min_time = np.inf
@@ -71,7 +71,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
             time = time[idx:]
 
             # Clips off all measurements after 10^7s
-            idx = np.where(time < limit)[0]
+            idx = np.where(time <= limit)[0]
 
             print("{}. Plotting for {}".format(index, m))
             print(len(regret), len(runtimes))
@@ -98,12 +98,14 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
 
     mean_df = pd.DataFrame(mean_df)
     std_df = pd.DataFrame(std_df)
+    # minimum of the maximum time limit recorded for each algorithm
     cutoff_idx = min(
         list(map(lambda x: np.where(~mean_df.isna()[x] == True)[0][-1], mean_df.columns))
     )
     mean_df = mean_df.iloc[:cutoff_idx + 1].ffill()
     std_df = std_df.iloc[:cutoff_idx + 1].ffill()
     rank_df = mean_df.apply(stats.rankdata, axis=1, result_type='broadcast')
+    mean_df.iloc.to_pickle(os.path.join(path, 'all_mean_df.pkl'))
     mean_df.iloc[-1].to_pickle(os.path.join(path, 'mean_df.pkl'))
     std_df.iloc[-1].to_pickle(os.path.join(path, 'std_df.pkl'))
     rank_df.to_pickle(os.path.join(path, 'rank_df.pkl'))
