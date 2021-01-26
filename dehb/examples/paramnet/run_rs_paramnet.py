@@ -142,7 +142,7 @@ if args.runs is None:  # for a single run
     if not args.fix_seed:
         np.random.seed(args.run_id)
     traj, test_traj, runtime = run_random_search(iterations=args.iter, verbose=args.verbose)
-    valid_scores, test_scores = calc_regrets(traj)
+    valid_scores, test_scores = calc_regrets(traj, test_traj)
     save_json(valid_scores, test_scores, runtime, output_path, args.run_id)
 
 else:  # for multiple runs
@@ -152,7 +152,7 @@ else:  # for multiple runs
         if args.verbose:
             print("\nRun #{:<3}\n{}".format(run_id + 1, '-' * 8))
         traj, test_traj, runtime = run_random_search(iterations=args.iter, verbose=args.verbose)
-        valid_scores, test_scores = calc_regrets(traj)
+        valid_scores, test_scores = calc_regrets(traj, test_traj)
         save_json(valid_scores, test_scores, runtime, output_path, run_id)
 
 save_configspace(cs, output_path)
