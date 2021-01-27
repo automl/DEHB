@@ -1,6 +1,8 @@
+import os
+import json
 import time
 import numpy as np
-from distributed import client, Client
+from distributed import Client
 
 from .de import DE, AsyncDE
 
@@ -613,7 +615,19 @@ class DEHB(DEHBBase):
                 return True
         return False
 
-    def run(self, fevals=None, brackets=None, total_cost=None, verbose=False):
+    def _save_incumbent(self):
+        try:
+            res = dict()
+            config = self.de[self.budgets[0]].vector_to_configspace(self.inc_config)
+            res["config"] = config.get_dictionary()
+            res["score"] = self.inc_score
+            with open(os.path.join(self.output_path, "incumbent.json"), 'w') as f:
+                json.dump(res, f)
+        except Exception as e:
+            print("Incumbent not saved: {}".format(repr(e)))
+
+    def run(self, fevals=None, brackets=None, total_cost=None,
+            verbose=False, save_intermediate=True):
         """ Main interface to run optimization by DEHB
 
         This function waits on workers and if a worker is free, asks for a configuration and a
@@ -654,13 +668,18 @@ class DEHB(DEHBBase):
                                 bracket.bracket_id, bracket.sh_bracket, bracket._sh_bracket
                             ))
             self._fetch_results_from_workers()
+            if save_intermediate:
+                self._save_incumbent()
             self.clean_inactive_brackets()
 
         while len(self.futures) > 0:
             self._fetch_results_from_workers()
+            if save_intermediate:
+                self._save_incumbent()
             time.sleep(0.05)  # waiting 50ms
             if verbose:
                 print("DEHB optimisation over! Waiting to collect results from workers running...")
         if verbose:
             print("End of optimisation!")
+        self._save_incumbent()
         return np.array(self.traj), np.array(self.runtime), np.array(self.history)
