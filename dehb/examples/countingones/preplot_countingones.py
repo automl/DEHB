@@ -98,6 +98,8 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
             std_df[label] = pd.Series(data=np.std(te, axis=1)[idx], index=time[idx])
 
     mean_df = pd.DataFrame(mean_df)
+    all_mean_df = mean_df.copy()
+    all_mean_df.ffill().to_pickle(os.path.join(path, 'all_mean_df.pkl'))
     std_df = pd.DataFrame(std_df)
     # minimum of the maximum time limit recorded for each algorithm
     cutoff_idx = min(
@@ -106,7 +108,6 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
     mean_df = mean_df.iloc[:cutoff_idx + 1].ffill()
     std_df = std_df.iloc[:cutoff_idx + 1].ffill()
     rank_df = mean_df.apply(stats.rankdata, axis=1, result_type='broadcast')
-    mean_df.to_pickle(os.path.join(path, 'all_mean_df.pkl'))
     mean_df.iloc[-1].to_pickle(os.path.join(path, 'mean_df.pkl'))
     std_df.iloc[-1].to_pickle(os.path.join(path, 'std_df.pkl'))
     rank_df.to_pickle(os.path.join(path, 'rank_df.pkl'))

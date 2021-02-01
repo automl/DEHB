@@ -59,3 +59,14 @@ def map_to_original(vector, dim_map):
     for i in range(dimensions):
         new_vector[i] = np.max(np.array(vector)[dim_map[i]])
     return new_vector
+
+
+def speedup(df, algo, base_algo="DEHB"):
+    marker = np.where(df[base_algo] > df[algo].min())[0][-1]
+    base_t = df.index[marker]
+    algo_t = df[algo].idxmin()  # np.flip(df[algo]).idxmin()
+    speedup = algo_t / base_t
+    print("{} is faster than {} by at least {} times to reach {}".format(
+        base_algo, algo, speedup,
+        np.format_float_scientific(df[algo].min(), precision=1, exp_digits=1))
+    )
