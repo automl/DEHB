@@ -51,9 +51,9 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
             curr_inc = np.min(np.array(res[regret_key]) + y_star_valid)
             if curr_inc < global_inc:
                 global_inc = curr_inc
-            runtimes.append(np.min((np.cumsum(res[runtime_key])[-1], limit)))
+            runtimes.append(np.min((res[runtime_key][-1], limit)))
         min_max_time.append(np.mean(runtimes))
-    limit = np.min((np.min(min_max_time), limit))
+    limit = np.min((np.max(min_max_time), limit))
     print("Found global incumbent: ", global_inc, "\tMin-max time: ", limit)
 
     no_runs_found = False
@@ -75,7 +75,6 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
             curr_regret = np.array(res[regret_key]) + y_star_valid - global_inc
             _, idx = np.unique(curr_regret, return_index=True)
             idx.sort()
-            # regret.append(np.array(res[regret_key])[idx])
             regret.append(curr_regret[idx])
             runtimes.append(np.array(res[runtime_key])[idx])
 
