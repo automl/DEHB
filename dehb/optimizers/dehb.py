@@ -1,10 +1,20 @@
 import os
+import sys
 import json
 import time
 import numpy as np
+from loguru import logger
 from distributed import Client
 
 from .de import DE, AsyncDE
+
+
+logger.configure(handlers=[{"sink": sys.stdout, "level": "INFO"}])
+_logger_props = {
+    "format": "{time} {level} {message}",
+    "enqueue": True,
+    "rotation": "500 MB"
+}
 
 
 class DEHBBase():
@@ -59,6 +69,14 @@ class DEHBBase():
 
         # Miscellaneous
         self.output_path = kwargs['output_path'] if 'output_path' in kwargs else ''
+        self.logger = logger
+        log_suffix = time.strftime("%x %X %Z")
+        log_suffix = log_suffix.replace("/", '-').replace(":", '-').replace(" ", '_')
+        self.logger.add(
+            "{}/dehb_{}.log".format(self.output_path, log_suffix),
+            **_logger_props
+        )
+        self.log_filename = "{}/dehb_{}.log".format(self.output_path, log_suffix)
 
         # Global trackers
         self.population = None
@@ -75,6 +93,7 @@ class DEHBBase():
         self.traj = []
         self.runtime = []
         self.history = []
+        self.logger.info("\n\nRESET at {}\n\n".format(time.strftime("%x %X %Z")))
 
     def init_population(self, pop_size=10):
         population = np.random.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
@@ -284,6 +303,7 @@ class DEHB(DEHBBase):
         """
         d = dict(self.__dict__)
         d["client"] = None  # hack to allow Dask client to be a class attribute
+        d["logger"] = None  # hack to allow logger object to be a class attribute
         return d
 
     def __del__(self):
@@ -624,8 +644,21 @@ class DEHB(DEHBBase):
             with open(os.path.join(self.output_path, "incumbent.json"), 'w') as f:
                 json.dump(res, f)
         except Exception as e:
-            print("Incumbent not saved: {}".format(repr(e)))
+            self.logger.warning("Incumbent not saved: {}".format(repr(e)))
 
+    def _verbosity_debug(self):
+        for bracket in self.active_brackets:
+            self.logger.debug("Bracket ID: {}".format(bracket.bracket_id))
+            for i in range(2):
+                b_info = bracket.sh_bracket if i == 0 else bracket._sh_bracket
+                b_status = "to-do" if i == 0 else "completed"
+                self.logger.debug(
+                    " => {:<}: {}".format(
+                        "Jobs {:<9} {{budget: # configurations}}".format(b_status), b_info
+                    )
+                )
+
+    @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None,
             verbose=False, save_intermediate=True):
         """ Main interface to run optimization by DEHB
@@ -641,6 +674,8 @@ class DEHB(DEHBBase):
         2) Number of Successive Halving brackets run under Hyperband (brackets)
         3) Total computational cost aggregated by all function evaluations (total_cost)
         """
+        if verbose:
+            print("\nLogging at {}\n".format(os.path.join(os.getcwd(), self.log_filename)))
         self.start = time.time()
         while True:
             if self._is_run_budget_exhausted(fevals, brackets, total_cost):
@@ -660,26 +695,32 @@ class DEHB(DEHBBase):
                     self.submit_job(job_info)
                     if verbose:
                         budget = job_info['budget']
-                        print("BracketID: {}; Budget: {}; Best score: {}".format(
-                            job_info['bracket_id'], budget, self.inc_score
-                        ))
-                        for bracket in self.active_brackets:
-                            print('=> BracketID: {}; Submit: {}; Collect: {}'.format(
-                                bracket.bracket_id, bracket.sh_bracket, bracket._sh_bracket
-                            ))
+                        self.logger.info(
+                            "BracketID: {}; Budget: {}; Best score: {}".format(
+                                job_info['bracket_id'], budget, self.inc_score
+                            )
+                        )
+                        self._verbosity_debug()
             self._fetch_results_from_workers()
-            if save_intermediate:
+            if save_intermediate and self.inc_config is not None:
                 self._save_incumbent()
             self.clean_inactive_brackets()
 
         while len(self.futures) > 0:
             self._fetch_results_from_workers()
-            if save_intermediate:
+            if save_intermediate and self.inc_config is not None:
                 self._save_incumbent()
             time.sleep(0.05)  # waiting 50ms
             if verbose:
-                print("DEHB optimisation over! Waiting to collect results from workers running...")
+                self.logger.info(
+                    "DEHB optimisation over! Waiting to collect results from workers running..."
+                )
         if verbose:
-            print("End of optimisation!")
+            self.logger.info("\nEnd of optimisation!\n")
+            self.logger.info("Incumbent score: {}".format(self.inc_score))
+            self.logger.info("Incumbent config: ")
+            config = self.de[self.budgets[0]].vector_to_configspace(self.inc_config)
+            for k, v in config.get_dictionary().items():
+                self.logger.info("{}: {}".format(k, v))
         self._save_incumbent()
         return np.array(self.traj), np.array(self.runtime), np.array(self.history)
