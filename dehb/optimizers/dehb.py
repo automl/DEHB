@@ -108,7 +108,7 @@ class DEHBBase():
 
         return ns, budgets
 
-    def get_incumbents():
+    def get_incumbents(self):
         return self.inc_config, self.inc_score
 
     def f_objective(self):
