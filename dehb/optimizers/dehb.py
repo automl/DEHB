@@ -17,130 +17,6 @@ _logger_props = {
 }
 
 
-class DEHBBase():
-    def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=None,
-                 crossover_prob=None, strategy=None, min_budget=None,
-                 max_budget=None, eta=None, min_clip=None, max_clip=None, configspace=True,
-                 boundary_fix_type='random', max_age=np.inf, **kwargs):
-        # Benchmark related variables
-        self.cs = cs
-        if dimensions is None and self.cs is not None:
-            self.dimensions = len(self.cs.get_hyperparameters())
-        else:
-            self.dimensions = dimensions
-        self.f = f
-
-        # DE related variables
-        self.mutation_factor = mutation_factor
-        self.crossover_prob = crossover_prob
-        self.strategy = strategy
-        self.configspace = configspace
-        self.fix_type = boundary_fix_type
-        self.max_age = max_age
-        self.de_params = {
-            "mutation_factor": self.mutation_factor,
-            "crossover_prob": self.crossover_prob,
-            "strategy": self.strategy,
-            "configspace": self.configspace,
-            "boundary_fix_type": self.fix_type,
-            "max_age": self.max_age,
-            "cs": self.cs,
-            "dimensions": self.dimensions,
-            "f": f
-        }
-
-        # Hyperband related variables
-        self.min_budget = min_budget
-        self.max_budget = max_budget
-        self.eta = eta
-        self.min_clip = min_clip
-        self.max_clip = max_clip
-
-        # Precomputing budget spacing and number of configurations for HB iterations
-        self.max_SH_iter = None
-        self.budgets = None
-        if self.min_budget is not None and \
-           self.max_budget is not None and \
-           self.eta is not None:
-            self.max_SH_iter = -int(np.log(self.min_budget / self.max_budget) / np.log(self.eta)) + 1
-            self.budgets = self.max_budget * np.power(self.eta,
-                                                     -np.linspace(start=self.max_SH_iter - 1,
-                                                                  stop=0, num=self.max_SH_iter))
-
-        # Miscellaneous
-        self.output_path = kwargs['output_path'] if 'output_path' in kwargs else ''
-        self.logger = logger
-        log_suffix = time.strftime("%x %X %Z")
-        log_suffix = log_suffix.replace("/", '-').replace(":", '-').replace(" ", '_')
-        self.logger.add(
-            "{}/dehb_{}.log".format(self.output_path, log_suffix),
-            **_logger_props
-        )
-        self.log_filename = "{}/dehb_{}.log".format(self.output_path, log_suffix)
-
-        # Global trackers
-        self.population = None
-        self.fitness = None
-        self.inc_score = np.inf
-        self.inc_config = None
-        self.history = []
-
-    def reset(self):
-        self.inc_score = np.inf
-        self.inc_config = None
-        self.population = None
-        self.fitness = None
-        self.traj = []
-        self.runtime = []
-        self.history = []
-        self.logger.info("\n\nRESET at {}\n\n".format(time.strftime("%x %X %Z")))
-
-    def init_population(self, pop_size=10):
-        population = np.random.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
-        return population
-
-    def get_next_iteration(self, iteration):
-        '''Computes the Successive Halving spacing
-
-        Given the iteration index, computes the budget spacing to be used and
-        the number of configurations to be used for the SH iterations.
-
-        Parameters
-        ----------
-        iteration : int
-            Iteration index
-        clip : int, {1, 2, 3, ..., None}
-            If not None, clips the minimum number of configurations to 'clip'
-
-        Returns
-        -------
-        ns : array
-        budgets : array
-        '''
-        # number of 'SH runs'
-        s = self.max_SH_iter - 1 - (iteration % self.max_SH_iter)
-        # budget spacing for this iteration
-        budgets = self.budgets[(-s-1):]
-        # number of configurations in that bracket
-        n0 = int(np.floor((self.max_SH_iter)/(s+1)) * self.eta**s)
-        ns = [max(int(n0*(self.eta**(-i))), 1) for i in range(s+1)]
-        if self.min_clip is not None and self.max_clip is not None:
-            ns = np.clip(ns, a_min=self.min_clip, a_max=self.max_clip)
-        elif self.min_clip is not None:
-            ns = np.clip(ns, a_min=self.min_clip, a_max=np.max(ns))
-
-        return ns, budgets
-
-    def get_incumbents(self):
-        return self.inc_config, self.inc_score
-
-    def f_objective(self):
-        raise NotImplementedError("The function needs to be defined in the sub class.")
-
-    def run(self):
-        raise NotImplementedError("The function needs to be defined in the sub class.")
-
-
 class SHBracketManager(object):
     """ Synchronous Successive Halving utilities
     """
@@ -264,6 +140,154 @@ class SHBracketManager(object):
         """ Returns True if any of the rungs/budgets have a configuration pending/running
         """
         return np.any([self._is_rung_waiting(i) > 0 for i, _ in enumerate(self.budgets)])
+
+    def __repr__(self):
+        cell = "{{:^{}}}".format(9)
+        header = "|{}|{}|{}|{}|".format(
+            cell.format("budget"),
+            cell.format("pending"),
+            cell.format("waiting"),
+            cell.format("done")
+        )
+        _hline = "-" * len(header)
+        table = [header, _hline]
+        for i, budget in enumerate(self.budgets):
+            pending = self.sh_bracket[budget]
+            done = self._sh_bracket[budget]
+            waiting = np.abs(self.n_configs[i] - pending - done)
+            entry = "|{}|{}|{}|{}|".format(
+                cell.format(budget),
+                cell.format(pending),
+                cell.format(waiting),
+                cell.format(done)
+            )
+            table.append(entry)
+        table.append(_hline)
+        return "\n".join(table)
+
+
+class DEHBBase:
+    def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=None,
+                 crossover_prob=None, strategy=None, min_budget=None,
+                 max_budget=None, eta=None, min_clip=None, max_clip=None, configspace=True,
+                 boundary_fix_type='random', max_age=np.inf, **kwargs):
+        # Benchmark related variables
+        self.cs = cs
+        if dimensions is None and self.cs is not None:
+            self.dimensions = len(self.cs.get_hyperparameters())
+        else:
+            self.dimensions = dimensions
+        self.f = f
+
+        # DE related variables
+        self.mutation_factor = mutation_factor
+        self.crossover_prob = crossover_prob
+        self.strategy = strategy
+        self.configspace = configspace
+        self.fix_type = boundary_fix_type
+        self.max_age = max_age
+        self.de_params = {
+            "mutation_factor": self.mutation_factor,
+            "crossover_prob": self.crossover_prob,
+            "strategy": self.strategy,
+            "configspace": self.configspace,
+            "boundary_fix_type": self.fix_type,
+            "max_age": self.max_age,
+            "cs": self.cs,
+            "dimensions": self.dimensions,
+            "f": f
+        }
+
+        # Hyperband related variables
+        self.min_budget = min_budget
+        self.max_budget = max_budget
+        self.eta = eta
+        self.min_clip = min_clip
+        self.max_clip = max_clip
+
+        # Precomputing budget spacing and number of configurations for HB iterations
+        self.max_SH_iter = None
+        self.budgets = None
+        if self.min_budget is not None and \
+           self.max_budget is not None and \
+           self.eta is not None:
+            self.max_SH_iter = -int(np.log(self.min_budget / self.max_budget) / np.log(self.eta)) + 1
+            self.budgets = self.max_budget * np.power(self.eta,
+                                                     -np.linspace(start=self.max_SH_iter - 1,
+                                                                  stop=0, num=self.max_SH_iter))
+
+        # Miscellaneous
+        self.output_path = kwargs['output_path'] if 'output_path' in kwargs else ''
+        self.logger = logger
+        log_suffix = time.strftime("%x %X %Z")
+        log_suffix = log_suffix.replace("/", '-').replace(":", '-').replace(" ", '_')
+        self.logger.add(
+            "{}/dehb_{}.log".format(self.output_path, log_suffix),
+            **_logger_props
+        )
+        self.log_filename = "{}/dehb_{}.log".format(self.output_path, log_suffix)
+
+        # Global trackers
+        self.population = None
+        self.fitness = None
+        self.inc_score = np.inf
+        self.inc_config = None
+        self.history = []
+
+    def reset(self):
+        self.inc_score = np.inf
+        self.inc_config = None
+        self.population = None
+        self.fitness = None
+        self.traj = []
+        self.runtime = []
+        self.history = []
+        self.logger.info("\n\nRESET at {}\n\n".format(time.strftime("%x %X %Z")))
+
+    def init_population(self, pop_size=10):
+        population = np.random.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
+        return population
+
+    def get_next_iteration(self, iteration):
+        '''Computes the Successive Halving spacing
+
+        Given the iteration index, computes the budget spacing to be used and
+        the number of configurations to be used for the SH iterations.
+
+        Parameters
+        ----------
+        iteration : int
+            Iteration index
+        clip : int, {1, 2, 3, ..., None}
+            If not None, clips the minimum number of configurations to 'clip'
+
+        Returns
+        -------
+        ns : array
+        budgets : array
+        '''
+        # number of 'SH runs'
+        s = self.max_SH_iter - 1 - (iteration % self.max_SH_iter)
+        # budget spacing for this iteration
+        budgets = self.budgets[(-s-1):]
+        # number of configurations in that bracket
+        n0 = int(np.floor((self.max_SH_iter)/(s+1)) * self.eta**s)
+        ns = [max(int(n0*(self.eta**(-i))), 1) for i in range(s+1)]
+        if self.min_clip is not None and self.max_clip is not None:
+            ns = np.clip(ns, a_min=self.min_clip, a_max=self.max_clip)
+        elif self.min_clip is not None:
+            ns = np.clip(ns, a_min=self.min_clip, a_max=np.max(ns))
+
+        return ns, budgets
+
+    def get_incumbents(self):
+        return self.inc_config, self.inc_score
+
+    def f_objective(self):
+        raise NotImplementedError("The function needs to be defined in the sub class.")
+
+    def run(self):
+        raise NotImplementedError("The function needs to be defined in the sub class.")
 
 
 class DEHB(DEHBBase):
@@ -407,13 +431,14 @@ class DEHB(DEHBBase):
         self.active_brackets.append(bracket)
         return bracket
 
-    def is_worker_available(self):
+    def is_worker_available(self, verbose=False):
         """ Checks if at least one worker is available to run a job
         """
         if self.n_workers == 1:
             # in the synchronous case, one worker is always available
             return True
-        if len(self.futures) >= sum(self.client.nthreads().values()):
+        workers = sum(self.client.nthreads().values())
+        if len(self.futures) >= workers:
             # pause/wait if active worker count greater allocated workers
             return False
         return True
@@ -578,6 +603,10 @@ class DEHB(DEHBBase):
         else:
             # Dask not invoked in the synchronous case
             done_list = [(i, future) for i, future in enumerate(self.futures)]
+        if len(done_list) > 0:
+            self.logger.debug(
+                "Collecting {} of the {} job(s) done.".format(len(done_list), len(self.futures))
+            )
         for _, future in done_list:
             if self.n_workers > 1:
                 run_info = future.result()
@@ -648,15 +677,23 @@ class DEHB(DEHBBase):
 
     def _verbosity_debug(self):
         for bracket in self.active_brackets:
-            self.logger.debug("Bracket ID: {}".format(bracket.bracket_id))
-            for i in range(2):
-                b_info = bracket.sh_bracket if i == 0 else bracket._sh_bracket
-                b_status = "to-do" if i == 0 else "completed"
-                self.logger.debug(
-                    " => {:<}: {}".format(
-                        "Jobs {:<9} {{budget: # configurations}}".format(b_status), b_info
-                    )
-                )
+            self.logger.debug("Bracket ID {}:\n{}".format(
+                bracket.bracket_id,
+                str(bracket)
+            ))
+
+    def _verbosity_runtime(self, fevals, brackets, total_cost):
+        if fevals is not None:
+            remaining = (len(self.traj), fevals, "function evaluation(s) done")
+        elif brackets is not None:
+            _suffix = "bracket(s) started; # active brackets: {}".format(len(self.active_brackets))
+            remaining = (self.iteration_counter + 1, brackets, _suffix)
+        else:
+            elapsed = np.format_float_positional(time.time() - self.start, precision=2)
+            remaining = (elapsed, total_cost, "seconds elapsed")
+        self.logger.info(
+            "{}/{} {}".format(remaining[0], remaining[1], remaining[2])
+        )
 
     @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None,
@@ -680,7 +717,7 @@ class DEHB(DEHBBase):
         while True:
             if self._is_run_budget_exhausted(fevals, brackets, total_cost):
                 break
-            if self.is_worker_available():
+            if self.is_worker_available(verbose):
                 job_info = self._get_next_job()
                 if brackets is not None and job_info['bracket_id'] >= brackets:
                     # ignore submission and only collect results
@@ -692,31 +729,40 @@ class DEHB(DEHBBase):
                     # have finished computation and returned its results
                     pass
                 else:
+                    self.logger.debug("{}/{} worker(s) available.".format(
+                        sum(self.client.nthreads().values()),
+                        len(self.client.scheduler_info()['workers']))
+                    )
+                    # submits job_info to a worker for execution
                     self.submit_job(job_info)
                     if verbose:
                         budget = job_info['budget']
+                        self._verbosity_runtime(fevals, brackets, total_cost)
                         self.logger.info(
-                            "BracketID: {}; Budget: {}; Best score: {}".format(
-                                job_info['bracket_id'], budget, self.inc_score
-                            )
+                            "Evaluating a configuration with budget {} under "
+                            "bracket ID {}".format(budget, job_info['bracket_id'])
                         )
-                        self._verbosity_debug()
+                        self.logger.info(
+                            "Best score seen/Incumbent score: {}".format(self.inc_score)
+                        )
+                    self._verbosity_debug()
             self._fetch_results_from_workers()
             if save_intermediate and self.inc_config is not None:
                 self._save_incumbent()
             self.clean_inactive_brackets()
 
+        if verbose and len(self.futures) > 0:
+            self.logger.info(
+                "DEHB optimisation over! Waiting to collect results from workers running..."
+            )
         while len(self.futures) > 0:
             self._fetch_results_from_workers()
             if save_intermediate and self.inc_config is not None:
                 self._save_incumbent()
             time.sleep(0.05)  # waiting 50ms
-            if verbose:
-                self.logger.info(
-                    "DEHB optimisation over! Waiting to collect results from workers running..."
-                )
+
         if verbose:
-            self.logger.info("\nEnd of optimisation!\n")
+            self.logger.info("End of optimisation!\n")
             self.logger.info("Incumbent score: {}".format(self.inc_score))
             self.logger.info("Incumbent config: ")
             config = self.de[self.budgets[0]].vector_to_configspace(self.inc_config)

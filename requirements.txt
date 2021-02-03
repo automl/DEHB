@@ -1,0 +1,5 @@
+numpy>=1.18.2
+loguru>=0.5.3
+dask>=2.27.0
+distributed>=2.27.0
+ConfigSpace>=0.4.16
