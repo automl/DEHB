@@ -9,7 +9,7 @@ from distributed import Client
 from .de import DE, AsyncDE
 
 
-# logger.configure(handlers=[{"sink": sys.stdout, "level": "INFO"}])
+logger.configure(handlers=[{"sink": sys.stdout, "level": "INFO"}])
 _logger_props = {
     "format": "{time} {level} {message}",
     "enqueue": True,
@@ -605,7 +605,7 @@ class DEHB(DEHBBase):
             done_list = [(i, future) for i, future in enumerate(self.futures)]
         if len(done_list) > 0:
             self.logger.debug(
-                "Collecting {} of the {} job(s) done.".format(len(done_list), len(self.futures))
+                "Collecting {} of the {} job(s) active.".format(len(done_list), len(self.futures))
             )
         for _, future in done_list:
             if self.n_workers > 1:
