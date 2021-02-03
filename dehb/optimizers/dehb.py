@@ -9,7 +9,7 @@ from distributed import Client
 from .de import DE, AsyncDE
 
 
-logger.configure(handlers=[{"sink": sys.stdout, "level": "INFO"}])
+# logger.configure(handlers=[{"sink": sys.stdout, "level": "INFO"}])
 _logger_props = {
     "format": "{time} {level} {message}",
     "enqueue": True,
@@ -730,7 +730,7 @@ class DEHB(DEHBBase):
                     pass
                 else:
                     self.logger.debug("{}/{} worker(s) available.".format(
-                        sum(self.client.nthreads().values()),
+                        len(self.client.scheduler_info()['workers']) - len(self.futures),
                         len(self.client.scheduler_info()['workers']))
                     )
                     # submits job_info to a worker for execution
