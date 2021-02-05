@@ -585,10 +585,11 @@ class DEHB(DEHBBase):
                     # have finished computation and returned its results
                     pass
                 else:
-                    self.logger.debug("{}/{} worker(s) available.".format(
-                        len(self.client.scheduler_info()['workers']) - len(self.futures),
-                        len(self.client.scheduler_info()['workers']))
-                    )
+                    if self.n_workers > 1 and hasattr(self, "client") and isinstance(self.client, Client):
+                        self.logger.debug("{}/{} worker(s) available.".format(
+                            len(self.client.scheduler_info()['workers']) - len(self.futures),
+                            len(self.client.scheduler_info()['workers']))
+                        )
                     # submits job_info to a worker for execution
                     self.submit_job(job_info)
                     if verbose:
