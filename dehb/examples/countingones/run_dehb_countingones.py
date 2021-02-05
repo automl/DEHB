@@ -10,7 +10,7 @@ import ConfigSpace
 from hpolib.benchmarks.synthetic_functions.counting_ones import CountingOnes
 
 from dehb import DE
-from dehb import DEHB, DEHB_0, DEHB_1, DEHB_2, DEHB_3
+from dehb import DEHB
 
 
 # Common objective function for DE & DEHB representing Counting Ones benchmark
@@ -111,13 +111,8 @@ dim_folder = "{}+{}".format(args.n_cont, args.n_cat)
 
 if args.folder is None:
     folder = "{}/dehb".format(dim_folder)
-    if args.version is not None:
-        folder = "{}/dehb_v{}".format(dim_folder, args.version)
 else:
     folder = "{}/{}".format(dim_folder, args.folder)
-
-dehbs = {None: DEHB, "0": DEHB_0, "1": DEHB_1, "2": DEHB_2, "3": DEHB_3}
-DEHB = dehbs[args.version]
 
 output_path = os.path.join(args.output_path, folder)
 os.makedirs(output_path, exist_ok=True)

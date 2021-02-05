@@ -6,7 +6,6 @@ import sys
 sys.path.append(os.path.join(os.getcwd(), '../nasbench/'))
 sys.path.append(os.path.join(os.getcwd(), '../nasbench-1shot1/'))
 
-import json
 import pickle
 import argparse
 import numpy as np
@@ -18,8 +17,7 @@ from nasbench_analysis.search_spaces.search_space_2 import SearchSpace2
 from nasbench_analysis.search_spaces.search_space_3 import SearchSpace3
 from nasbench_analysis.utils import INPUT, OUTPUT, CONV1X1, CONV3X3, MAXPOOL3X3
 
-from dehb import DE
-from dehb import DEHB, DEHB_0, DEHB_1, DEHB_2, DEHB_3
+from dehb import DEHB
 
 
 def save_configspace(cs, path, filename='configspace'):
@@ -112,10 +110,6 @@ for space in spaces:
         fitness = 1 - fitness
         return fitness, cost
 
-
-    dehbs = {None: DEHB, "0": DEHB_0, "1": DEHB_1, "2": DEHB_2, "3": DEHB_3}
-    DEHB = dehbs[args.version]
-
     # Initializing DEHB object
     dehb = DEHB(cs=cs, dimensions=dimensions, f=f, strategy=args.strategy,
                 mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,
@@ -124,7 +118,7 @@ for space in spaces:
 
     if args.runs is None:  # for a single run
         if not args.fix_seed:
-            np.random.seed(0)
+            np.random.seed(args.run_id)
         # Running DEHB iterations
         traj, runtime, history = dehb.run(iterations=args.iter, verbose=args.verbose)
         fh = open(os.path.join(output_path,

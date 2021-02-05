@@ -5,12 +5,10 @@ import pickle
 import argparse
 import numpy as np
 
-import ConfigSpace
-
 from hpolib.benchmarks.surrogates.paramnet import SurrogateReducedParamNetTime
 
 from dehb import DE
-from dehb import DEHB, DEHB_0, DEHB_1, DEHB_2, DEHB_3
+from dehb import DEHB
 
 
 # Common objective function for DE & DEHB representing SVM Surrogates benchmark
@@ -101,9 +99,6 @@ args = parser.parse_args()
 args.verbose = True if args.verbose == 'True' else False
 args.fix_seed = True if args.fix_seed == 'True' else False
 
-dehbs = {None: DEHB, "0": DEHB_0, "1": DEHB_1, "2": DEHB_2, "3": DEHB_3}
-DEHB = dehbs[args.version]
-
 if args.folder is None:
     if args.version is None:
         folder = "{}/dehb".format(args.dataset)
@@ -130,9 +125,7 @@ budgets = {  # (min, max)-budget (seconds) for the different data sets
     'optdigits': (1, 27),
     'poker': (81, 2187),
 }
-
 min_budget, max_budget = budgets[args.dataset]
-
 
 # Initializing DE object
 dehb = DEHB(cs=cs, dimensions=dimensions, f=f, strategy=args.strategy,
@@ -143,10 +136,9 @@ dehb = DEHB(cs=cs, dimensions=dimensions, f=f, strategy=args.strategy,
 # Helper DE object for vector to config mapping
 de = DE(cs=cs, b=b, f=f)
 
-
 if args.runs is None:  # for a single run
     if not args.fix_seed:
-        np.random.seed(0)
+        np.random.seed(args.run_id)
     # Running DE iterations
     traj, runtime, history = dehb.run(iterations=args.iter, verbose=args.verbose)
     test_scores = calc_test_scores(history)

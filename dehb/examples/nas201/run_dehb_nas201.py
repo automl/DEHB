@@ -16,7 +16,7 @@ from nas_201_api import NASBench201API as API
 from models import CellStructure, get_search_spaces
 
 from dehb import DE
-from dehb import DEHB, DEHB_0, DEHB_1, DEHB_2, DEHB_3
+from dehb import DEHB
 
 
 # From https://github.com/D-X-Y/AutoDL-Projects/blob/master/exps/algos/BOHB.py
@@ -192,9 +192,6 @@ def f(config, budget=max_budget):
     return fitness, cost
 
 
-dehbs = {None: DEHB, "0": DEHB_0, "1": DEHB_1, "2": DEHB_2, "3": DEHB_3}
-DEHB = dehbs[args.version]
-
 # Initializing DEHB object
 dehb = DEHB(cs=cs, dimensions=dimensions, f=f, strategy=args.strategy,
             mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,
@@ -207,7 +204,7 @@ de = DE(cs=cs, dimensions=dimensions, f=f, pop_size=10,
 
 if args.runs is None:  # for a single run
     if not args.fix_seed:
-        np.random.seed(0)
+        np.random.seed(args.run_id)
     # Running DE iterations
     traj, runtime, history = dehb.run(iterations=args.iter, verbose=args.verbose)
     res = calculate_regrets(history, runtime)

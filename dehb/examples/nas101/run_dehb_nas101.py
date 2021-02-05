@@ -15,8 +15,7 @@ from tabular_benchmarks import FCNetProteinStructureBenchmark, FCNetSliceLocaliz
     FCNetNavalPropulsionBenchmark, FCNetParkinsonsTelemonitoringBenchmark
 from tabular_benchmarks import NASCifar10A, NASCifar10B, NASCifar10C
 
-from dehb import DE
-from dehb import DEHB, DEHB_0, DEHB_1, DEHB_2, DEHB_3
+from dehb import DEHB
 
 
 def save_configspace(cs, path, filename='configspace'):
@@ -143,9 +142,6 @@ else:
 output_path = os.path.join(args.output_path, folder)
 os.makedirs(output_path, exist_ok=True)
 
-dehbs = {None: DEHB, "0": DEHB_0, "1": DEHB_1, "2": DEHB_2, "3": DEHB_3}
-DEHB = dehbs[args.version]
-
 # Initializing DEHB object
 dehb = DEHB(cs=cs, dimensions=dimensions, f=f, strategy=args.strategy,
             mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,
@@ -154,7 +150,7 @@ dehb = DEHB(cs=cs, dimensions=dimensions, f=f, strategy=args.strategy,
 
 if args.runs is None:  # for a single run
     if not args.fix_seed:
-        np.random.seed(0)
+        np.random.seed(args.run_id)
     # Running DEHB iterations
     traj, runtime, history = dehb.run(iterations=args.iter, verbose=args.verbose)
     if 'cifar' in args.benchmark:

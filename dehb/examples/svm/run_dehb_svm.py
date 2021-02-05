@@ -1,16 +1,13 @@
 import os
-import sys
 import json
 import pickle
 import argparse
 import numpy as np
 
-import ConfigSpace
-
 from hpolib.benchmarks.surrogates.svm import SurrogateSVM as surrogate
 
 from dehb import DE
-from dehb import DEHB, DEHB_0, DEHB_1
+from dehb import DEHB
 
 
 # Common objective function for DE & DEHB representing SVM Surrogates benchmark
@@ -108,9 +105,6 @@ if args.folder is None:
 else:
     folder = args.folder
 
-dehbs = {None: DEHB, "0": DEHB_0, "1": DEHB_1}
-DEHB = dehbs[args.version]
-
 output_path = os.path.join(args.output_path, folder)
 os.makedirs(output_path, exist_ok=True)
 
@@ -120,7 +114,6 @@ b = surrogate()
 # Parameter space to be used by DE
 cs = b.get_configuration_space()
 dimensions = len(cs.get_hyperparameters())
-
 
 # Initializing DEHB object
 dehb = DEHB(cs=cs, dimensions=dimensions, f=f, strategy=args.strategy,
@@ -134,7 +127,7 @@ de = DE(cs=cs, b=b, f=f)
 
 if args.runs is None:  # for a single run
     if not args.fix_seed:
-        np.random.seed(0)
+        np.random.seed(args.run_id)
     # Running DE iterations
     traj, runtime, history = dehb.run(iterations=args.iter, verbose=args.verbose)
     test_scores = calc_test_scores(history)
