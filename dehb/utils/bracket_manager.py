@@ -126,7 +126,9 @@ class SHBracketManager(object):
         return np.any([self._is_rung_waiting(i) > 0 for i, _ in enumerate(self.budgets)])
 
     def __repr__(self):
-        cell = "{{:^{}}}".format(9)
+        cell_width = 9
+        cell = "{{:^{}}}".format(cell_width)
+        budget_cell = "{{:^{}.2f}}".format(cell_width)
         header = "|{}|{}|{}|{}|".format(
             cell.format("budget"),
             cell.format("pending"),
@@ -140,7 +142,7 @@ class SHBracketManager(object):
             done = self._sh_bracket[budget]
             waiting = np.abs(self.n_configs[i] - pending - done)
             entry = "|{}|{}|{}|{}|".format(
-                cell.format(budget),
+                budget_cell.format(budget),
                 cell.format(pending),
                 cell.format(waiting),
                 cell.format(done)

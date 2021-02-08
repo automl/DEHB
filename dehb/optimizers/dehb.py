@@ -69,7 +69,7 @@ class DEHBBase:
                                                                   stop=0, num=self.max_SH_iter))
 
         # Miscellaneous
-        self.output_path = kwargs['output_path'] if 'output_path' in kwargs else ''
+        self.output_path = kwargs['output_path'] if 'output_path' in kwargs else './'
         self.logger = logger
         log_suffix = time.strftime("%x %X %Z")
         log_suffix = log_suffix.replace("/", '-').replace(":", '-').replace(" ", '_')
@@ -205,6 +205,11 @@ class DEHB(DEHBBase):
         }
         return run_info
 
+    def vector_to_configspace(self, config):
+        assert hasattr(self, "de")
+        assert len(self.budgets) > 0
+        return self.de[self.budgets[0]].vector_to_configspace(config)
+
     def reset(self):
         super().reset()
         if self.n_workers > 1 and hasattr(self, "client") and isinstance(self.client, Client):
@@ -333,7 +338,8 @@ class DEHB(DEHBBase):
                 )
             # retaining only n_configs
             self.de[high_budget].promotion_pop = self.de[high_budget].promotion_pop[:n_configs]
-            self.de[high_budget].promotion_fitness = self.de[high_budget].promotion_fitness[:n_configs]
+            self.de[high_budget].promotion_fitness = \
+                self.de[high_budget].promotion_fitness[:n_configs]
 
         if len(self.de[high_budget].promotion_pop) > 0:
             config = self.de[high_budget].promotion_pop[0]
@@ -585,7 +591,8 @@ class DEHB(DEHBBase):
                     # have finished computation and returned its results
                     pass
                 else:
-                    if self.n_workers > 1 and hasattr(self, "client") and isinstance(self.client, Client):
+                    if self.n_workers > 1 and hasattr(self, "client") and \
+                            isinstance(self.client, Client):
                         self.logger.debug("{}/{} worker(s) available.".format(
                             len(self.client.scheduler_info()['workers']) - len(self.futures),
                             len(self.client.scheduler_info()['workers']))
