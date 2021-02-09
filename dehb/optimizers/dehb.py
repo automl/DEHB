@@ -386,7 +386,6 @@ class DEHB(DEHBBase):
         # a single DE evolution --- (mutation + crossover) occurs here
         mutation_pop_idx = np.argsort(self.de[lower_budget].fitness)[:num_configs]
         mutation_pop = self.de[lower_budget].population[mutation_pop_idx]
-        # TODO: make global pop smarter --- select top configs from subpop?
         # generate mutants from previous budget subpopulation or global population
         if len(mutation_pop) < self.de[budget]._min_pop_size:
             filler = self.de[budget]._min_pop_size - len(mutation_pop) + 1
@@ -527,8 +526,11 @@ class DEHB(DEHBBase):
     def _save_incumbent(self):
         try:
             res = dict()
-            config = self.de[self.budgets[0]].vector_to_configspace(self.inc_config)
-            res["config"] = config.get_dictionary()
+            if self.configspace:
+                config = self.de[self.budgets[0]].vector_to_configspace(self.inc_config)
+                res["config"] = config.get_dictionary()
+            else:
+                res["config"] = self.inc_config.tolist()
             res["score"] = self.inc_score
             with open(os.path.join(self.output_path, "incumbent.json"), 'w') as f:
                 json.dump(res, f)

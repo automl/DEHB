@@ -215,6 +215,9 @@ class DE(DEBase):
         if self.configspace:
             # converts [0, 1] vector to a ConfigSpace object
             config = self.vector_to_configspace(x)
+        else:
+            # can insert custom scaling/transform function here
+            config = x.copy()
         if budget is not None:  # to be used when called by multi-fidelity based optimizers
             fitness, cost = self.f(config, budget=budget)
         else:
