@@ -633,4 +633,4 @@ class DEHB(DEHBBase):
             for k, v in config.get_dictionary().items():
                 self.logger.info("{}: {}".format(k, v))
         self._save_incumbent()
-        return np.array(self.traj), np.array(self.runtime), np.array(self.history)
+        return np.array(self.traj), np.array(self.runtime), np.array(self.history, dtype=object)
