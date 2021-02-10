@@ -69,7 +69,7 @@ class DEHBBase:
                                                                   stop=0, num=self.max_SH_iter))
 
         # Miscellaneous
-        self.output_path = kwargs['output_path'] if 'output_path' in kwargs else ''
+        self.output_path = kwargs['output_path'] if 'output_path' in kwargs else './'
         self.logger = logger
         log_suffix = time.strftime("%x %X %Z")
         log_suffix = log_suffix.replace("/", '-').replace(":", '-').replace(" ", '_')
@@ -205,6 +205,11 @@ class DEHB(DEHBBase):
         }
         return run_info
 
+    def vector_to_configspace(self, config):
+        assert hasattr(self, "de")
+        assert len(self.budgets) > 0
+        return self.de[self.budgets[0]].vector_to_configspace(config)
+
     def reset(self):
         super().reset()
         if self.n_workers > 1 and hasattr(self, "client") and isinstance(self.client, Client):
@@ -333,7 +338,8 @@ class DEHB(DEHBBase):
                 )
             # retaining only n_configs
             self.de[high_budget].promotion_pop = self.de[high_budget].promotion_pop[:n_configs]
-            self.de[high_budget].promotion_fitness = self.de[high_budget].promotion_fitness[:n_configs]
+            self.de[high_budget].promotion_fitness = \
+                self.de[high_budget].promotion_fitness[:n_configs]
 
         if len(self.de[high_budget].promotion_pop) > 0:
             config = self.de[high_budget].promotion_pop[0]
@@ -380,7 +386,6 @@ class DEHB(DEHBBase):
         # a single DE evolution --- (mutation + crossover) occurs here
         mutation_pop_idx = np.argsort(self.de[lower_budget].fitness)[:num_configs]
         mutation_pop = self.de[lower_budget].population[mutation_pop_idx]
-        # TODO: make global pop smarter --- select top configs from subpop?
         # generate mutants from previous budget subpopulation or global population
         if len(mutation_pop) < self.de[budget]._min_pop_size:
             filler = self.de[budget]._min_pop_size - len(mutation_pop) + 1
@@ -521,8 +526,11 @@ class DEHB(DEHBBase):
     def _save_incumbent(self):
         try:
             res = dict()
-            config = self.de[self.budgets[0]].vector_to_configspace(self.inc_config)
-            res["config"] = config.get_dictionary()
+            if self.configspace:
+                config = self.de[self.budgets[0]].vector_to_configspace(self.inc_config)
+                res["config"] = config.get_dictionary()
+            else:
+                res["config"] = self.inc_config.tolist()
             res["score"] = self.inc_score
             with open(os.path.join(self.output_path, "incumbent.json"), 'w') as f:
                 json.dump(res, f)
@@ -585,7 +593,8 @@ class DEHB(DEHBBase):
                     # have finished computation and returned its results
                     pass
                 else:
-                    if self.n_workers > 1 and hasattr(self, "client") and isinstance(self.client, Client):
+                    if self.n_workers > 1 and hasattr(self, "client") and \
+                            isinstance(self.client, Client):
                         self.logger.debug("{}/{} worker(s) available.".format(
                             len(self.client.scheduler_info()['workers']) - len(self.futures),
                             len(self.client.scheduler_info()['workers']))
@@ -626,4 +635,4 @@ class DEHB(DEHBBase):
             for k, v in config.get_dictionary().items():
                 self.logger.info("{}: {}".format(k, v))
         self._save_incumbent()
-        return np.array(self.traj), np.array(self.runtime), np.array(self.history)
+        return np.array(self.traj), np.array(self.runtime), np.array(self.history, dtype=object)
