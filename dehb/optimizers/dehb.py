@@ -189,12 +189,12 @@ class DEHB(DEHBBase):
         if hasattr(self, "client") and isinstance(self, Client):
             self.client.close()
 
-    def _f_objective(self, job_info):
+    def _f_objective(self, job_info, **kwargs):
         """ Wrapper to call DE's objective function.
         """
         config, budget, parent_id = job_info['config'], job_info['budget'], job_info['parent_id']
         bracket_id = job_info['bracket_id']
-        fitness, cost = self.de[budget].f_objective(config, budget)
+        fitness, cost = self.de[budget].f_objective(config, budget, **kwargs)
         run_info = {
             'fitness': fitness,
             'cost': cost,
@@ -435,7 +435,7 @@ class DEHB(DEHBBase):
         }
         return job_info
 
-    def submit_job(self, job_info):
+    def submit_job(self, job_info, **kwargs):
         """ Asks a free worker to run the objective function on config and budget
         """
         # submit to to Dask client
@@ -445,7 +445,7 @@ class DEHB(DEHBBase):
             )
         else:
             # skipping scheduling to Dask worker to avoid added overheads in the synchronous case
-            self.futures.append(self._f_objective(job_info))
+            self.futures.append(self._f_objective(job_info, **kwargs))
 
         # pass information of job submission to Bracket Manager
         for bracket in self.active_brackets:
@@ -559,7 +559,7 @@ class DEHB(DEHBBase):
 
     @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None,
-            verbose=False, debug=False, save_intermediate=True):
+            verbose=False, debug=False, save_intermediate=True, **kwargs):
         """ Main interface to run optimization by DEHB
 
         This function waits on workers and if a worker is free, asks for a configuration and a
@@ -600,7 +600,7 @@ class DEHB(DEHBBase):
                             len(self.client.scheduler_info()['workers']))
                         )
                     # submits job_info to a worker for execution
-                    self.submit_job(job_info)
+                    self.submit_job(job_info, **kwargs)
                     if verbose:
                         budget = job_info['budget']
                         self._verbosity_runtime(fevals, brackets, total_cost)
