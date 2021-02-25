@@ -523,16 +523,19 @@ class DEHB(DEHBBase):
                 return True
         return False
 
-    def _save_incumbent(self):
+    def _save_incumbent(self, name=None):
+        if name is None:
+            name = time.strftime("%x %X %Z", time.localtime(self.start))
+            name = name.replace("/", '-').replace(":", '-').replace(" ", '_')
         try:
             res = dict()
             if self.configspace:
-                config = self.de[self.budgets[0]].vector_to_configspace(self.inc_config)
+                config = self.vector_to_configspace(self.inc_config)
                 res["config"] = config.get_dictionary()
             else:
                 res["config"] = self.inc_config.tolist()
             res["score"] = self.inc_score
-            with open(os.path.join(self.output_path, "incumbent.json"), 'w') as f:
+            with open(os.path.join(self.output_path, "incumbent_{}.json".format(name)), 'w') as f:
                 json.dump(res, f)
         except Exception as e:
             self.logger.warning("Incumbent not saved: {}".format(repr(e)))
@@ -571,13 +574,16 @@ class DEHB(DEHBBase):
         than one are specified, DEHB selects only one in the priority order (high to low):
         1) Number of function evaluations (fevals)
         2) Number of Successive Halving brackets run under Hyperband (brackets)
-        3) Total computational cost aggregated by all function evaluations (total_cost)
+        3) Total computational cost (in seconds) aggregated by all function evaluations (total_cost)
         """
+        self.start = time.time()
         if verbose:
-            print("\nLogging at {}\n".format(os.path.join(os.getcwd(), self.log_filename)))
+            print("\nLogging at {} for optimization starting at {}\n".format(
+                os.path.join(os.getcwd(), self.log_filename),
+                time.strftime("%x %X %Z", time.localtime(self.start))
+            ))
         if debug:
             logger.configure(handlers=[{"sink": sys.stdout}])
-        self.start = time.time()
         while True:
             if self._is_run_budget_exhausted(fevals, brackets, total_cost):
                 break
@@ -631,7 +637,7 @@ class DEHB(DEHBBase):
             self.logger.info("End of optimisation!\n")
             self.logger.info("Incumbent score: {}".format(self.inc_score))
             self.logger.info("Incumbent config: ")
-            config = self.de[self.budgets[0]].vector_to_configspace(self.inc_config)
+            config = self.vector_to_configspace(self.inc_config)
             for k, v in config.get_dictionary().items():
                 self.logger.info("{}: {}".format(k, v))
         self._save_incumbent()
