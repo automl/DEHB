@@ -189,11 +189,12 @@ class DEHB(DEHBBase):
         if hasattr(self, "client") and isinstance(self, Client):
             self.client.close()
 
-    def _f_objective(self, job_info, **kwargs):
+    def _f_objective(self, job_info):
         """ Wrapper to call DE's objective function.
         """
         config, budget, parent_id = job_info['config'], job_info['budget'], job_info['parent_id']
         bracket_id = job_info['bracket_id']
+        kwargs = job_info["kwargs"]
         fitness, cost = self.de[budget].f_objective(config, budget, **kwargs)
         run_info = {
             'fitness': fitness,
@@ -438,6 +439,7 @@ class DEHB(DEHBBase):
     def submit_job(self, job_info, **kwargs):
         """ Asks a free worker to run the objective function on config and budget
         """
+        job_info["kwargs"] = kwargs
         # submit to to Dask client
         if self.n_workers > 1:
             self.futures.append(
@@ -445,7 +447,7 @@ class DEHB(DEHBBase):
             )
         else:
             # skipping scheduling to Dask worker to avoid added overheads in the synchronous case
-            self.futures.append(self._f_objective(job_info, **kwargs))
+            self.futures.append(self._f_objective(job_info))
 
         # pass information of job submission to Bracket Manager
         for bracket in self.active_brackets:

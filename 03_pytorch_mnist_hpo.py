@@ -240,7 +240,8 @@ def main():
     # DEHB optimization
     np.random.seed(args.seed)
     dehb = DEHB(f=objective_function, cs=cs, dimensions=dimensions, min_budget=args.min_budget,
-                max_budget=args.max_budget, eta=args.eta, output_path=args.output_path)
+                max_budget=args.max_budget, eta=args.eta, output_path=args.output_path,
+                n_workers=args.n_workers)
     traj, runtime, history = dehb.run(total_cost=args.runtime, verbose=args.verbose, device=device,
                                       train_set=train_set, valid_set=valid_set, test_set=test_set)
 
