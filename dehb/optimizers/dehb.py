@@ -53,6 +53,7 @@ class DEHBBase:
         # Hyperband related variables
         self.min_budget = min_budget
         self.max_budget = max_budget
+        assert self.max_budget > self.min_budget, "only (Max Budget > Min Budget) supported!"
         self.eta = eta
         self.min_clip = min_clip
         self.max_clip = max_clip
