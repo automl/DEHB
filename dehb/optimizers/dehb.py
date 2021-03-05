@@ -96,9 +96,8 @@ class DEHBBase:
         self.history = []
         self.logger.info("\n\nRESET at {}\n\n".format(time.strftime("%x %X %Z")))
 
-    def init_population(self, pop_size=10):
-        population = np.random.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
-        return population
+    def init_population(self):
+        raise NotImplementedError("Redefine!")
 
     def get_next_iteration(self, iteration):
         '''Computes the Successive Halving spacing
@@ -211,6 +210,11 @@ class DEHB(DEHBBase):
         assert len(self.budgets) > 0
         return self.de[self.budgets[0]].vector_to_configspace(config)
 
+    def configspace_to_vector(self, config):
+        assert hasattr(self, "de")
+        assert len(self.budgets) > 0
+        return self.de[self.budgets[0]].configspace_to_vector(config)
+
     def reset(self):
         super().reset()
         if self.n_workers > 1 and hasattr(self, "client") and isinstance(self.client, Client):
@@ -228,6 +232,14 @@ class DEHB(DEHBBase):
         self.history = []
         self._get_pop_sizes()
         self._init_subpop()
+
+    def init_population(self, pop_size):
+        if self.configspace:
+            population = self.cs.sample_configuration(size=pop_size)
+            population = [self.configspace_to_vector(individual) for individual in population]
+        else:
+            population = np.random.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
+        return population
 
     def clean_inactive_brackets(self):
         """ Removes brackets from the active list if it is done as communicated by Bracket Manager

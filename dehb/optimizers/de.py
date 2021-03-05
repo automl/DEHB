@@ -1,5 +1,6 @@
 import numpy as np
 import ConfigSpace
+import ConfigSpace.util
 
 
 class DEBase():
@@ -27,6 +28,10 @@ class DEBase():
 
         # Miscellaneous
         self.configspace = configspace
+        self.hps = dict()
+        for i, hp in enumerate(cs.get_hyperparameters()):
+            # maps hyperparameter name to positional index in vector form
+            self.hps[hp.name] = i
         self.output_path = kwargs['output_path'] if 'output_path' in kwargs else ''
 
         # Global trackers
@@ -73,9 +78,13 @@ class DEBase():
 
         return self._min_pop_size
 
-    def init_population(self, pop_size=10):
-        population = np.random.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
-        return population
+    def init_population(self, pop_size):
+        if self.configspace:
+            population = self.cs.sample_configuration(size=pop_size)
+            population = [self.configspace_to_vector(individual) for individual in population]
+        else:
+            population = np.random.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
+        return np.array(population)
 
     def sample_population(self, size=3, alt_pop=None):
         '''Samples 'size' individuals
@@ -123,12 +132,16 @@ class DEBase():
             vector[violations] = np.clip(vector[violations], a_min=0, a_max=1)
         return vector
 
-    def vector_to_configspace(self, vector):
+    def vector_to_configspace(self, vector: np.array) -> ConfigSpace.Configuration:
         '''Converts numpy array to ConfigSpace object
 
         Works when self.cs is a ConfigSpace object and the input vector is in the domain [0, 1].
         '''
-        new_config = self.cs.sample_configuration()
+        # creates a ConfigSpace object dict with all hyperparameters present, the inactive too
+        new_config = ConfigSpace.util.impute_inactive_values(
+            self.cs.sample_configuration()
+        ).get_dictionary()
+        # iterates over all hyperparameters and normalizes each based on its type
         for i, hyper in enumerate(self.cs.get_hyperparameters()):
             if type(hyper) == ConfigSpace.OrdinalHyperparameter:
                 ranges = np.arange(start=0, stop=1, step=1/len(hyper.sequence))
@@ -144,9 +157,45 @@ class DEBase():
                 else:
                     param_value = hyper.lower + (hyper.upper - hyper.lower) * vector[i]
                 if type(hyper) == ConfigSpace.UniformIntegerHyperparameter:
-                    param_value = np.round(param_value).astype(int)   # converting to discrete (int)
+                    param_value = int(np.round(param_value))  # converting to discrete (int)
+                else:
+                    param_value = float(param_value)
             new_config[hyper.name] = param_value
+        # the mapping from unit hypercube to the actual config space may lead to illegal
+        # configurations based on conditions defined, which need to be deactivated/removed
+        new_config = ConfigSpace.util.deactivate_inactive_hyperparameters(
+            configuration = new_config, configuration_space=self.cs
+        )
         return new_config
+
+    def configspace_to_vector(self, config: ConfigSpace.Configuration) -> np.array:
+        '''Converts ConfigSpace object to numpy array scaled to [0,1]
+
+        Works when self.cs is a ConfigSpace object and the input config is a ConfigSpace object.
+        Handles conditional spaces implicitly by replacing illegal parameters with default values
+        to maintain the dimensionality of the vector.
+        '''
+        # the imputation replaces illegal parameter values with their default
+        config = ConfigSpace.util.impute_inactive_values(config)
+        dimensions = len(self.cs.get_hyperparameters())
+        vector = [np.nan for i in range(dimensions)]
+        for name in config:
+            i = self.hps[name]
+            hyper = self.cs.get_hyperparameter(name)
+            if type(hyper) == ConfigSpace.OrdinalHyperparameter:
+                nlevels = len(hyper.sequence)
+                vector[i] = hyper.sequence.index(config[name]) / nlevels
+            elif type(hyper) == ConfigSpace.CategoricalHyperparameter:
+                nlevels = len(hyper.choices)
+                vector[i] = hyper.choices.index(config[name]) / nlevels
+            else:
+                bounds = (hyper.lower, hyper.upper)
+                param_value = config[name]
+                if hyper.log:
+                    vector[i] = np.log(param_value / bounds[0]) / np.log(bounds[1] / bounds[0])
+                else:
+                    vector[i] = (config[name] - bounds[0]) / (bounds[1] - bounds[0])
+        return np.array(vector)
 
     def f_objective(self):
         raise NotImplementedError("The function needs to be defined in the sub class.")
