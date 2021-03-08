@@ -1,6 +1,7 @@
 import numpy as np
 import ConfigSpace
 import ConfigSpace.util
+from typing import List
 
 
 class DEBase():
@@ -78,19 +79,23 @@ class DEBase():
 
         return self._min_pop_size
 
-    def init_population(self, pop_size):
+    def init_population(self, pop_size: int) -> List:
         if self.configspace:
+            # sample from ConfigSpace s.t. conditional constraints (if any) are maintained
             population = self.cs.sample_configuration(size=pop_size)
+            # the population is maintained in a list-of-vector form where each ConfigSpace
+            # configuration is scaled to a unit hypercube, i.e., all dimensions scaled to [0,1]
             population = [self.configspace_to_vector(individual) for individual in population]
         else:
+            # if no ConfigSpace representation available, uniformly sample from [0, 1]
             population = np.random.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
         return np.array(population)
 
-    def sample_population(self, size=3, alt_pop=None):
+    def sample_population(self, size: int = 3, alt_pop: List = None) -> List:
         '''Samples 'size' individuals
 
         If alt_pop is None or a list/array of None, sample from own population
-        Else sample from the specified alternate population
+        Else sample from the specified alternate population (alt_pop)
         '''
         if isinstance(alt_pop, list) or isinstance(alt_pop, np.ndarray):
             idx = [indv is None for indv in alt_pop]
@@ -107,7 +112,7 @@ class DEBase():
             selection = np.random.choice(np.arange(len(self.population)), size, replace=False)
             return self.population[selection]
 
-    def boundary_check(self, vector):
+    def boundary_check(self, vector: np.array) -> np.array:
         '''
         Checks whether each of the dimensions of the input vector are within [0, 1].
         If not, values of those dimensions are replaced with the type of fix selected.
@@ -268,10 +273,12 @@ class DE(DEBase):
             # can insert custom scaling/transform function here
             config = x.copy()
         if budget is not None:  # to be used when called by multi-fidelity based optimizers
-            fitness, cost = self.f(config, budget=budget, **kwargs)
+            res = self.f(config, budget=budget, **kwargs)
         else:
-            fitness, cost = self.f(config, **kwargs)
-        return fitness, cost
+            res = self.f(config, **kwargs)
+        assert "fitness" in res
+        assert "cost" in res
+        return res
 
     def init_eval_pop(self, budget=None, eval=True, **kwargs):
         '''Creates new population of 'pop_size' and evaluates individuals.
@@ -289,13 +296,15 @@ class DE(DEBase):
 
         for i in range(self.pop_size):
             config = self.population[i]
-            self.fitness[i], cost = self.f_objective(config, budget, **kwargs)
+            res = self.f_objective(config, budget, **kwargs)
+            self.fitness[i], cost = res["fitness"], res["cost"]
+            info = res["info"] if "info" in res else dict()
             if self.fitness[i] < self.inc_score:
                 self.inc_score = self.fitness[i]
                 self.inc_config = config
             traj.append(self.inc_score)
             runtime.append(cost)
-            history.append((config.tolist(), float(self.fitness[i]), float(budget or 0)))
+            history.append((config.tolist(), float(self.fitness[i]), float(budget or 0), info))
 
         return traj, runtime, history
 
@@ -314,7 +323,9 @@ class DE(DEBase):
         costs = []
         ages = []
         for i in range(pop_size):
-            fitness, cost = self.f_objective(pop[i], budget, **kwargs)
+            res = self.f_objective(pop[i], budget, **kwargs)
+            fitness, cost = res["fitness"], res["cost"]
+            info = res["info"] if "info" in res else dict()
             if population is None:
                 self.fitness[i] = fitness
             if fitness <= self.inc_score:
@@ -322,7 +333,7 @@ class DE(DEBase):
                 self.inc_config = pop[i]
             traj.append(self.inc_score)
             runtime.append(cost)
-            history.append((pop[i].tolist(), float(fitness), float(budget or 0)))
+            history.append((pop[i].tolist(), float(fitness), float(budget or 0), info))
             fitnesses.append(fitness)
             costs.append(cost)
             ages.append(self.max_age)
@@ -436,7 +447,9 @@ class DE(DEBase):
         history = []
         for i in range(len(trials)):
             # evaluation of the newly created individuals
-            fitness, cost = self.f_objective(trials[i], budget, **kwargs)
+            res = self.f_objective(trials[i], budget, **kwargs)
+            fitness, cost = res["fitness"], res["cost"]
+            info = res["info"] if "info" in res else dict()
             # selection -- competition between parent[i] -- child[i]
             ## equality is important for landscape exploration
             if fitness <= self.fitness[i]:
@@ -453,7 +466,7 @@ class DE(DEBase):
                 self.inc_config = self.population[i]
             traj.append(self.inc_score)
             runtime.append(cost)
-            history.append((trials[i].tolist(), float(fitness), float(budget or 0)))
+            history.append((trials[i].tolist(), float(fitness), float(budget or 0), info))
         return traj, runtime, history
 
     def evolve_generation(self, budget=None, best=None, alt_pop=None, **kwargs):
@@ -615,7 +628,9 @@ class AsyncDE(DE):
         costs = []
         ages = []
         for i in range(pop_size):
-            fitness, cost = self.f_objective(pop[i], budget, **kwargs)
+            res = self.f_objective(pop[i], budget, **kwargs)
+            fitness, cost = res["fitness"], res["cost"]
+            info = res["info"] if "info" in res else dict()
             if population is None:
                 self.fitness[i] = fitness
             if fitness <= self.inc_score:
@@ -623,7 +638,7 @@ class AsyncDE(DE):
                 self.inc_config = pop[i]
             traj.append(self.inc_score)
             runtime.append(cost)
-            history.append((pop[i].tolist(), float(fitness), float(budget or 0)))
+            history.append((pop[i].tolist(), float(fitness), float(budget or 0), info))
             fitnesses.append(fitness)
             costs.append(cost)
             ages.append(self.max_age)

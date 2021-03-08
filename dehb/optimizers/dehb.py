@@ -195,14 +195,16 @@ class DEHB(DEHBBase):
         config, budget, parent_id = job_info['config'], job_info['budget'], job_info['parent_id']
         bracket_id = job_info['bracket_id']
         kwargs = job_info["kwargs"]
-        fitness, cost = self.de[budget].f_objective(config, budget, **kwargs)
+        res = self.de[budget].f_objective(config, budget, **kwargs)
+        info = res["info"] if "info" in res else dict()
         run_info = {
-            'fitness': fitness,
-            'cost': cost,
+            'fitness': res["fitness"],
+            'cost': res["cost"],
             'config': config,
             'budget': budget,
             'parent_id': parent_id,
-            'bracket_id': bracket_id
+            'bracket_id': bracket_id,
+            'info': info
         }
         return run_info
 
@@ -252,7 +254,7 @@ class DEHB(DEHBBase):
         ]
         return
 
-    def _update_trackers(self, traj, runtime, history, budget):
+    def _update_trackers(self, traj, runtime, history):
         self.traj.append(traj)
         self.runtime.append(runtime)
         self.history.append(history)
@@ -489,6 +491,7 @@ class DEHB(DEHBBase):
                 run_info = future
             # update bracket information
             fitness, cost = run_info["fitness"], run_info["cost"]
+            info = run_info["info"] if "info" in run_info else dict()
             budget, parent_id = run_info["budget"], run_info["parent_id"]
             config = run_info["config"]
             bracket_id = run_info["bracket_id"]
@@ -506,8 +509,8 @@ class DEHB(DEHBBase):
                 self.inc_score = self.de[budget].fitness[parent_id]
                 self.inc_config = self.de[budget].population[parent_id]
             # book-keeping
-            self._update_trackers(traj=self.inc_score, runtime=cost, budget=budget,
-                                  history=(config.tolist(), float(fitness), float(budget)))
+            self._update_trackers(traj=self.inc_score, runtime=cost,
+                                  history=(config.tolist(), float(fitness), float(budget), info))
         # remove processed future
         self.futures = np.delete(self.futures, [i for i, _ in done_list]).tolist()
 
