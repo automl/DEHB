@@ -83,6 +83,8 @@ class DEBase():
         if self.configspace:
             # sample from ConfigSpace s.t. conditional constraints (if any) are maintained
             population = self.cs.sample_configuration(size=pop_size)
+            if not isinstance(population, List):
+                population = [population]
             # the population is maintained in a list-of-vector form where each ConfigSpace
             # configuration is scaled to a unit hypercube, i.e., all dimensions scaled to [0,1]
             population = [self.configspace_to_vector(individual) for individual in population]
@@ -584,7 +586,7 @@ class AsyncDE(DE):
         return mutants
 
     def _sample_population(self, size=3, alt_pop=None, target=None):
-        '''Samples 'size' individuals
+        '''Samples 'size' individuals for mutation step
 
         If alt_pop is None or a list/array of None, sample from own population
         Else sample from the specified alternate population
