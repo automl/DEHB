@@ -509,8 +509,11 @@ class DEHB(DEHBBase):
                 self.inc_score = self.de[budget].fitness[parent_id]
                 self.inc_config = self.de[budget].population[parent_id]
             # book-keeping
-            self._update_trackers(traj=self.inc_score, runtime=cost,
-                                  history=(config.tolist(), float(fitness), float(budget), info))
+            self._update_trackers(
+                traj=self.inc_score, runtime=cost, history=(
+                    config.tolist(), float(fitness), float(cost), float(budget), info
+                )
+            )
         # remove processed future
         self.futures = np.delete(self.futures, [i for i, _ in done_list]).tolist()
 
