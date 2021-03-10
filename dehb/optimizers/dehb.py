@@ -261,6 +261,11 @@ class DEHB(DEHBBase):
         self.runtime.append(runtime)
         self.history.append(history)
 
+    def _update_incumbents(self, config, score, info):
+        self.inc_config = config
+        self.inc_score = score
+        self.inc_info = info
+
     def _get_pop_sizes(self):
         """Determines maximum pop size for each budget
         """
@@ -508,8 +513,11 @@ class DEHB(DEHBBase):
                 self.de[budget].fitness[parent_id] = fitness
             # updating incumbents
             if self.de[budget].fitness[parent_id] < self.inc_score:
-                self.inc_score = self.de[budget].fitness[parent_id]
-                self.inc_config = self.de[budget].population[parent_id]
+                self._update_incumbents(
+                    config=self.de[budget].population[parent_id],
+                    score=self.de[budget].fitness[parent_id],
+                    info=info
+                )
             # book-keeping
             self._update_trackers(
                 traj=self.inc_score, runtime=cost, history=(
@@ -558,6 +566,7 @@ class DEHB(DEHBBase):
             else:
                 res["config"] = self.inc_config.tolist()
             res["score"] = self.inc_score
+            res["info"] = self.inc_info
             with open(os.path.join(self.output_path, "incumbent_{}.json".format(name)), 'w') as f:
                 json.dump(res, f)
         except Exception as e:
