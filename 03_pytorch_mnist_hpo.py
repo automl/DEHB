@@ -181,7 +181,12 @@ def objective_function(config, budget, **kwargs):
     loss = evaluate(model, device, valid_loader)
     cost = time.time() - start
 
-    return loss, cost
+    res = {
+        "fitness": loss,
+        "cost": cost,
+        "info": dict()
+    }
+    return res
 
 
 def main():
