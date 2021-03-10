@@ -170,6 +170,7 @@ class DEHB(DEHBBase):
         else:
             self.client = None
         self.futures = []
+        self.shared_data = None
 
         # Initializing DE subpopulations
         self._get_pop_sizes()
@@ -225,6 +226,7 @@ class DEHB(DEHBBase):
         else:
             self.client = None
         self.futures = []
+        self.shared_data = None
         self.iteration_counter = -1
         self.de = {}
         self._max_pop_size = None
@@ -454,7 +456,7 @@ class DEHB(DEHBBase):
     def submit_job(self, job_info, **kwargs):
         """ Asks a free worker to run the objective function on config and budget
         """
-        job_info["kwargs"] = kwargs
+        job_info["kwargs"] = self.shared_data if self.shared_data is not None else kwargs
         # submit to to Dask client
         if self.n_workers > 1:
             self.futures.append(
@@ -597,6 +599,12 @@ class DEHB(DEHBBase):
         2) Number of Successive Halving brackets run under Hyperband (brackets)
         3) Total computational cost (in seconds) aggregated by all function evaluations (total_cost)
         """
+        # checks if a Dask client exists
+        if len(kwargs) > 0 and self.n_workers > 1 and isinstance(self.client, Client):
+            # broadcasts all additional data passed as **kwargs to all client workers
+            # this reduces overload in the client-worker communication by not having to
+            # serialize the redundant data used by all workers for every job
+            self.shared_data = self.client.scatter(kwargs, broadcast=True)
         self.start = time.time()
         if verbose:
             print("\nLogging at {} for optimization starting at {}\n".format(
@@ -655,7 +663,8 @@ class DEHB(DEHBBase):
             time.sleep(0.05)  # waiting 50ms
 
         if verbose:
-            self.logger.info("End of optimisation!\n")
+            time_taken = time.time() - self.start
+            self.logger.info("End of optimisation! Total duration: {}\n".format(time_taken))
             self.logger.info("Incumbent score: {}".format(self.inc_score))
             self.logger.info("Incumbent config: ")
             config = self.vector_to_configspace(self.inc_config)

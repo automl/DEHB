@@ -167,6 +167,7 @@ def objective_function(config, budget, **kwargs):
     test_set = kwargs["test_set"]
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True)
     valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=batch_size, shuffle=False)
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=False)
 
     # Build model
     model = Model(config).to(device)
@@ -180,11 +181,12 @@ def objective_function(config, budget, **kwargs):
 
     loss = evaluate(model, device, valid_loader)
     cost = time.time() - start
+    test_loss = evaluate(model, device, test_loader)
 
     res = {
         "fitness": loss,
         "cost": cost,
-        "info": dict()
+        "info": {"test_loss": test_loss}
     }
     return res
 
