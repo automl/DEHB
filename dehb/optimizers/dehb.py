@@ -673,7 +673,9 @@ class DEHB(DEHBBase):
 
         if verbose:
             time_taken = time.time() - self.start
-            self.logger.info("End of optimisation! Total duration: {}\n".format(time_taken))
+            self.logger.info("End of optimisation! Total duration: {}; Total fevals: {}\n".format(
+                time_taken, len(self.traj)
+            ))
             self.logger.info("Incumbent score: {}".format(self.inc_score))
             self.logger.info("Incumbent config: ")
             config = self.vector_to_configspace(self.inc_config)
