@@ -146,12 +146,12 @@ class DEHB(DEHBBase):
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=0.5,
                  crossover_prob=0.5, strategy='rand1_bin', min_budget=None,
                  max_budget=None, eta=3, min_clip=None, max_clip=None, configspace=True,
-                 boundary_fix_type='random', max_age=np.inf, n_workers=1, **kwargs):
+                 boundary_fix_type='random', max_age=np.inf, n_workers=None, client=None, **kwargs):
         super().__init__(cs=cs, f=f, dimensions=dimensions, mutation_factor=mutation_factor,
                          crossover_prob=crossover_prob, strategy=strategy, min_budget=min_budget,
                          max_budget=max_budget, eta=eta, min_clip=min_clip, max_clip=max_clip,
                          configspace=configspace, boundary_fix_type=boundary_fix_type,
-                         max_age=max_age, n_workers=1, **kwargs)
+                         max_age=max_age, **kwargs)
         self.iteration_counter = -1
         self.de = {}
         self._max_pop_size = None
@@ -162,13 +162,19 @@ class DEHB(DEHBBase):
         self.start = None
 
         # Dask variables
-        self.n_workers = n_workers
-        if self.n_workers > 1:
-            self.client = Client(
-                n_workers=self.n_workers, processes=True, threads_per_worker=1, scheduler_port=0
-            )  # port 0 makes Dask select a random free port
+        if n_workers is None and client is None:
+            raise ValueError("Need to specify either 'n_workers'(>0) or 'client' (a Dask client)!")
+        if client is not None and isinstance(client, Client):
+            self.client = client
+            self.n_workers = len(client.ncores())
         else:
-            self.client = None
+            self.n_workers = n_workers
+            if self.n_workers > 1:
+                self.client = Client(
+                    n_workers=self.n_workers, processes=True, threads_per_worker=1, scheduler_port=0
+                )  # port 0 makes Dask select a random free port
+            else:
+                self.client = None
         self.futures = []
         self.shared_data = None
 
@@ -614,6 +620,7 @@ class DEHB(DEHBBase):
             # this reduces overload in the client-worker communication by not having to
             # serialize the redundant data used by all workers for every job
             self.shared_data = self.client.scatter(kwargs, broadcast=True)
+
         self.start = time.time()
         if verbose:
             print("\nLogging at {} for optimization starting at {}\n".format(
@@ -660,6 +667,7 @@ class DEHB(DEHBBase):
             if save_intermediate and self.inc_config is not None:
                 self._save_incumbent()
             self.clean_inactive_brackets()
+        # end of while
 
         if verbose and len(self.futures) > 0:
             self.logger.info(

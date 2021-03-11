@@ -1,6 +1,9 @@
+import os
 import time
+import pickle
 import argparse
 import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -244,23 +247,34 @@ def main():
     cs = get_configspace(args.seed)
     dimensions = len(cs.get_hyperparameters())
 
-    # DEHB optimization
+    ###########################
+    # DEHB optimisation block #
+    ###########################
     np.random.seed(args.seed)
     dehb = DEHB(f=objective_function, cs=cs, dimensions=dimensions, min_budget=args.min_budget,
                 max_budget=args.max_budget, eta=args.eta, output_path=args.output_path,
                 n_workers=args.n_workers)
     traj, runtime, history = dehb.run(total_cost=args.runtime, verbose=args.verbose, device=device,
                                       train_set=train_set, valid_set=valid_set, test_set=test_set)
+    # end of DEHB optimisation
+
+    # Saving optimisation trace history
+    name = time.strftime("%x %X %Z", time.localtime(dehb.start))
+    name = name.replace("/", '-').replace(":", '-').replace(" ", '_')
+    dehb.logger.info("Saving optimisation trace history...")
+    with open(os.path.join(args.output_path, "history_{}.pkl".format(name)), "wb") as f:
+        pickle.dump(history, f)
 
     # Retrain and evaluate best found configuration
+    dehb.logger.info("Retraining on complete training data to compute test metrics...")
     train_set = torchvision.datasets.MNIST(
         root='./data', train=True, download=True, transform=transform
     )
     incumbent = dehb.vector_to_configspace(dehb.inc_config)
     acc = train_and_evaluate(incumbent, args.max_budget, verbose=True,
                              train_set=train_set, test_set=test_set, device=device)
-    print("Test accuracy of {:.3f} for the best found configuration: ".format(acc))
-    print(incumbent)
+    dehb.logger.info("Test accuracy of {:.3f} for the best found configuration: ".format(acc))
+    dehb.logger.info(incumbent)
 
 
 if __name__ == "__main__":
