@@ -1,8 +1,29 @@
+"""
+This script runs a Hyperparameter Optimisation (HPO) using DEHB to tune the architecture and
+training hyperparameters for training a neural network on MNIST in PyTorch.
+
+The parameter space is defined in the get_configspace() function. Any configuration sampled from
+this space can be passed to an object of class Model() which can instantiate a CNN architecture
+from it. The objective_function() is the target function that DEHB minimizes for this problem. This
+function instantiates an architecture, an optimizer, as defined by a configuration and performs the
+training and evaluation (on the validation set) as per the budget passed.
+The argument `runtime` can be passed to DEHB as a wallclock budget for running the optimisation.
+
+Additional requirements:
+* torch>=1.7.1
+* torchvision>=0.8.2
+* torchsummary>=1.5.1
+
+PyTorch code referenced from: https://github.com/pytorch/examples/blob/master/mnist/main.py
+"""
+
+
 import os
 import time
 import pickle
 import argparse
 import numpy as np
+from distributed import Client
 
 import torch
 import torch.nn as nn
@@ -60,7 +81,6 @@ class Model(nn.Module):
         # Layer 2
         x = self.conv2(x)
         x = F.relu(x)
-        # x = F.max_pool2d(x, self.pool_kernel, self.pool_stride)
         x = self.maxpool(x)
         x = self.dropout(x)
         # FC Layer 1
@@ -161,6 +181,7 @@ def train_and_evaluate(config, max_budget, verbose=False, **kwargs):
 
 
 def objective_function(config, budget, **kwargs):
+    """ The target function to minimize for HPO"""
     device = kwargs["device"]
 
     # Data Loaders
@@ -175,13 +196,12 @@ def objective_function(config, budget, **kwargs):
     # Build model
     model = Model(config).to(device)
 
-    start = time.time()  # measuring wallclock time
-
     # Optimizer
     optimizer = optim.Adadelta(model.parameters(), lr=config["lr"])
+
+    start = time.time()  # measuring wallclock time
     for epoch in range(1, int(budget)+1):
         train(model, device, train_loader, optimizer)
-
     loss = evaluate(model, device, valid_loader)
     cost = time.time() - start
     test_loss = evaluate(model, device, test_loader)
@@ -189,23 +209,19 @@ def objective_function(config, budget, **kwargs):
     res = {
         "fitness": loss,
         "cost": cost,
-        "info": {"test_loss": test_loss}
+        "info": {"test_loss": test_loss, "budget": budget}
     }
     return res
 
 
-def main():
+def input_arguments():
     parser = argparse.ArgumentParser(description='Optimizing MNIST in PyTorch using DEHB.')
-    parser.add_argument('--no-cuda', action='store_true', default=False,
+    parser.add_argument('--no_cuda', action='store_true', default=False,
                         help='disables CUDA training')
-    parser.add_argument('--dry-run', action='store_true', default=False,
-                        help='quickly check a single pass')
     parser.add_argument('--seed', type=int, default=123, metavar='S',
                         help='random seed (default: 123)')
-    parser.add_argument('--log-interval', type=int, default=10, metavar='N',
-                        help='how many batches to wait before logging training status')
-    parser.add_argument('--refit-save', action='store_true', default=False,
-                        help='Refit with incumbent on full budget and save model')
+    parser.add_argument('--refit_training', action='store_true', default=False,
+                        help='Refit with incumbent configuration on full training data and budget')
     parser.add_argument('--min_budget', type=float, default=None,
                         help='Minimum budget (epoch length)')
     parser.add_argument('--max_budget', type=float, default=None,
@@ -214,6 +230,8 @@ def main():
                         help='Parameter for Hyperband controlling early stopping aggressiveness')
     parser.add_argument('--output_path', type=str, default="./pytorch_mnist_dehb",
                         help='Directory for DEHB to write logs and outputs')
+    parser.add_argument('--scheduler_file', type=str, default=None,
+                        help='The file to connect a Dask client with a Dask scheduler')
     parser.add_argument('--n_workers', type=int, default=1,
                         help='Number of CPU workers for DEHB to distribute function evaluations to')
     parser.add_argument('--verbose', action="store_true", default=False,
@@ -221,6 +239,12 @@ def main():
     parser.add_argument('--runtime', type=float, default=300,
                         help='Total time in seconds as budget to run DEHB')
     args = parser.parse_args()
+    return args
+
+
+def main():
+    args = input_arguments()
+
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
     torch.manual_seed(args.seed)
@@ -228,12 +252,8 @@ def main():
     device = torch.device("cuda" if use_cuda else "cpu")
 
     # Data Preparation
-    transform = transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
-    )
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))
+    transform=transforms.Compose([
+        transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))
     ])
     train_set = torchvision.datasets.MNIST(
         root='./data', train=True, download=True, transform=transform
@@ -247,13 +267,21 @@ def main():
     cs = get_configspace(args.seed)
     dimensions = len(cs.get_hyperparameters())
 
+    # Dask checks and setups
+    if args.scheduler_file is None:
+        client = None
+    else:
+        client = Client(scheduler_file=args.scheduler_file)
+
     ###########################
     # DEHB optimisation block #
     ###########################
     np.random.seed(args.seed)
     dehb = DEHB(f=objective_function, cs=cs, dimensions=dimensions, min_budget=args.min_budget,
                 max_budget=args.max_budget, eta=args.eta, output_path=args.output_path,
-                n_workers=args.n_workers)
+                # if client is not None and of type Client, n_workers is ignored
+                # if client is None, a Dask client with n_workers is set up
+                client=client, n_workers=args.n_workers)
     traj, runtime, history = dehb.run(total_cost=args.runtime, verbose=args.verbose, device=device,
                                       train_set=train_set, valid_set=valid_set, test_set=test_set)
     # end of DEHB optimisation
@@ -266,15 +294,16 @@ def main():
         pickle.dump(history, f)
 
     # Retrain and evaluate best found configuration
-    dehb.logger.info("Retraining on complete training data to compute test metrics...")
-    train_set = torchvision.datasets.MNIST(
-        root='./data', train=True, download=True, transform=transform
-    )
-    incumbent = dehb.vector_to_configspace(dehb.inc_config)
-    acc = train_and_evaluate(incumbent, args.max_budget, verbose=True,
-                             train_set=train_set, test_set=test_set, device=device)
-    dehb.logger.info("Test accuracy of {:.3f} for the best found configuration: ".format(acc))
-    dehb.logger.info(incumbent)
+    if args.refit_training:
+        dehb.logger.info("Retraining on complete training data to compute test metrics...")
+        train_set = torchvision.datasets.MNIST(
+            root='./data', train=True, download=True, transform=transform
+        )
+        incumbent = dehb.vector_to_configspace(dehb.inc_config)
+        acc = train_and_evaluate(incumbent, args.max_budget, verbose=True,
+                                 train_set=train_set, test_set=test_set, device=device)
+        dehb.logger.info("Test accuracy of {:.3f} for the best found configuration: ".format(acc))
+        dehb.logger.info(incumbent)
 
 
 if __name__ == "__main__":

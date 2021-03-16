@@ -319,13 +319,22 @@ class DEHB(DEHBBase):
         self.active_brackets.append(bracket)
         return bracket
 
+    def _get_worker_count(self):
+        if isinstance(self.client, Client):
+            return len(self.client.ncores())
+        else:
+            return 1
+
     def is_worker_available(self, verbose=False):
         """ Checks if at least one worker is available to run a job
         """
-        if self.n_workers == 1:
+        if self.n_workers == 1 or self.client is None or not isinstance(self.client, Client):
             # in the synchronous case, one worker is always available
             return True
-        workers = sum(self.client.nthreads().values())
+        # checks the absolute number of workers mapped to the client scheduler
+        # client.ncores() should return a dict with the keys as unique addresses to these workers
+        # treating the number of available workers in this manner
+        workers = self._get_worker_count()  # len(self.client.ncores())
         if len(self.futures) >= workers:
             # pause/wait if active worker count greater allocated workers
             return False
@@ -469,7 +478,7 @@ class DEHB(DEHBBase):
         """
         job_info["kwargs"] = self.shared_data if self.shared_data is not None else kwargs
         # submit to to Dask client
-        if self.n_workers > 1:
+        if self.n_workers > 1 or isinstance(self.client, Client):
             self.futures.append(
                 self.client.submit(self._f_objective, job_info)
             )
@@ -487,7 +496,7 @@ class DEHB(DEHBBase):
     def _fetch_results_from_workers(self):
         """ Iterate over futures and collect results from finished workers
         """
-        if self.n_workers > 1:
+        if self.n_workers > 1 or isinstance(self.client, Client):
             done_list = [(i, future) for i, future in enumerate(self.futures) if future.done()]
         else:
             # Dask not invoked in the synchronous case
@@ -497,7 +506,7 @@ class DEHB(DEHBBase):
                 "Collecting {} of the {} job(s) active.".format(len(done_list), len(self.futures))
             )
         for _, future in done_list:
-            if self.n_workers > 1:
+            if self.n_workers > 1 or isinstance(self.client, Client):
                 run_info = future.result()
             else:
                 # Dask not invoked in the synchronous case
@@ -644,12 +653,12 @@ class DEHB(DEHBBase):
                     # have finished computation and returned its results
                     pass
                 else:
-                    if self.n_workers > 1 and hasattr(self, "client") and \
-                            isinstance(self.client, Client):
+                    if self.n_workers > 1 or isinstance(self.client, Client):
                         self.logger.debug("{}/{} worker(s) available.".format(
-                            len(self.client.scheduler_info()['workers']) - len(self.futures),
-                            len(self.client.scheduler_info()['workers']))
-                        )
+                            self._get_worker_count() - len(self.futures), self._get_worker_count()
+                            # len(self.client.scheduler_info()['workers']) - len(self.futures),
+                            # len(self.client.scheduler_info()['workers']))
+                        ))
                     # submits job_info to a worker for execution
                     self.submit_job(job_info, **kwargs)
                     if verbose:
