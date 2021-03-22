@@ -234,7 +234,7 @@ def input_arguments():
                         help='The file to connect a Dask client with a Dask scheduler')
     parser.add_argument('--n_workers', type=int, default=1,
                         help='Number of CPU workers for DEHB to distribute function evaluations to')
-    parser.add_argument('--single_node_with_gpus', type=bool, default=False, action="store_true",
+    parser.add_argument('--single_node_with_gpus', default=False, action="store_true",
                         help='If True, signals the DEHB run to assume all required GPUs are on '
                              'the same node/machine. To be specified as True if no client is '
                              'passed and n_workers > 1. Should be set to False if a client is '
@@ -252,13 +252,12 @@ def main():
     args = input_arguments()
 
     use_cuda = not args.no_cuda and torch.cuda.is_available()
+    device = torch.device("cuda" if use_cuda else "cpu")
 
     torch.manual_seed(args.seed)
 
-    device = torch.device("cuda" if use_cuda else "cpu")
-
     # Data Preparation
-    transform=transforms.Compose([
+    transform = transforms.Compose([
         transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))
     ])
     train_set = torchvision.datasets.MNIST(
