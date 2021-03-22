@@ -7,6 +7,7 @@ import ConfigSpace
 from copy import deepcopy
 from loguru import logger
 from distributed import Client
+from typing import Union, List
 
 from dehb.optimizers import DE, AsyncDE
 from dehb.utils import SHBracketManager
@@ -154,8 +155,7 @@ class DEHB(DEHBBase):
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=0.5,
                  crossover_prob=0.5, strategy='rand1_bin', min_budget=None,
                  max_budget=None, eta=3, min_clip=None, max_clip=None, configspace=True,
-                 boundary_fix_type='random', max_age=np.inf, n_workers=None, client=None,
-                 single_node_with_gpus=False, **kwargs):
+                 boundary_fix_type='random', max_age=np.inf, n_workers=None, client=None, **kwargs):
         super().__init__(cs=cs, f=f, dimensions=dimensions, mutation_factor=mutation_factor,
                          crossover_prob=crossover_prob, strategy=strategy, min_budget=min_budget,
                          max_budget=max_budget, eta=eta, min_clip=min_clip, max_clip=max_clip,
@@ -194,9 +194,7 @@ class DEHB(DEHBBase):
         # Misc.
         self.available_gpus = None
         self.gpu_usage = None
-        self.single_node_with_gpus = single_node_with_gpus
-        if self.single_node_with_gpus:
-            self.distribute_gpus()
+        self.single_node_with_gpus = None
 
     def __getstate__(self):
         """ Allows the object to picklable while having Dask client as a class attribute.
@@ -215,8 +213,8 @@ class DEHB(DEHBBase):
     def _f_objective(self, job_info):
         """ Wrapper to call DE's objective function.
         """
-        # handles GPUs on a single node if mapping is provided
-        if "gpu_devices" in job_info:
+        # handles GPUs on a single node
+        if "gpu_devices" in job_info:  # job_info appended during job submission self.submit_job()
             os.environ.update({"CUDA_VISIBLE_DEVICES": job_info["gpu_devices"]})
 
         config, budget, parent_id = job_info['config'], job_info['budget'], job_info['parent_id']
@@ -233,12 +231,21 @@ class DEHB(DEHBBase):
             'bracket_id': bracket_id,
             'info': info
         }
+
         if "gpu_devices" in job_info:
+            # important for GPU usage tracking if single_node_with_gpus=True
             device_id = int(job_info["gpu_devices"].strip().split(",")[0])
             run_info.update({"device_id": device_id})
         return run_info
 
-    def _create_cuda_visible_devices(self, available_gpus, start_id):
+    def _create_cuda_visible_devices(self, available_gpus: List[int], start_id: int) -> str:
+        """ Generates a string to set the CUDA_VISIBLE_DEVICES environment variable.
+
+        Given a list of available GPU device IDs and a preferred ID (start_id), the environment
+        variable is created by putting the start_id device first, followed by the remaining devices
+        arranged randomly. The worker that uses this string to set the environment variable uses
+        the start_id GPU device primarily now.
+        """
         assert start_id in available_gpus
         available_gpus = deepcopy(available_gpus)
         available_gpus.remove(start_id)
@@ -248,6 +255,13 @@ class DEHB(DEHBBase):
         return final_variable
 
     def distribute_gpus(self):
+        """ Function to create a GPU usage tracker dict.
+
+        The idea is to extract the exact GPU device IDs available. During job submission, each
+        submitted job is given a preference of a GPU device ID based on the GPU device with the
+        least number of active running jobs. On retrieval of the result, this gpu usage dict is
+        updated for the device ID that the finished job was mapped to.
+        """
         try:
             available_gpus = os.environ["CUDA_VISIBLE_DEVICES"]
             available_gpus = available_gpus.strip().split(",")
@@ -255,6 +269,7 @@ class DEHB(DEHBBase):
         except KeyError as e:
             print("Unable to find valid GPU devices. "
                   "Environment variable {} not visible!".format(str(e)))
+            self.available_gpus = []
         self.gpu_usage = dict()
         for _id in self.available_gpus:
             self.gpu_usage[_id] = 0
@@ -289,8 +304,6 @@ class DEHB(DEHBBase):
         self._init_subpop()
         self.available_gpus = None
         self.gpu_usage = None
-        if self.single_node_with_gpus:
-            self.distribute_gpus()
 
     def init_population(self, pop_size):
         if self.configspace:
@@ -527,17 +540,22 @@ class DEHB(DEHBBase):
         job_info["kwargs"] = self.shared_data if self.shared_data is not None else kwargs
         # submit to to Dask client
         if self.n_workers > 1 or isinstance(self.client, Client):
+            # managing GPU allocation for the job to be submitted
             if self.single_node_with_gpus:
                 candidates = []
                 for k, v in self.gpu_usage.items():
                     if v == min(self.gpu_usage.values()):
                         candidates.append(k)
                 device_id = np.random.choice(candidates)
+                # creating string for setting environment variable CUDA_VISIBLE_DEVICES
                 gpu_ids = self._create_cuda_visible_devices(
                     self.available_gpus, device_id
                 )
                 job_info.update({"gpu_devices": gpu_ids})
+                # updating GPU usage
                 self.gpu_usage[device_id] += 1
+                self.logger.debug("GPU device selected: {}".format(device_id))
+                self.logger.debug("GPU device usage: {}".format(self.gpu_usage))
             self.futures.append(
                 self.client.submit(self._f_objective, job_info)
             )
@@ -568,7 +586,9 @@ class DEHB(DEHBBase):
             if self.n_workers > 1 or isinstance(self.client, Client):
                 run_info = future.result()
                 if "device_id" in run_info:
-                    self.gpu_usage[run_info["device_id"]] += 1
+                    # updating GPU usage
+                    self.gpu_usage[run_info["device_id"]] -= 1
+                    self.logger.debug("GPU device released: {}".format(run_info["device_id"]))
                 future.release()
             else:
                 # Dask not invoked in the synchronous case
@@ -670,7 +690,7 @@ class DEHB(DEHBBase):
         )
 
     @logger.catch
-    def run(self, fevals=None, brackets=None, total_cost=None,
+    def run(self, fevals=None, brackets=None, total_cost=None, single_node_with_gpus=False,
             verbose=False, debug=False, save_intermediate=True, **kwargs):
         """ Main interface to run optimization by DEHB
 
@@ -691,6 +711,12 @@ class DEHB(DEHBBase):
             # this reduces overload in the client-worker communication by not having to
             # serialize the redundant data used by all workers for every job
             self.shared_data = self.client.scatter(kwargs, broadcast=True)
+
+        # allows each worker to be mapped to a different GPU when running on a single node
+        # where all available GPUs are accessible
+        self.single_node_with_gpus = single_node_with_gpus
+        if self.single_node_with_gpus:
+            self.distribute_gpus()
 
         self.start = time.time()
         if verbose:

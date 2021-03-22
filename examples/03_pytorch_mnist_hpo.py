@@ -234,6 +234,12 @@ def input_arguments():
                         help='The file to connect a Dask client with a Dask scheduler')
     parser.add_argument('--n_workers', type=int, default=1,
                         help='Number of CPU workers for DEHB to distribute function evaluations to')
+    parser.add_argument('--single_node_with_gpus', type=bool, default=False, action="store_true",
+                        help='If True, signals the DEHB run to assume all required GPUs are on '
+                             'the same node/machine. To be specified as True if no client is '
+                             'passed and n_workers > 1. Should be set to False if a client is '
+                             'specified as a scheduler-file created. The onus of GPU usage is then'
+                             'on the Dask workers created and mapped to the scheduler-file.')
     parser.add_argument('--verbose', action="store_true", default=False,
                         help='Decides verbosity of DEHB optimization')
     parser.add_argument('--runtime', type=float, default=300,
@@ -268,12 +274,12 @@ def main():
     dimensions = len(cs.get_hyperparameters())
 
     # Dask checks and setups
+    single_node_with_gpus = args.single_node_with_gpus
     if args.scheduler_file is not None and os.path.isfile(args.scheduler_file):
         client = Client(scheduler_file=args.scheduler_file)
+        single_node_with_gpus = False  # explicitly delegating GPU handling to Dask workers defined
     else:
         client = None
-
-    single_node_with_gpus = True if n_workers > 1 else False
 
     ###########################
     # DEHB optimisation block #
@@ -283,9 +289,10 @@ def main():
                 max_budget=args.max_budget, eta=args.eta, output_path=args.output_path,
                 # if client is not None and of type Client, n_workers is ignored
                 # if client is None, a Dask client with n_workers is set up
-                client=client, n_workers=args.n_workers, single_node_with_gpus=single_node_with_gpus)
+                client=client, n_workers=args.n_workers)
     traj, runtime, history = dehb.run(total_cost=args.runtime, verbose=args.verbose, device=device,
-                                      train_set=train_set, valid_set=valid_set, test_set=test_set)
+                                      train_set=train_set, valid_set=valid_set, test_set=test_set,
+                                      single_node_with_gpus=single_node_with_gpus)
     # end of DEHB optimisation
 
     # Saving optimisation trace history
