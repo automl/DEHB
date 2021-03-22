@@ -268,10 +268,11 @@ def main():
     dimensions = len(cs.get_hyperparameters())
 
     # Dask checks and setups
-    if args.scheduler_file is None:
-        client = None
-    else:
+    if args.scheduler_file is not None and os.path.isfile(args.scheduler_file):
         client = Client(scheduler_file=args.scheduler_file)
+        
+    else:
+        client = None
 
     ###########################
     # DEHB optimisation block #

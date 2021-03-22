@@ -3,6 +3,7 @@ import sys
 import json
 import time
 import numpy as np
+import ConfigSpace
 from loguru import logger
 from distributed import Client
 
@@ -21,10 +22,11 @@ _logger_props = {
 class DEHBBase:
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=None,
                  crossover_prob=None, strategy=None, min_budget=None,
-                 max_budget=None, eta=None, min_clip=None, max_clip=None, configspace=True,
+                 max_budget=None, eta=None, min_clip=None, max_clip=None,
                  boundary_fix_type='random', max_age=np.inf, **kwargs):
         # Benchmark related variables
         self.cs = cs
+        self.configspace = True if isinstance(self.cs, ConfigSpace.ConfigurationSpace) else False
         if dimensions is None and self.cs is not None:
             self.dimensions = len(self.cs.get_hyperparameters())
         else:
@@ -35,7 +37,6 @@ class DEHBBase:
         self.mutation_factor = mutation_factor
         self.crossover_prob = crossover_prob
         self.strategy = strategy
-        self.configspace = configspace
         self.fix_type = boundary_fix_type
         self.max_age = max_age
         self.de_params = {
@@ -71,6 +72,7 @@ class DEHBBase:
 
         # Miscellaneous
         self.output_path = kwargs['output_path'] if 'output_path' in kwargs else './'
+        os.makedirs(self.output_path, exist_ok=True)
         self.logger = logger
         log_suffix = time.strftime("%x %X %Z")
         log_suffix = log_suffix.replace("/", '-').replace(":", '-').replace(" ", '_')
@@ -79,6 +81,8 @@ class DEHBBase:
             **_logger_props
         )
         self.log_filename = "{}/dehb_{}.log".format(self.output_path, log_suffix)
+        # Updating DE parameter list
+        self.de_params.update({"output_path": self.output_path})
 
         # Global trackers
         self.population = None
@@ -133,6 +137,9 @@ class DEHBBase:
         return ns, budgets
 
     def get_incumbents(self):
+        """ Returns a tuple of the (incumbent configuration, incumbent score/fitness). """
+        if self.configspace:
+            return self.vector_to_configspace(self.inc_config), self.inc_score
         return self.inc_config, self.inc_score
 
     def f_objective(self):

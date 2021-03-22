@@ -1,7 +1,9 @@
+import os
 import numpy as np
 import ConfigSpace
 import ConfigSpace.util
 from typing import List
+from distributed import Client
 
 
 class DEBase():
@@ -9,7 +11,7 @@ class DEBase():
     '''
     def __init__(self, cs=None, f=None, dimensions=None, pop_size=None, max_age=None,
                  mutation_factor=None, crossover_prob=None, strategy=None, budget=None,
-                 configspace=True, boundary_fix_type='random', **kwargs):
+                 boundary_fix_type='random', **kwargs):
         # Benchmark related variables
         self.cs = cs
         self.f = f
@@ -28,12 +30,14 @@ class DEBase():
         self.fix_type = boundary_fix_type
 
         # Miscellaneous
-        self.configspace = configspace
+        self.configspace = True if isinstance(self.cs, ConfigSpace.ConfigurationSpace) else False
         self.hps = dict()
-        for i, hp in enumerate(cs.get_hyperparameters()):
-            # maps hyperparameter name to positional index in vector form
-            self.hps[hp.name] = i
-        self.output_path = kwargs['output_path'] if 'output_path' in kwargs else ''
+        if self.configspace:
+            for i, hp in enumerate(cs.get_hyperparameters()):
+                # maps hyperparameter name to positional index in vector form
+                self.hps[hp.name] = i
+        self.output_path = kwargs['output_path'] if 'output_path' in kwargs else './'
+        os.makedirs(self.output_path, exist_ok=True)
 
         # Global trackers
         self.inc_score = np.inf
@@ -235,6 +239,20 @@ class DE(DEBase):
         self.encoding = encoding
         self.dim_map = dim_map
         self._set_min_pop_size()
+
+    def __getstate__(self):
+        """ Allows the object to picklable while having Dask client as a class attribute.
+        """
+        d = dict(self.__dict__)
+        d["client"] = None  # hack to allow Dask client to be a class attribute
+        d["logger"] = None  # hack to allow logger object to be a class attribute
+        return d
+
+    def __del__(self):
+        """ Ensures a clean kill of the Dask client and frees up a port.
+        """
+        if hasattr(self, "client") and isinstance(self, Client):
+            self.client.close()
 
     def reset(self):
         super().reset()
