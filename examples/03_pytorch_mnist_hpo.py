@@ -270,9 +270,10 @@ def main():
     # Dask checks and setups
     if args.scheduler_file is not None and os.path.isfile(args.scheduler_file):
         client = Client(scheduler_file=args.scheduler_file)
-        
     else:
         client = None
+
+    single_node_with_gpus = True if n_workers > 1 else False
 
     ###########################
     # DEHB optimisation block #
@@ -282,7 +283,7 @@ def main():
                 max_budget=args.max_budget, eta=args.eta, output_path=args.output_path,
                 # if client is not None and of type Client, n_workers is ignored
                 # if client is None, a Dask client with n_workers is set up
-                client=client, n_workers=args.n_workers)
+                client=client, n_workers=args.n_workers, single_node_with_gpus=single_node_with_gpus)
     traj, runtime, history = dehb.run(total_cost=args.runtime, verbose=args.verbose, device=device,
                                       train_set=train_set, valid_set=valid_set, test_set=test_set)
     # end of DEHB optimisation

@@ -154,7 +154,8 @@ class DEHB(DEHBBase):
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=0.5,
                  crossover_prob=0.5, strategy='rand1_bin', min_budget=None,
                  max_budget=None, eta=3, min_clip=None, max_clip=None, configspace=True,
-                 boundary_fix_type='random', max_age=np.inf, n_workers=None, client=None, **kwargs):
+                 boundary_fix_type='random', max_age=np.inf, n_workers=None, client=None,
+                 single_node_with_gpus=False, **kwargs):
         super().__init__(cs=cs, f=f, dimensions=dimensions, mutation_factor=mutation_factor,
                          crossover_prob=crossover_prob, strategy=strategy, min_budget=min_budget,
                          max_budget=max_budget, eta=eta, min_clip=min_clip, max_clip=max_clip,
@@ -191,9 +192,11 @@ class DEHB(DEHBBase):
         self._init_subpop()
 
         # Misc.
-        self.gpu_map = None
-        self.gpu_map_reset = False
-        self.available_worker_ids = None
+        self.available_gpus = None
+        self.gpu_usage = None
+        self.single_node_with_gpus = single_node_with_gpus
+        if self.single_node_with_gpus:
+            self.distribute_gpus()
 
     def __getstate__(self):
         """ Allows the object to picklable while having Dask client as a class attribute.
@@ -230,6 +233,9 @@ class DEHB(DEHBBase):
             'bracket_id': bracket_id,
             'info': info
         }
+        if "gpu_devices" in job_info:
+            device_id = int(job_info["gpu_devices"].strip().split(",")[0])
+            run_info.update({"device_id": device_id})
         return run_info
 
     def _create_cuda_visible_devices(self, available_gpus, start_id):
@@ -241,7 +247,7 @@ class DEHB(DEHBBase):
         final_variable = ",".join(final_variable)
         return final_variable
 
-    def map_gpus_to_workers(self, worker_map: dict=dict(), clear_on_reset=False):
+    def distribute_gpus(self):
         try:
             available_gpus = os.environ["CUDA_VISIBLE_DEVICES"]
             available_gpus = available_gpus.strip().split(",")
@@ -249,26 +255,9 @@ class DEHB(DEHBBase):
         except KeyError as e:
             print("Unable to find valid GPU devices. "
                   "Environment variable {} not visible!".format(str(e)))
-        if isinstance(worker_map, dict) and len(worker_map) > 0:
-            assert isinstance(worker_map, dict)
-            # check if all keys to the map dict are integers
-            assert np.all(list(map(lambda x: isinstance(x, int), list(worker_map.keys()))))
-            # check if all the keys are index IDs for the workers [0, 1, ..., n_workers-1]
-            assert np.all(np.sort(list(worker_map.keys())) == np.arange(self.n_workers))
-            # check if specified GPU devices are valid device IDs
-            assert np.all(list(map(lambda x: x in available_gpus, list(worker_map.values()))))
-        else:
-            _gpus = np.random.choice(available_gpus, size=len(available_gpus), replace=False)
-            if len(_gpus) < self.n_workers:
-                _gpus = np.concatenate(
-                    _gpus,
-                    np.random.choice(available_gpus, size=self.n_workers - len(_gpus), replace=True)
-                )
-            worker_map = {}
-            for i in range(self.n_workers):
-                worker_map[i] = _gpus[i]
-        self.gpu_map = worker_map
-        self.gpu_map_reset = clear_on_reset
+        self.gpu_usage = dict()
+        for _id in self.available_gpus:
+            self.gpu_usage[_id] = 0
 
     def vector_to_configspace(self, config):
         assert hasattr(self, "de")
@@ -288,7 +277,6 @@ class DEHB(DEHBBase):
             self.client = None
         self.futures = []
         self.shared_data = None
-        self.gpu_map = None if self.gpu_map_reset else self.gpu_map
         self.iteration_counter = -1
         self.de = {}
         self._max_pop_size = None
@@ -299,6 +287,10 @@ class DEHB(DEHBBase):
         self.history = []
         self._get_pop_sizes()
         self._init_subpop()
+        self.available_gpus = None
+        self.gpu_usage = None
+        if self.single_node_with_gpus:
+            self.distribute_gpus()
 
     def init_population(self, pop_size):
         if self.configspace:
@@ -394,10 +386,6 @@ class DEHB(DEHBBase):
         if len(self.futures) >= workers:
             # pause/wait if active worker count greater allocated workers
             return False
-        self.available_worker_ids = [
-            i for i, _addr in enumerate(self.client.ncores().keys())
-            if self.client.scheduler_info()["workers"][_addr]["metrics"]["executing"] == 0
-        ]
         return True
 
     def _get_promotion_candidate(self, low_budget, high_budget, n_configs):
@@ -539,16 +527,19 @@ class DEHB(DEHBBase):
         job_info["kwargs"] = self.shared_data if self.shared_data is not None else kwargs
         # submit to to Dask client
         if self.n_workers > 1 or isinstance(self.client, Client):
-            workers = None  # Dask scheduler can submit to any of the workers
-            if isinstance(self.gpu_map, dict) and len(self.gpu_map) > 0:
-                workers = np.random.choice(self.available_worker_ids)
+            if self.single_node_with_gpus:
+                candidates = []
+                for k, v in self.gpu_usage.items():
+                    if v == min(self.gpu_usage.values()):
+                        candidates.append(k)
+                device_id = np.random.choice(candidates)
                 gpu_ids = self._create_cuda_visible_devices(
-                    self.available_gpus, self.gpu_map[workers]
+                    self.available_gpus, device_id
                 )
-                # submits on a specific worker to use a specified CUDA device
                 job_info.update({"gpu_devices": gpu_ids})
+                self.gpu_usage[device_id] += 1
             self.futures.append(
-                self.client.submit(self._f_objective, job_info, workers=workers)
+                self.client.submit(self._f_objective, job_info)
             )
         else:
             # skipping scheduling to Dask worker to avoid added overheads in the synchronous case
@@ -576,6 +567,9 @@ class DEHB(DEHBBase):
         for _, future in done_list:
             if self.n_workers > 1 or isinstance(self.client, Client):
                 run_info = future.result()
+                if "device_id" in run_info:
+                    self.gpu_usage[run_info["device_id"]] += 1
+                future.release()
             else:
                 # Dask not invoked in the synchronous case
                 run_info = future
