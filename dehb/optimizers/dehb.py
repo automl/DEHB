@@ -4,10 +4,10 @@ import json
 import time
 import numpy as np
 import ConfigSpace
+from typing import List
 from copy import deepcopy
 from loguru import logger
 from distributed import Client
-from typing import Union, List
 
 from dehb.optimizers import DE, AsyncDE
 from dehb.utils import SHBracketManager
