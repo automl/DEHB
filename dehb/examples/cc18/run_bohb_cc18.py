@@ -129,7 +129,7 @@ else:
 task_ids = all_task_ids if args.task_id is None else [args.task_id]
 
 for task_id in task_ids:
-    output_path = os.path.join(args.output_path, str(args.task_id), args.folder)
+    output_path = os.path.join(args.output_path, str(task_id), args.folder)
     os.makedirs(output_path, exist_ok=True)
 
     for run_id in range(args.run_start, args.runs + args.run_start):
@@ -173,7 +173,6 @@ for task_id in task_ids:
         results = bohb.run(args.n_iters, min_n_workers=num_workers)
         print("Saving file...")
         fh = open(os.path.join(output_path, 'run_{}.json'.format(run_id)), 'w')
-        print(util.extract_results_to_pickle(results))
         json.dump(convert_to_json(util.extract_results_to_pickle(results)), fh)
         fh.close()
         print("Shutting BOHB workers")
