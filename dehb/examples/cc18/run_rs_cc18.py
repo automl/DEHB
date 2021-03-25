@@ -3,21 +3,18 @@
 
 import os
 import sys
-sys.path.append(os.path.join(os.getcwd(), '../HPOlib3/'))
-
 import json
 import pickle
 import argparse
 import numpy as np
 
-from hpolib.benchmarks.ml.xgboost_benchmark import XGBoostBenchmark as Benchmark
-from hpolib.util.openml_data_manager import get_openmlcc18_taskids
+sys.path.append(os.path.join(os.getcwd(), '../HPOBench/'))
+from hpobench.benchmarks.ml.xgboost_benchmark import XGBoostBenchmark as Benchmark
 
 from dehb import DE
 
 
-# task_ids = get_openmlcc18_taskids()
-task_ids = [126031, 189906, 167155]  # as suggested by Philip
+all_task_ids = [126031, 189906, 167155]  # as suggested by Philip
 
 
 def save_configspace(cs, path, filename='configspace'):
@@ -26,19 +23,14 @@ def save_configspace(cs, path, filename='configspace'):
     fh.close()
 
 
-# Common objective function for DE representing XGBoostBenchmark
-def f(config, budget=None):
-    global n_estimators, max_budget
-    if budget is None:
-        budget = max_budget
-    res = b.objective_function(config, n_estimators=n_estimators, subsample=budget)
+def f(config):
+    res = b.objective_function(config)
     fitness = res['function_value']
     cost = res['cost']
     return fitness, cost
 
 
 def calc_test_scores(runtime, history):
-    global n_estimators
     regret_validation = []
     regret_test = []
     inc = np.inf
@@ -47,9 +39,9 @@ def calc_test_scores(runtime, history):
         config, valid_score, _ = history[i]
         if valid_score < inc:
             inc = valid_score
-            config = de.vector_to_configspace(config)
-            test_res = b.objective_function_test(config, n_estimators=n_estimators)
-            test_score = test_res['function_value']
+            # config = de.vector_to_configspace(config)
+            test_res = None  #b.objective_function_test(config, n_estimators=n_estimators)
+            test_score = None  #test_res['function_value']
         regret_test.append(test_score)
         regret_validation.append(inc)
     runtime = np.cumsum(runtime).tolist()
@@ -60,48 +52,33 @@ def calc_test_scores(runtime, history):
     return res
 
 
-def randomsearch(dimensions, f, convert_fn, generations, pop_size, budget=None, verbose=True):
+def randomsearch(cs, f, iterations, verbose=False):
     traj = []
     runtime = []
     history = []
-    inc_score = np.inf
-    inc_config = None
-    for i in range(generations * pop_size):
+    for i in range(iterations):
         if verbose:
-            print("Iteration #{:<5}/{:<5} - {:<.5f}".format(i+1, generations * pop_size, inc_score))
-        config_arr = np.random.uniform(size=dimensions)
-        config_obj = convert_fn(config_arr)
-        fitness, cost = f(config_obj, budget=budget)
-        if fitness < inc_score:
-            inc_score = fitness
-            inc_config = config_obj
-        traj.append(inc_score)
+            print("RS #{}/{}".format(i+1, iterations))
+        config = cs.sample_configuration()
+        fitness, cost = f(config)
+        traj.append(fitness)
         runtime.append(cost)
-        history.append((config_arr.tolist(), float(fitness), float(budget or 0)))
-
+        history.append((config.get_array().tolist(), float(fitness), float(0)))
     return np.array(traj), np.array(runtime), np.array(history)
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--fix_seed', default='False', type=str, choices=['True', 'False'],
                     nargs='?', help='seed')
-parser.add_argument('--run_id', default=0, type=int, nargs='?',
-                    help='unique number to identify this run')
 parser.add_argument('--runs', default=None, type=int, nargs='?', help='number of runs to perform')
 parser.add_argument('--run_start', default=0, type=int, nargs='?',
                     help='run index to start with for multiple runs')
-parser.add_argument('--task_id', default=task_ids[0], type=int,
-                    help="specify the OpenML task id to run on from among {}".format(task_ids))
-parser.add_argument('--n_estimators', default=64, type=int,
-                    help="specify the number of estimators XGBoost will be trained with")
+parser.add_argument('--task_id', default=None, type=int,
+                    help="specify the OpenML task id to run on from among {}".format(all_task_ids))
+parser.add_argument('--n_iters', default=100, type=int,
+                    help="number of Random Search function evaluations")
 parser.add_argument('--output_path', default="./results", type=str, nargs='?',
                     help='specifies the path where the results will be saved')
-# pop size and gens included to match DE's number of function evaluation as gens * pop_size
-parser.add_argument('--pop_size', default=20, type=int, nargs='?', help='population size')
-parser.add_argument('--gens', default=100, type=int, nargs='?',
-                    help='(iterations) number of generations for DE to evolve')
-parser.add_argument('--max_budget', default=1, type=float,
-                    help='the maximum budget for the benchmark')
 parser.add_argument('--verbose', default='False', choices=['True', 'False'], nargs='?', type=str,
                     help='to print progress or not')
 parser.add_argument('--folder', default='randomsearch', type=str, nargs='?',
@@ -110,49 +87,26 @@ parser.add_argument('--folder', default='randomsearch', type=str, nargs='?',
 args = parser.parse_args()
 args.verbose = True if args.verbose == 'True' else False
 args.fix_seed = True if args.fix_seed == 'True' else False
-n_estimators = args.n_estimators
-max_budget = args.max_budget
 
-task_ids = get_openmlcc18_taskids()
-if args.task_id not in task_ids:
-    raise "Incorrect task ID. Choose from: {}".format(task_ids)
+task_ids = all_task_ids if args.task_id is None else [args.task_id]
 
-b = Benchmark(task_id=args.task_id)
-# Parameter space to be used by DE
-cs = b.get_configuration_space()
-dimensions = len(cs.get_hyperparameters())
+for task_id in task_ids:
+    output_path = os.path.join(args.output_path, str(task_id), args.folder)
+    os.makedirs(output_path, exist_ok=True)
 
-output_path = os.path.join(args.output_path, str(args.task_id), args.folder)
-os.makedirs(output_path, exist_ok=True)
-
-# Initializing DE object (for vector_to_configspace access)
-de = DE(cs=cs, dimensions=dimensions, f=None, pop_size=None, mutation_factor=None,
-        crossover_prob=None, strategy=None)
-
-if args.runs is None:  # for a single run
-    if not args.fix_seed:
-        np.random.seed(0)
-    # Running RS iterations
-    traj, runtime, history = randomsearch(dimensions, f, de.vector_to_configspace, args.gens,
-                                          args.pop_size, budget=max_budget, verbose=args.verbose)
-    fh = open(os.path.join(output_path, 'run_{}.json'.format(args.run_id)), 'w')
-    json.dump(calc_test_scores(runtime, history), fh)
-    fh.close()
-else:  # for multiple runs
-    for run_id, _ in enumerate(range(args.runs), start=args.run_start):
+    for run_id in range(args.run_start, args.runs + args.run_start):
+        print("Task: {} --- Run {}:\n{}".format(task_id, run_id, "=" * 30))
         if not args.fix_seed:
             np.random.seed(run_id)
-        if args.verbose:
-            print("\nRun #{:<3}\n{}".format(run_id + 1, '-' * 8))
-        # Running RS iterations
-        traj, runtime, history = randomsearch(dimensions, f, de.vector_to_configspace, args.gens,
-                                              args.pop_size, budget=max_budget, verbose=args.verbose)
+        # Initializing benchmark
+        rng = np.random.RandomState(seed=run_id)
+        b = Benchmark(task_id=task_id, rng=rng)
+        # Parameter space to be used by DE
+        cs = b.get_configuration_space()
+        dimensions = len(cs.get_hyperparameters())
+        traj, runtime, history = randomsearch(cs=cs, f=f, iterations=args.n_iters,
+                                              verbose=args.verbose)
         fh = open(os.path.join(output_path, 'run_{}.json'.format(run_id)), 'w')
         json.dump(calc_test_scores(runtime, history), fh)
         fh.close()
-        if args.verbose:
-            print("Run saved. Resetting...")
-        # essential step to not accumulate consecutive runs
-        de.reset()
-
-save_configspace(cs, output_path)
+    print()
