@@ -77,7 +77,7 @@ parser.add_argument('--run_start', default=0, type=int, nargs='?',
                     help='run index to start with for multiple runs')
 parser.add_argument('--task_id', default=None, type=int,
                     help="specify the OpenML task id to run on from among {}".format(all_task_ids))
-parser.add_argument('--iter', default=100, type=int, nargs='?',
+parser.add_argument('--n_iters', default=100, type=int, nargs='?',
                     help='number of DEHB iterations')
 parser.add_argument('--output_path', default="./results", type=str, nargs='?',
                     help='specifies the path where the results will be saved')
@@ -144,7 +144,7 @@ for task_id in task_ids:
                 mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,
                 strategy=args.strategy, budget=max_budget)
         # Starting DEHB optimisation
-        traj, runtime, history = dehb.run(iterations=args.iter, verbose=args.verbose)
+        traj, runtime, history = dehb.run(iterations=args.n_iters, verbose=args.verbose)
         fh = open(os.path.join(output_path, 'run_{}.json'.format(run_id)), 'w')
         json.dump(calc_test_scores(runtime, history, de), fh)
         fh.close()
