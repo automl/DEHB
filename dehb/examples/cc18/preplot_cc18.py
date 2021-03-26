@@ -6,7 +6,7 @@ from scipy import stats
 
 
 def create_plot(plt, methods, path, regret_type, fill_trajectory,
-                colors, linestyles, marker, n_runs=500, limit=1e7):
+                colors, linestyles, marker, n_runs=500, limit=1e7, **Kwargs):
 
     # plot limits
     min_time = np.inf
