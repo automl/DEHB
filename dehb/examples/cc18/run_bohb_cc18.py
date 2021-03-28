@@ -24,7 +24,7 @@ sys.path.append(os.path.join(os.getcwd(), '../HPOBench/'))
 from hpobench.benchmarks.ml.xgboost_benchmark import XGBoostBenchmark as Benchmark
 
 
-all_task_ids = [126031, 189906, 167155]  # as suggested by Philip
+all_task_ids = [189906]  # [126031, 189906, 167155]  # as suggested by Philip
 
 
 def save_configspace(cs, path, filename='configspace'):
@@ -74,11 +74,12 @@ class MyWorker(Worker):
         if budget is None:
             budget = max_budget
         fitness, cost = self.f(config, budget)
-        # res = self.b.objective_function_test(config)
-        # print(fitness, cost)
+        res = self.b.objective_function_test(config)
+        test_fitness = res['function_value']
+        print(fitness, test_fitness, cost)
         return ({
             'loss': float(fitness),
-            'info': {'cost': float(cost), 'test_loss': None}  #float(res['function_value'])}
+            'info': {'cost': float(cost), 'test_loss': float(test_fitness)}
         })
 
 

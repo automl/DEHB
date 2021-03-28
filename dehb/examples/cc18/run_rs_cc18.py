@@ -14,7 +14,7 @@ from hpobench.benchmarks.ml.xgboost_benchmark import XGBoostBenchmark as Benchma
 from dehb import DE
 
 
-all_task_ids = [126031, 189906, 167155]  # as suggested by Philip
+all_task_ids = [189906]  # [126031, 189906, 167155]  # as suggested by Philip
 
 
 def save_configspace(cs, path, filename='configspace'):
@@ -30,7 +30,7 @@ def f(config):
     return fitness, cost
 
 
-def calc_test_scores(runtime, history):
+def calc_test_scores(runtime, history, de, b):
     regret_validation = []
     regret_test = []
     inc = np.inf
@@ -39,9 +39,9 @@ def calc_test_scores(runtime, history):
         config, valid_score, _ = history[i]
         if valid_score < inc:
             inc = valid_score
-            # config = de.vector_to_configspace(config)
-            test_res = None  #b.objective_function_test(config, n_estimators=n_estimators)
-            test_score = None  #test_res['function_value']
+            config = de.vector_to_configspace(config)
+            test_res = b.objective_function_test(config)
+            test_score = test_res['function_value']
         regret_test.append(test_score)
         regret_validation.append(inc)
     runtime = np.cumsum(runtime).tolist()
@@ -104,9 +104,11 @@ for task_id in task_ids:
         # Parameter space to be used by DE
         cs = b.get_configuration_space()
         dimensions = len(cs.get_hyperparameters())
+        # Initializing helper DE object
+        de = DE(cs=cs, dimensions=dimensions, f=f)
         traj, runtime, history = randomsearch(cs=cs, f=f, iterations=args.n_iters,
                                               verbose=args.verbose)
         fh = open(os.path.join(output_path, 'run_{}.json'.format(run_id)), 'w')
-        json.dump(calc_test_scores(runtime, history), fh)
+        json.dump(calc_test_scores(runtime, history,de, b), fh)
         fh.close()
     print()
