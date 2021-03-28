@@ -76,7 +76,6 @@ class MyWorker(Worker):
         fitness, cost = self.f(config, budget)
         res = self.b.objective_function_test(config)
         test_fitness = res['function_value']
-        print(fitness, test_fitness, cost)
         return ({
             'loss': float(fitness),
             'info': {'cost': float(cost), 'test_loss': float(test_fitness)}
