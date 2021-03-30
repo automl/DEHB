@@ -215,8 +215,10 @@ class DEHB(DEHBBase):
     def _f_objective(self, job_info):
         """ Wrapper to call DE's objective function.
         """
-        # handles GPUs on a single node
-        if "gpu_devices" in job_info:  # job_info appended during job submission self.submit_job()
+        # check if job_info appended during job submission self.submit_job() includes "gpu_devices"
+        if "gpu_devices" in job_info and self.single_node_with_gpus:
+            # should set the environment variable for the spawned worker process
+            # reprioritising a CUDA device order specific to this worker process
             os.environ.update({"CUDA_VISIBLE_DEVICES": job_info["gpu_devices"]})
 
         config, budget, parent_id = job_info['config'], job_info['budget'], job_info['parent_id']
@@ -536,28 +538,31 @@ class DEHB(DEHBBase):
         }
         return job_info
 
+    def _get_gpu_id_with_low_load(self):
+        candidates = []
+        for k, v in self.gpu_usage.items():
+            if v == min(self.gpu_usage.values()):
+                candidates.append(k)
+        device_id = np.random.choice(candidates)
+        # creating string for setting environment variable CUDA_VISIBLE_DEVICES
+        gpu_ids = self._create_cuda_visible_devices(
+            self.available_gpus, device_id
+        )
+        # updating GPU usage
+        self.gpu_usage[device_id] += 1
+        self.logger.debug("GPU device selected: {}".format(device_id))
+        self.logger.debug("GPU device usage: {}".format(self.gpu_usage))
+        return gpu_ids
+
     def submit_job(self, job_info, **kwargs):
         """ Asks a free worker to run the objective function on config and budget
         """
         job_info["kwargs"] = self.shared_data if self.shared_data is not None else kwargs
         # submit to to Dask client
         if self.n_workers > 1 or isinstance(self.client, Client):
-            # managing GPU allocation for the job to be submitted
             if self.single_node_with_gpus:
-                candidates = []
-                for k, v in self.gpu_usage.items():
-                    if v == min(self.gpu_usage.values()):
-                        candidates.append(k)
-                device_id = np.random.choice(candidates)
-                # creating string for setting environment variable CUDA_VISIBLE_DEVICES
-                gpu_ids = self._create_cuda_visible_devices(
-                    self.available_gpus, device_id
-                )
-                job_info.update({"gpu_devices": gpu_ids})
-                # updating GPU usage
-                self.gpu_usage[device_id] += 1
-                self.logger.debug("GPU device selected: {}".format(device_id))
-                self.logger.debug("GPU device usage: {}".format(self.gpu_usage))
+                # managing GPU allocation for the job to be submitted
+                job_info.update({"gpu_devices": self._get_gpu_id_with_low_load()})
             self.futures.append(
                 self.client.submit(self._f_objective, job_info)
             )
