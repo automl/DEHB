@@ -9,7 +9,7 @@ do
     esac
 done
 
-#echo "Submitting Dask scheduler..."
+echo "Submitting Dask scheduler..."
 sbatch utils/dask_scheduler.sh -f $filename -e $envname
 
 for ((i=1; i<=$nworkers; i++)); do

@@ -19,6 +19,6 @@ done
 source $HOME/anaconda3/bin/activate $envname
 
 # creating a Dask worker
-PYTHONPATH=$PWD dask-worker --scheduler-file $filename --name $workername --nprocs 1 --resources "GPU=1"
+PYTHONPATH=$PWD dask-worker --scheduler-file $filename --name $workername --resources "GPU=1" --no-nanny
 
 # for more options: https://docs.dask.org/en/latest/setup/cli.html#dask-worker

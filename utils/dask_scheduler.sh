@@ -2,7 +2,7 @@
 
 #SBATCH -p mldlc_gpu-rtx2080
 #SBATCH --gres=gpu:0
-#SBATCH --mem 1G
+#SBATCH --mem 0
 #SBATCH -c 2
 #SBATCH -J scheduler
 #SBATCH -t 6-00
