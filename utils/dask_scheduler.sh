@@ -1,6 +1,6 @@
 #! /bin/bash
 
-#SBATCH -p alldlc_gpu-rtx2080
+#SBATCH -p mldlc_gpu-rtx2080
 #SBATCH --gres=gpu:0
 #SBATCH --mem 1G
 #SBATCH -c 2

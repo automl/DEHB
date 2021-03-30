@@ -1,9 +1,9 @@
 #! /bin/bash
 
-#SBATCH -p alldlc_gpu-rtx2080
+#SBATCH -p mldlc_gpu-rtx2080
 #SBATCH --gres=gpu:1
 #SBATCH --mem 0
-#SBATCH -J workers
+#SBATCH -J worker
 #SBATCH -t 6-00
 
 while getopts f:e:w: flag

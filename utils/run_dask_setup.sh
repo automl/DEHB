@@ -17,4 +17,3 @@ for ((i=1; i<=$nworkers; i++)); do
    sbatch utils/dask_workers.sh -f $filename -e $envname -w worker$i
    sleep 2
 done
-
