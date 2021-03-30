@@ -9,6 +9,10 @@ function instantiates an architecture, an optimizer, as defined by a configurati
 training and evaluation (on the validation set) as per the budget passed.
 The argument `runtime` can be passed to DEHB as a wallclock budget for running the optimisation.
 
+This tutorial also briefly refers to the different methods of interfacing DEHB with the Dask
+parallelism framework. Moreover, also introduce how GPUs may be managed, which is recommended for
+running this example tutorial.
+
 Additional requirements:
 * torch>=1.7.1
 * torchvision>=0.8.2
@@ -204,8 +208,11 @@ def objective_function(config, budget, **kwargs):
         train(model, device, train_loader, optimizer)
     loss = evaluate(model, device, valid_loader)
     cost = time.time() - start
+
+    # not including test score computation in the `cost`
     test_loss = evaluate(model, device, test_loader)
 
+    # dict representation that DEHB requires
     res = {
         "fitness": loss,
         "cost": cost,
@@ -272,11 +279,20 @@ def main():
     cs = get_configspace(args.seed)
     dimensions = len(cs.get_hyperparameters())
 
+    # Some insights into Dask interfaces to DEHB and handling GPU devices for parallelism:
+    # * if args.scheduler_file is specified, args.n_workers need not be specifed --- since
+    #    args.scheduler_file indicates a Dask client/server is active
+    # * if args.scheduler_file is not specified and args.n_workers > 1 --- the DEHB object
+    #    creates a Dask client as at instantiation and dies with the associated DEHB object
+    # * if args.single_node_with_gpus is True --- assumes that all GPU devices indicated
+    #    through the environment variable "CUDA_VISIBLE_DEVICES" resides on the same machine
+
     # Dask checks and setups
     single_node_with_gpus = args.single_node_with_gpus
     if args.scheduler_file is not None and os.path.isfile(args.scheduler_file):
         client = Client(scheduler_file=args.scheduler_file)
-        single_node_with_gpus = False  # explicitly delegating GPU handling to Dask workers defined
+        # explicitly delegating GPU handling to Dask workers defined
+        single_node_with_gpus = False
     else:
         client = None
 

@@ -29,8 +29,10 @@ class DEHBBase:
         # Benchmark related variables
         self.cs = cs
         self.configspace = True if isinstance(self.cs, ConfigSpace.ConfigurationSpace) else False
-        if dimensions is None and self.cs is not None:
+        if self.configspace:
             self.dimensions = len(self.cs.get_hyperparameters())
+        elif dimensions is None or not isinstance(dimensions, (int, np.int)):
+            assert "Need to specify `dimensions` as an int when `cs` is not available/specified!"
         else:
             self.dimensions = dimensions
         self.f = f
