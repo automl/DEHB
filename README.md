@@ -10,10 +10,10 @@ pip install -r requirements.txt
 
 ### Tutorials/Example notebooks
 
-* [00 - A generic template to use DEHB for multi-fidelity Hyperparameter Optimization](00_interfacing_DEHB.ipynb)
-* [01 - Using DEHB to optimize 4 hyperparameters of a Scikit-learn's Random Forest on a classification dataset](01_Optimizing_RandomForest_using_DEHB.ipynb)
-* [02 - Optimizing Scikit-learn's Random Forest without using ConfigSpace to represent the hyperparameter space](02_using%20DEHB_without_ConfigSpace.ipynb)
-* [03 - Hyperparameter Optimization for MNIST in PyTorch](03_pytorch_mnist_hpo.py)
+* [00 - A generic template to use DEHB for multi-fidelity Hyperparameter Optimization](examples/00_interfacing_DEHB.ipynb)
+* [01 - Using DEHB to optimize 4 hyperparameters of a Scikit-learn's Random Forest on a classification dataset](examples/01_Optimizing_RandomForest_using_DEHB.ipynb)
+* [02 - Optimizing Scikit-learn's Random Forest without using ConfigSpace to represent the hyperparameter space](examples/02_using%20DEHB_without_ConfigSpace.ipynb)
+* [03 - Hyperparameter Optimization for MNIST in PyTorch](examples/03_pytorch_mnist_hpo.py)
 
 To run PyTorch example: (*note additional requirements*) 
 ```bash
