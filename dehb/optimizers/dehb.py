@@ -751,8 +751,6 @@ class DEHB(DEHBBase):
                     if self.n_workers > 1 or isinstance(self.client, Client):
                         self.logger.debug("{}/{} worker(s) available.".format(
                             self._get_worker_count() - len(self.futures), self._get_worker_count()
-                            # len(self.client.scheduler_info()['workers']) - len(self.futures),
-                            # len(self.client.scheduler_info()['workers']))
                         ))
                     # submits job_info to a worker for execution
                     self.submit_job(job_info, **kwargs)
