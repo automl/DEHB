@@ -1,5 +1,9 @@
+import os
 import numpy as np
 import ConfigSpace
+import ConfigSpace.util
+from typing import List
+from distributed import Client
 
 
 class DEBase():
@@ -7,7 +11,7 @@ class DEBase():
     '''
     def __init__(self, cs=None, f=None, dimensions=None, pop_size=None, max_age=None,
                  mutation_factor=None, crossover_prob=None, strategy=None, budget=None,
-                 configspace=True, boundary_fix_type='random', **kwargs):
+                 boundary_fix_type='random', **kwargs):
         # Benchmark related variables
         self.cs = cs
         self.f = f
@@ -26,8 +30,14 @@ class DEBase():
         self.fix_type = boundary_fix_type
 
         # Miscellaneous
-        self.configspace = configspace
-        self.output_path = kwargs['output_path'] if 'output_path' in kwargs else ''
+        self.configspace = True if isinstance(self.cs, ConfigSpace.ConfigurationSpace) else False
+        self.hps = dict()
+        if self.configspace:
+            for i, hp in enumerate(cs.get_hyperparameters()):
+                # maps hyperparameter name to positional index in vector form
+                self.hps[hp.name] = i
+        self.output_path = kwargs['output_path'] if 'output_path' in kwargs else './'
+        os.makedirs(self.output_path, exist_ok=True)
 
         # Global trackers
         self.inc_score = np.inf
@@ -73,15 +83,25 @@ class DEBase():
 
         return self._min_pop_size
 
-    def init_population(self, pop_size=10):
-        population = np.random.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
-        return population
+    def init_population(self, pop_size: int) -> List:
+        if self.configspace:
+            # sample from ConfigSpace s.t. conditional constraints (if any) are maintained
+            population = self.cs.sample_configuration(size=pop_size)
+            if not isinstance(population, List):
+                population = [population]
+            # the population is maintained in a list-of-vector form where each ConfigSpace
+            # configuration is scaled to a unit hypercube, i.e., all dimensions scaled to [0,1]
+            population = [self.configspace_to_vector(individual) for individual in population]
+        else:
+            # if no ConfigSpace representation available, uniformly sample from [0, 1]
+            population = np.random.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
+        return np.array(population)
 
-    def sample_population(self, size=3, alt_pop=None):
+    def sample_population(self, size: int = 3, alt_pop: List = None) -> List:
         '''Samples 'size' individuals
 
         If alt_pop is None or a list/array of None, sample from own population
-        Else sample from the specified alternate population
+        Else sample from the specified alternate population (alt_pop)
         '''
         if isinstance(alt_pop, list) or isinstance(alt_pop, np.ndarray):
             idx = [indv is None for indv in alt_pop]
@@ -98,7 +118,7 @@ class DEBase():
             selection = np.random.choice(np.arange(len(self.population)), size, replace=False)
             return self.population[selection]
 
-    def boundary_check(self, vector):
+    def boundary_check(self, vector: np.array) -> np.array:
         '''
         Checks whether each of the dimensions of the input vector are within [0, 1].
         If not, values of those dimensions are replaced with the type of fix selected.
@@ -123,12 +143,16 @@ class DEBase():
             vector[violations] = np.clip(vector[violations], a_min=0, a_max=1)
         return vector
 
-    def vector_to_configspace(self, vector):
+    def vector_to_configspace(self, vector: np.array) -> ConfigSpace.Configuration:
         '''Converts numpy array to ConfigSpace object
 
         Works when self.cs is a ConfigSpace object and the input vector is in the domain [0, 1].
         '''
-        new_config = self.cs.sample_configuration()
+        # creates a ConfigSpace object dict with all hyperparameters present, the inactive too
+        new_config = ConfigSpace.util.impute_inactive_values(
+            self.cs.sample_configuration()
+        ).get_dictionary()
+        # iterates over all hyperparameters and normalizes each based on its type
         for i, hyper in enumerate(self.cs.get_hyperparameters()):
             if type(hyper) == ConfigSpace.OrdinalHyperparameter:
                 ranges = np.arange(start=0, stop=1, step=1/len(hyper.sequence))
@@ -144,9 +168,45 @@ class DEBase():
                 else:
                     param_value = hyper.lower + (hyper.upper - hyper.lower) * vector[i]
                 if type(hyper) == ConfigSpace.UniformIntegerHyperparameter:
-                    param_value = np.round(param_value).astype(int)   # converting to discrete (int)
+                    param_value = int(np.round(param_value))  # converting to discrete (int)
+                else:
+                    param_value = float(param_value)
             new_config[hyper.name] = param_value
+        # the mapping from unit hypercube to the actual config space may lead to illegal
+        # configurations based on conditions defined, which need to be deactivated/removed
+        new_config = ConfigSpace.util.deactivate_inactive_hyperparameters(
+            configuration = new_config, configuration_space=self.cs
+        )
         return new_config
+
+    def configspace_to_vector(self, config: ConfigSpace.Configuration) -> np.array:
+        '''Converts ConfigSpace object to numpy array scaled to [0,1]
+
+        Works when self.cs is a ConfigSpace object and the input config is a ConfigSpace object.
+        Handles conditional spaces implicitly by replacing illegal parameters with default values
+        to maintain the dimensionality of the vector.
+        '''
+        # the imputation replaces illegal parameter values with their default
+        config = ConfigSpace.util.impute_inactive_values(config)
+        dimensions = len(self.cs.get_hyperparameters())
+        vector = [np.nan for i in range(dimensions)]
+        for name in config:
+            i = self.hps[name]
+            hyper = self.cs.get_hyperparameter(name)
+            if type(hyper) == ConfigSpace.OrdinalHyperparameter:
+                nlevels = len(hyper.sequence)
+                vector[i] = hyper.sequence.index(config[name]) / nlevels
+            elif type(hyper) == ConfigSpace.CategoricalHyperparameter:
+                nlevels = len(hyper.choices)
+                vector[i] = hyper.choices.index(config[name]) / nlevels
+            else:
+                bounds = (hyper.lower, hyper.upper)
+                param_value = config[name]
+                if hyper.log:
+                    vector[i] = np.log(param_value / bounds[0]) / np.log(bounds[1] / bounds[0])
+                else:
+                    vector[i] = (config[name] - bounds[0]) / (bounds[1] - bounds[0])
+        return np.array(vector)
 
     def f_objective(self):
         raise NotImplementedError("The function needs to be defined in the sub class.")
@@ -180,6 +240,20 @@ class DE(DEBase):
         self.dim_map = dim_map
         self._set_min_pop_size()
 
+    def __getstate__(self):
+        """ Allows the object to picklable while having Dask client as a class attribute.
+        """
+        d = dict(self.__dict__)
+        d["client"] = None  # hack to allow Dask client to be a class attribute
+        d["logger"] = None  # hack to allow logger object to be a class attribute
+        return d
+
+    def __del__(self):
+        """ Ensures a clean kill of the Dask client and frees up a port.
+        """
+        if hasattr(self, "client") and isinstance(self, Client):
+            self.client.close()
+
     def reset(self):
         super().reset()
         self.traj = []
@@ -207,7 +281,7 @@ class DE(DEBase):
             new_vector[i] = np.max(np.array(vector)[self.dim_map[i]])
         return new_vector
 
-    def f_objective(self, x, budget=None):
+    def f_objective(self, x, budget=None, **kwargs):
         if self.f is None:
             raise NotImplementedError("An objective function needs to be passed.")
         if self.encoding:
@@ -219,12 +293,14 @@ class DE(DEBase):
             # can insert custom scaling/transform function here
             config = x.copy()
         if budget is not None:  # to be used when called by multi-fidelity based optimizers
-            fitness, cost = self.f(config, budget=budget)
+            res = self.f(config, budget=budget, **kwargs)
         else:
-            fitness, cost = self.f(config)
-        return fitness, cost
+            res = self.f(config, **kwargs)
+        assert "fitness" in res
+        assert "cost" in res
+        return res
 
-    def init_eval_pop(self, budget=None, eval=True):
+    def init_eval_pop(self, budget=None, eval=True, **kwargs):
         '''Creates new population of 'pop_size' and evaluates individuals.
         '''
         self.population = self.init_population(self.pop_size)
@@ -240,17 +316,19 @@ class DE(DEBase):
 
         for i in range(self.pop_size):
             config = self.population[i]
-            self.fitness[i], cost = self.f_objective(config, budget)
+            res = self.f_objective(config, budget, **kwargs)
+            self.fitness[i], cost = res["fitness"], res["cost"]
+            info = res["info"] if "info" in res else dict()
             if self.fitness[i] < self.inc_score:
                 self.inc_score = self.fitness[i]
                 self.inc_config = config
             traj.append(self.inc_score)
             runtime.append(cost)
-            history.append((config.tolist(), float(self.fitness[i]), float(budget or 0)))
+            history.append((config.tolist(), float(self.fitness[i]), float(budget or 0), info))
 
         return traj, runtime, history
 
-    def eval_pop(self, population=None, budget=None):
+    def eval_pop(self, population=None, budget=None, **kwargs):
         '''Evaluates a population
 
         If population=None, the current population's fitness will be evaluated
@@ -265,7 +343,9 @@ class DE(DEBase):
         costs = []
         ages = []
         for i in range(pop_size):
-            fitness, cost = self.f_objective(pop[i], budget)
+            res = self.f_objective(pop[i], budget, **kwargs)
+            fitness, cost = res["fitness"], res["cost"]
+            info = res["info"] if "info" in res else dict()
             if population is None:
                 self.fitness[i] = fitness
             if fitness <= self.inc_score:
@@ -273,7 +353,7 @@ class DE(DEBase):
                 self.inc_config = pop[i]
             traj.append(self.inc_score)
             runtime.append(cost)
-            history.append((pop[i].tolist(), float(fitness), float(budget or 0)))
+            history.append((pop[i].tolist(), float(fitness), float(budget or 0), info))
             fitnesses.append(fitness)
             costs.append(cost)
             ages.append(self.max_age)
@@ -379,7 +459,7 @@ class DE(DEBase):
             offspring = self.crossover_exp(target, mutant)
         return offspring
 
-    def selection(self, trials, budget=None):
+    def selection(self, trials, budget=None, **kwargs):
         '''Carries out a parent-offspring competition given a set of trial population
         '''
         traj = []
@@ -387,7 +467,9 @@ class DE(DEBase):
         history = []
         for i in range(len(trials)):
             # evaluation of the newly created individuals
-            fitness, cost = self.f_objective(trials[i], budget)
+            res = self.f_objective(trials[i], budget, **kwargs)
+            fitness, cost = res["fitness"], res["cost"]
+            info = res["info"] if "info" in res else dict()
             # selection -- competition between parent[i] -- child[i]
             ## equality is important for landscape exploration
             if fitness <= self.fitness[i]:
@@ -404,10 +486,10 @@ class DE(DEBase):
                 self.inc_config = self.population[i]
             traj.append(self.inc_score)
             runtime.append(cost)
-            history.append((trials[i].tolist(), float(fitness), float(budget or 0)))
+            history.append((trials[i].tolist(), float(fitness), float(budget or 0), info))
         return traj, runtime, history
 
-    def evolve_generation(self, budget=None, best=None, alt_pop=None):
+    def evolve_generation(self, budget=None, best=None, alt_pop=None, **kwargs):
         '''Performs a complete DE evolution: mutation -> crossover -> selection
         '''
         trials = []
@@ -418,7 +500,7 @@ class DE(DEBase):
             trial = self.boundary_check(trial)
             trials.append(trial)
         trials = np.array(trials)
-        traj, runtime, history = self.selection(trials, budget)
+        traj, runtime, history = self.selection(trials, budget, **kwargs)
         return traj, runtime, history
 
     def sample_mutants(self, size, population=None):
@@ -439,20 +521,20 @@ class DE(DEBase):
 
         return mutants
 
-    def run(self, generations=1, verbose=False, budget=None, reset=True):
+    def run(self, generations=1, verbose=False, budget=None, reset=True, **kwargs):
         # checking if a run exists
         if not hasattr(self, 'traj') or reset:
             self.reset()
             if verbose:
                 print("Initializing and evaluating new population...")
-            self.traj, self.runtime, self.history = self.init_eval_pop(budget=budget)
+            self.traj, self.runtime, self.history = self.init_eval_pop(budget=budget, **kwargs)
 
         if verbose:
             print("Running evolutionary search...")
         for i in range(generations):
             if verbose:
                 print("Generation {:<2}/{:<2} -- {:<0.7}".format(i+1, generations, self.inc_score))
-            traj, runtime, history = self.evolve_generation(budget=budget)
+            traj, runtime, history = self.evolve_generation(budget=budget, **kwargs)
             self.traj.extend(traj)
             self.runtime.extend(runtime)
             self.history.extend(history)
@@ -460,7 +542,7 @@ class DE(DEBase):
         if verbose:
             print("\nRun complete!")
 
-        return (np.array(self.traj), np.array(self.runtime), np.array(self.history))
+        return np.array(self.traj), np.array(self.runtime), np.array(self.history)
 
 
 class AsyncDE(DE):
@@ -522,7 +604,7 @@ class AsyncDE(DE):
         return mutants
 
     def _sample_population(self, size=3, alt_pop=None, target=None):
-        '''Samples 'size' individuals
+        '''Samples 'size' individuals for mutation step
 
         If alt_pop is None or a list/array of None, sample from own population
         Else sample from the specified alternate population
@@ -556,7 +638,7 @@ class AsyncDE(DE):
         selection = np.random.choice(np.arange(len(population)), size, replace=False)
         return population[selection]
 
-    def eval_pop(self, population=None, budget=None):
+    def eval_pop(self, population=None, budget=None, **kwargs):
         pop = self.population if population is None else population
         pop_size = self.pop_size if population is None else len(pop)
         traj = []
@@ -566,7 +648,9 @@ class AsyncDE(DE):
         costs = []
         ages = []
         for i in range(pop_size):
-            fitness, cost = self.f_objective(pop[i], budget)
+            res = self.f_objective(pop[i], budget, **kwargs)
+            fitness, cost = res["fitness"], res["cost"]
+            info = res["info"] if "info" in res else dict()
             if population is None:
                 self.fitness[i] = fitness
             if fitness <= self.inc_score:
@@ -574,7 +658,7 @@ class AsyncDE(DE):
                 self.inc_config = pop[i]
             traj.append(self.inc_score)
             runtime.append(cost)
-            history.append((pop[i].tolist(), float(fitness), float(budget or 0)))
+            history.append((pop[i].tolist(), float(fitness), float(budget or 0), info))
             fitnesses.append(fitness)
             costs.append(cost)
             ages.append(self.max_age)
@@ -635,7 +719,7 @@ class AsyncDE(DE):
 
         return mutants
 
-    def evolve_generation(self, budget=None, best=None, alt_pop=None):
+    def evolve_generation(self, budget=None, best=None, alt_pop=None, **kwargs):
         '''Performs a complete DE evolution, mutation -> crossover -> selection
         '''
         traj = []
@@ -653,7 +737,7 @@ class AsyncDE(DE):
             # selection takes place on a separate trial population only after
             # one iteration through the population has taken place
             trials = np.array(trials)
-            traj, runtime, history = self.selection(trials, budget)
+            traj, runtime, history = self.selection(trials, budget, **kwargs)
             return traj, runtime, history
 
         elif self.async_strategy == 'immediate':
@@ -664,7 +748,7 @@ class AsyncDE(DE):
                 trial = self.boundary_check(trial)
                 # evaluating a single trial population for the i-th individual
                 de_traj, de_runtime, de_history, fitnesses, costs = \
-                    self.eval_pop(trial.reshape(1, self.dimensions), budget=budget)
+                    self.eval_pop(trial.reshape(1, self.dimensions), budget=budget, **kwargs)
                 # one-vs-one selection
                 ## can replace the i-the population despite not completing one iteration
                 if fitnesses[0] <= self.fitness[i]:
@@ -688,7 +772,7 @@ class AsyncDE(DE):
                 trial = self.boundary_check(trial)
                 # evaluating a single trial population for the i-th individual
                 de_traj, de_runtime, de_history, fitnesses, costs = \
-                    self.eval_pop(trial.reshape(1, self.dimensions), budget=budget)
+                    self.eval_pop(trial.reshape(1, self.dimensions), budget=budget, **kwargs)
                 # one-vs-one selection
                 ## can replace the i-the population despite not completing one iteration
                 if fitnesses[0] <= self.fitness[i]:
@@ -700,20 +784,22 @@ class AsyncDE(DE):
 
         return traj, runtime, history
 
-    def run(self, generations=1, verbose=False, budget=None, reset=True):
+    def run(self, generations=1, verbose=False, budget=None, reset=True, **kwargs):
         # checking if a run exists
         if not hasattr(self, 'traj') or reset:
             self.reset()
             if verbose:
                 print("Initializing and evaluating new population...")
-            self.traj, self.runtime, self.history = self.init_eval_pop(budget=budget)
+            self.traj, self.runtime, self.history = self.init_eval_pop(budget=budget, **kwargs)
 
         if verbose:
             print("Running evolutionary search...")
         for i in range(generations):
             if verbose:
                 print("Generation {:<2}/{:<2} -- {:<0.7}".format(i+1, generations, self.inc_score))
-            traj, runtime, history = self.evolve_generation(budget=budget, best=self.inc_config)
+            traj, runtime, history = self.evolve_generation(
+                budget=budget, best=self.inc_config, **kwargs
+            )
             self.traj.extend(traj)
             self.runtime.extend(runtime)
             self.history.extend(history)

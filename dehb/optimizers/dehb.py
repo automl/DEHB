@@ -3,6 +3,9 @@ import sys
 import json
 import time
 import numpy as np
+import ConfigSpace
+from typing import List
+from copy import deepcopy
 from loguru import logger
 from distributed import Client
 
@@ -21,12 +24,15 @@ _logger_props = {
 class DEHBBase:
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=None,
                  crossover_prob=None, strategy=None, min_budget=None,
-                 max_budget=None, eta=None, min_clip=None, max_clip=None, configspace=True,
+                 max_budget=None, eta=None, min_clip=None, max_clip=None,
                  boundary_fix_type='random', max_age=np.inf, **kwargs):
         # Benchmark related variables
         self.cs = cs
-        if dimensions is None and self.cs is not None:
+        self.configspace = True if isinstance(self.cs, ConfigSpace.ConfigurationSpace) else False
+        if self.configspace:
             self.dimensions = len(self.cs.get_hyperparameters())
+        elif dimensions is None or not isinstance(dimensions, (int, np.int)):
+            assert "Need to specify `dimensions` as an int when `cs` is not available/specified!"
         else:
             self.dimensions = dimensions
         self.f = f
@@ -35,7 +41,6 @@ class DEHBBase:
         self.mutation_factor = mutation_factor
         self.crossover_prob = crossover_prob
         self.strategy = strategy
-        self.configspace = configspace
         self.fix_type = boundary_fix_type
         self.max_age = max_age
         self.de_params = {
@@ -53,6 +58,7 @@ class DEHBBase:
         # Hyperband related variables
         self.min_budget = min_budget
         self.max_budget = max_budget
+        assert self.max_budget > self.min_budget, "only (Max Budget > Min Budget) supported!"
         self.eta = eta
         self.min_clip = min_clip
         self.max_clip = max_clip
@@ -70,6 +76,7 @@ class DEHBBase:
 
         # Miscellaneous
         self.output_path = kwargs['output_path'] if 'output_path' in kwargs else './'
+        os.makedirs(self.output_path, exist_ok=True)
         self.logger = logger
         log_suffix = time.strftime("%x %X %Z")
         log_suffix = log_suffix.replace("/", '-').replace(":", '-').replace(" ", '_')
@@ -78,6 +85,8 @@ class DEHBBase:
             **_logger_props
         )
         self.log_filename = "{}/dehb_{}.log".format(self.output_path, log_suffix)
+        # Updating DE parameter list
+        self.de_params.update({"output_path": self.output_path})
 
         # Global trackers
         self.population = None
@@ -96,9 +105,8 @@ class DEHBBase:
         self.history = []
         self.logger.info("\n\nRESET at {}\n\n".format(time.strftime("%x %X %Z")))
 
-    def init_population(self, pop_size=10):
-        population = np.random.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
-        return population
+    def init_population(self):
+        raise NotImplementedError("Redefine!")
 
     def get_next_iteration(self, iteration):
         '''Computes the Successive Halving spacing
@@ -133,6 +141,9 @@ class DEHBBase:
         return ns, budgets
 
     def get_incumbents(self):
+        """ Returns a tuple of the (incumbent configuration, incumbent score/fitness). """
+        if self.configspace:
+            return self.vector_to_configspace(self.inc_config), self.inc_score
         return self.inc_config, self.inc_score
 
     def f_objective(self):
@@ -146,12 +157,12 @@ class DEHB(DEHBBase):
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=0.5,
                  crossover_prob=0.5, strategy='rand1_bin', min_budget=None,
                  max_budget=None, eta=3, min_clip=None, max_clip=None, configspace=True,
-                 boundary_fix_type='random', max_age=np.inf, n_workers=1, **kwargs):
+                 boundary_fix_type='random', max_age=np.inf, n_workers=None, client=None, **kwargs):
         super().__init__(cs=cs, f=f, dimensions=dimensions, mutation_factor=mutation_factor,
                          crossover_prob=crossover_prob, strategy=strategy, min_budget=min_budget,
                          max_budget=max_budget, eta=eta, min_clip=min_clip, max_clip=max_clip,
                          configspace=configspace, boundary_fix_type=boundary_fix_type,
-                         max_age=max_age, n_workers=1, **kwargs)
+                         max_age=max_age, **kwargs)
         self.iteration_counter = -1
         self.de = {}
         self._max_pop_size = None
@@ -162,18 +173,30 @@ class DEHB(DEHBBase):
         self.start = None
 
         # Dask variables
-        self.n_workers = n_workers
-        if self.n_workers > 1:
-            self.client = Client(
-                n_workers=self.n_workers, processes=True, threads_per_worker=1, scheduler_port=0
-            )  # port 0 makes Dask select a random free port
+        if n_workers is None and client is None:
+            raise ValueError("Need to specify either 'n_workers'(>0) or 'client' (a Dask client)!")
+        if client is not None and isinstance(client, Client):
+            self.client = client
+            self.n_workers = len(client.ncores())
         else:
-            self.client = None
+            self.n_workers = n_workers
+            if self.n_workers > 1:
+                self.client = Client(
+                    n_workers=self.n_workers, processes=True, threads_per_worker=1, scheduler_port=0
+                )  # port 0 makes Dask select a random free port
+            else:
+                self.client = None
         self.futures = []
+        self.shared_data = None
 
         # Initializing DE subpopulations
         self._get_pop_sizes()
         self._init_subpop()
+
+        # Misc.
+        self.available_gpus = None
+        self.gpu_usage = None
+        self.single_node_with_gpus = None
 
     def __getstate__(self):
         """ Allows the object to picklable while having Dask client as a class attribute.
@@ -192,23 +215,78 @@ class DEHB(DEHBBase):
     def _f_objective(self, job_info):
         """ Wrapper to call DE's objective function.
         """
+        # check if job_info appended during job submission self.submit_job() includes "gpu_devices"
+        if "gpu_devices" in job_info and self.single_node_with_gpus:
+            # should set the environment variable for the spawned worker process
+            # reprioritising a CUDA device order specific to this worker process
+            os.environ.update({"CUDA_VISIBLE_DEVICES": job_info["gpu_devices"]})
+
         config, budget, parent_id = job_info['config'], job_info['budget'], job_info['parent_id']
         bracket_id = job_info['bracket_id']
-        fitness, cost = self.de[budget].f_objective(config, budget)
+        kwargs = job_info["kwargs"]
+        res = self.de[budget].f_objective(config, budget, **kwargs)
+        info = res["info"] if "info" in res else dict()
         run_info = {
-            'fitness': fitness,
-            'cost': cost,
+            'fitness': res["fitness"],
+            'cost': res["cost"],
             'config': config,
             'budget': budget,
             'parent_id': parent_id,
-            'bracket_id': bracket_id
+            'bracket_id': bracket_id,
+            'info': info
         }
+
+        if "gpu_devices" in job_info:
+            # important for GPU usage tracking if single_node_with_gpus=True
+            device_id = int(job_info["gpu_devices"].strip().split(",")[0])
+            run_info.update({"device_id": device_id})
         return run_info
+
+    def _create_cuda_visible_devices(self, available_gpus: List[int], start_id: int) -> str:
+        """ Generates a string to set the CUDA_VISIBLE_DEVICES environment variable.
+
+        Given a list of available GPU device IDs and a preferred ID (start_id), the environment
+        variable is created by putting the start_id device first, followed by the remaining devices
+        arranged randomly. The worker that uses this string to set the environment variable uses
+        the start_id GPU device primarily now.
+        """
+        assert start_id in available_gpus
+        available_gpus = deepcopy(available_gpus)
+        available_gpus.remove(start_id)
+        np.random.shuffle(available_gpus)
+        final_variable = [str(start_id)] + [str(_id) for _id in available_gpus]
+        final_variable = ",".join(final_variable)
+        return final_variable
+
+    def distribute_gpus(self):
+        """ Function to create a GPU usage tracker dict.
+
+        The idea is to extract the exact GPU device IDs available. During job submission, each
+        submitted job is given a preference of a GPU device ID based on the GPU device with the
+        least number of active running jobs. On retrieval of the result, this gpu usage dict is
+        updated for the device ID that the finished job was mapped to.
+        """
+        try:
+            available_gpus = os.environ["CUDA_VISIBLE_DEVICES"]
+            available_gpus = available_gpus.strip().split(",")
+            self.available_gpus = [int(_id) for _id in available_gpus]
+        except KeyError as e:
+            print("Unable to find valid GPU devices. "
+                  "Environment variable {} not visible!".format(str(e)))
+            self.available_gpus = []
+        self.gpu_usage = dict()
+        for _id in self.available_gpus:
+            self.gpu_usage[_id] = 0
 
     def vector_to_configspace(self, config):
         assert hasattr(self, "de")
         assert len(self.budgets) > 0
         return self.de[self.budgets[0]].vector_to_configspace(config)
+
+    def configspace_to_vector(self, config):
+        assert hasattr(self, "de")
+        assert len(self.budgets) > 0
+        return self.de[self.budgets[0]].configspace_to_vector(config)
 
     def reset(self):
         super().reset()
@@ -217,6 +295,7 @@ class DEHB(DEHBBase):
         else:
             self.client = None
         self.futures = []
+        self.shared_data = None
         self.iteration_counter = -1
         self.de = {}
         self._max_pop_size = None
@@ -227,6 +306,16 @@ class DEHB(DEHBBase):
         self.history = []
         self._get_pop_sizes()
         self._init_subpop()
+        self.available_gpus = None
+        self.gpu_usage = None
+
+    def init_population(self, pop_size):
+        if self.configspace:
+            population = self.cs.sample_configuration(size=pop_size)
+            population = [self.configspace_to_vector(individual) for individual in population]
+        else:
+            population = np.random.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
+        return population
 
     def clean_inactive_brackets(self):
         """ Removes brackets from the active list if it is done as communicated by Bracket Manager
@@ -238,10 +327,15 @@ class DEHB(DEHBBase):
         ]
         return
 
-    def _update_trackers(self, traj, runtime, history, budget):
+    def _update_trackers(self, traj, runtime, history):
         self.traj.append(traj)
         self.runtime.append(runtime)
         self.history.append(history)
+
+    def _update_incumbents(self, config, score, info):
+        self.inc_config = config
+        self.inc_score = score
+        self.inc_info = info
 
     def _get_pop_sizes(self):
         """Determines maximum pop size for each budget
@@ -290,13 +384,22 @@ class DEHB(DEHBBase):
         self.active_brackets.append(bracket)
         return bracket
 
+    def _get_worker_count(self):
+        if isinstance(self.client, Client):
+            return len(self.client.ncores())
+        else:
+            return 1
+
     def is_worker_available(self, verbose=False):
         """ Checks if at least one worker is available to run a job
         """
-        if self.n_workers == 1:
+        if self.n_workers == 1 or self.client is None or not isinstance(self.client, Client):
             # in the synchronous case, one worker is always available
             return True
-        workers = sum(self.client.nthreads().values())
+        # checks the absolute number of workers mapped to the client scheduler
+        # client.ncores() should return a dict with the keys as unique addresses to these workers
+        # treating the number of available workers in this manner
+        workers = self._get_worker_count()  # len(self.client.ncores())
         if len(self.futures) >= workers:
             # pause/wait if active worker count greater allocated workers
             return False
@@ -435,11 +538,31 @@ class DEHB(DEHBBase):
         }
         return job_info
 
-    def submit_job(self, job_info):
+    def _get_gpu_id_with_low_load(self):
+        candidates = []
+        for k, v in self.gpu_usage.items():
+            if v == min(self.gpu_usage.values()):
+                candidates.append(k)
+        device_id = np.random.choice(candidates)
+        # creating string for setting environment variable CUDA_VISIBLE_DEVICES
+        gpu_ids = self._create_cuda_visible_devices(
+            self.available_gpus, device_id
+        )
+        # updating GPU usage
+        self.gpu_usage[device_id] += 1
+        self.logger.debug("GPU device selected: {}".format(device_id))
+        self.logger.debug("GPU device usage: {}".format(self.gpu_usage))
+        return gpu_ids
+
+    def submit_job(self, job_info, **kwargs):
         """ Asks a free worker to run the objective function on config and budget
         """
+        job_info["kwargs"] = self.shared_data if self.shared_data is not None else kwargs
         # submit to to Dask client
-        if self.n_workers > 1:
+        if self.n_workers > 1 or isinstance(self.client, Client):
+            if self.single_node_with_gpus:
+                # managing GPU allocation for the job to be submitted
+                job_info.update({"gpu_devices": self._get_gpu_id_with_low_load()})
             self.futures.append(
                 self.client.submit(self._f_objective, job_info)
             )
@@ -457,7 +580,7 @@ class DEHB(DEHBBase):
     def _fetch_results_from_workers(self):
         """ Iterate over futures and collect results from finished workers
         """
-        if self.n_workers > 1:
+        if self.n_workers > 1 or isinstance(self.client, Client):
             done_list = [(i, future) for i, future in enumerate(self.futures) if future.done()]
         else:
             # Dask not invoked in the synchronous case
@@ -467,13 +590,19 @@ class DEHB(DEHBBase):
                 "Collecting {} of the {} job(s) active.".format(len(done_list), len(self.futures))
             )
         for _, future in done_list:
-            if self.n_workers > 1:
+            if self.n_workers > 1 or isinstance(self.client, Client):
                 run_info = future.result()
+                if "device_id" in run_info:
+                    # updating GPU usage
+                    self.gpu_usage[run_info["device_id"]] -= 1
+                    self.logger.debug("GPU device released: {}".format(run_info["device_id"]))
+                future.release()
             else:
                 # Dask not invoked in the synchronous case
                 run_info = future
             # update bracket information
             fitness, cost = run_info["fitness"], run_info["cost"]
+            info = run_info["info"] if "info" in run_info else dict()
             budget, parent_id = run_info["budget"], run_info["parent_id"]
             config = run_info["config"]
             bracket_id = run_info["bracket_id"]
@@ -488,11 +617,17 @@ class DEHB(DEHBBase):
                 self.de[budget].fitness[parent_id] = fitness
             # updating incumbents
             if self.de[budget].fitness[parent_id] < self.inc_score:
-                self.inc_score = self.de[budget].fitness[parent_id]
-                self.inc_config = self.de[budget].population[parent_id]
+                self._update_incumbents(
+                    config=self.de[budget].population[parent_id],
+                    score=self.de[budget].fitness[parent_id],
+                    info=info
+                )
             # book-keeping
-            self._update_trackers(traj=self.inc_score, runtime=cost, budget=budget,
-                                  history=(config.tolist(), float(fitness), float(budget)))
+            self._update_trackers(
+                traj=self.inc_score, runtime=cost, history=(
+                    config.tolist(), float(fitness), float(cost), float(budget), info
+                )
+            )
         # remove processed future
         self.futures = np.delete(self.futures, [i for i, _ in done_list]).tolist()
 
@@ -523,16 +658,20 @@ class DEHB(DEHBBase):
                 return True
         return False
 
-    def _save_incumbent(self):
+    def _save_incumbent(self, name=None):
+        if name is None:
+            name = time.strftime("%x %X %Z", time.localtime(self.start))
+            name = name.replace("/", '-').replace(":", '-').replace(" ", '_')
         try:
             res = dict()
             if self.configspace:
-                config = self.de[self.budgets[0]].vector_to_configspace(self.inc_config)
+                config = self.vector_to_configspace(self.inc_config)
                 res["config"] = config.get_dictionary()
             else:
                 res["config"] = self.inc_config.tolist()
             res["score"] = self.inc_score
-            with open(os.path.join(self.output_path, "incumbent.json"), 'w') as f:
+            res["info"] = self.inc_info
+            with open(os.path.join(self.output_path, "incumbent_{}.json".format(name)), 'w') as f:
                 json.dump(res, f)
         except Exception as e:
             self.logger.warning("Incumbent not saved: {}".format(repr(e)))
@@ -558,8 +697,8 @@ class DEHB(DEHBBase):
         )
 
     @logger.catch
-    def run(self, fevals=None, brackets=None, total_cost=None,
-            verbose=False, debug=False, save_intermediate=True):
+    def run(self, fevals=None, brackets=None, total_cost=None, single_node_with_gpus=False,
+            verbose=False, debug=False, save_intermediate=True, **kwargs):
         """ Main interface to run optimization by DEHB
 
         This function waits on workers and if a worker is free, asks for a configuration and a
@@ -571,13 +710,29 @@ class DEHB(DEHBBase):
         than one are specified, DEHB selects only one in the priority order (high to low):
         1) Number of function evaluations (fevals)
         2) Number of Successive Halving brackets run under Hyperband (brackets)
-        3) Total computational cost aggregated by all function evaluations (total_cost)
+        3) Total computational cost (in seconds) aggregated by all function evaluations (total_cost)
         """
+        # checks if a Dask client exists
+        if len(kwargs) > 0 and self.n_workers > 1 and isinstance(self.client, Client):
+            # broadcasts all additional data passed as **kwargs to all client workers
+            # this reduces overload in the client-worker communication by not having to
+            # serialize the redundant data used by all workers for every job
+            self.shared_data = self.client.scatter(kwargs, broadcast=True)
+
+        # allows each worker to be mapped to a different GPU when running on a single node
+        # where all available GPUs are accessible
+        self.single_node_with_gpus = single_node_with_gpus
+        if self.single_node_with_gpus:
+            self.distribute_gpus()
+
+        self.start = time.time()
         if verbose:
-            print("\nLogging at {}\n".format(os.path.join(os.getcwd(), self.log_filename)))
+            print("\nLogging at {} for optimization starting at {}\n".format(
+                os.path.join(os.getcwd(), self.log_filename),
+                time.strftime("%x %X %Z", time.localtime(self.start))
+            ))
         if debug:
             logger.configure(handlers=[{"sink": sys.stdout}])
-        self.start = time.time()
         while True:
             if self._is_run_budget_exhausted(fevals, brackets, total_cost):
                 break
@@ -593,14 +748,12 @@ class DEHB(DEHBBase):
                     # have finished computation and returned its results
                     pass
                 else:
-                    if self.n_workers > 1 and hasattr(self, "client") and \
-                            isinstance(self.client, Client):
+                    if self.n_workers > 1 or isinstance(self.client, Client):
                         self.logger.debug("{}/{} worker(s) available.".format(
-                            len(self.client.scheduler_info()['workers']) - len(self.futures),
-                            len(self.client.scheduler_info()['workers']))
-                        )
+                            self._get_worker_count() - len(self.futures), self._get_worker_count()
+                        ))
                     # submits job_info to a worker for execution
-                    self.submit_job(job_info)
+                    self.submit_job(job_info, **kwargs)
                     if verbose:
                         budget = job_info['budget']
                         self._verbosity_runtime(fevals, brackets, total_cost)
@@ -616,6 +769,7 @@ class DEHB(DEHBBase):
             if save_intermediate and self.inc_config is not None:
                 self._save_incumbent()
             self.clean_inactive_brackets()
+        # end of while
 
         if verbose and len(self.futures) > 0:
             self.logger.info(
@@ -628,10 +782,13 @@ class DEHB(DEHBBase):
             time.sleep(0.05)  # waiting 50ms
 
         if verbose:
-            self.logger.info("End of optimisation!\n")
+            time_taken = time.time() - self.start
+            self.logger.info("End of optimisation! Total duration: {}; Total fevals: {}\n".format(
+                time_taken, len(self.traj)
+            ))
             self.logger.info("Incumbent score: {}".format(self.inc_score))
             self.logger.info("Incumbent config: ")
-            config = self.de[self.budgets[0]].vector_to_configspace(self.inc_config)
+            config = self.vector_to_configspace(self.inc_config)
             for k, v in config.get_dictionary().items():
                 self.logger.info("{}: {}".format(k, v))
         self._save_incumbent()
