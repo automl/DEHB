@@ -1,6 +1,6 @@
 To install the required HPOlib2 for benchmarks:
 
-`pip install git+https://github.com/automl/HPOlib2.git@development`
+`pip install git+https://github.com/automl/HPOlib1.5.git@development`
 
 
 To install HpBandSter:
