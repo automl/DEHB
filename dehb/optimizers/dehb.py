@@ -727,6 +727,8 @@ class DEHB(DEHBBase):
 
         self.start = time.time()
         if verbose:
+            if self.client is not None:
+                print("Client information: ", self.client)
             print("\nLogging at {} for optimization starting at {}\n".format(
                 os.path.join(os.getcwd(), self.log_filename),
                 time.strftime("%x %X %Z", time.localtime(self.start))
