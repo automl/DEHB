@@ -197,6 +197,8 @@ if benchmark != 'svm' and benchmark != 'bnn':
 plt.tick_params(which='both', direction="in")
 if benchmark == 'svm' or benchmark == 'bnn' or benchmark == "cc18":
     plt.legend(loc='upper right', framealpha=1, prop={'size': 30, 'weight': 'normal'})
+elif benchmark == "rl":
+    plt.legend(loc='lower left', framealpha=1, prop={'size': 30, 'weight': 'normal'}, ncol=2)
 else:
     plt.legend(loc='lower left', framealpha=1, prop={'size': 30, 'weight': 'normal'})
 plt.title(args.title)
