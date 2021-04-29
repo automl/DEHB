@@ -112,7 +112,8 @@ for i, name in enumerate(rank_lists.columns):
     plt.plot(
         rank_lists[name].index.to_numpy()[landmarks],
         rank_lists[name].to_numpy()[landmarks],
-        label=name, alpha=a, linestyle=linestyles[i], linewidth=1.5
+        label=name, alpha=a, linestyle=linestyles[i], linewidth=1.5,
+        color=colors[i]
     )
     xlims[0] = min(xlims[0], rank_lists[name].index.to_numpy()[0])
     xlims[1] = max(xlims[1], rank_lists[name].index.to_numpy()[-1])
@@ -122,7 +123,7 @@ plt.legend(loc='upper left', framealpha=1, prop={'size': 12}, ncol=4)
 plt.fill_between(
     rank_lists['DEHB'].index.to_numpy()[landmarks],
     0, rank_lists['DEHB'].to_numpy()[landmarks],
-    alpha=0.5, color='gray'
+    alpha=0.5, color=_colors["DEHB"]
 )
 # plt.fill_between(
 #     rank_lists['DEHB'].index.to_numpy()[landmarks],
