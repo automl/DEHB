@@ -162,6 +162,20 @@ max_regret = 0
 
 # plot setup
 colors = ["C%d" % i for i in range(len(methods))]
+if len(methods) <= 8:
+    _colors = dict()
+    _colors["RS"] = "C0"
+    _colors["HB"] = "C7"
+    _colors["BOHB"] = "C1"
+    _colors["TPE"] = "C3"
+    _colors["SMAC"] = "C4"
+    _colors["RE"] = "C5"
+    _colors["DE"] = "C6"
+    _colors["DEHB"] = "C2"
+    colors = []
+    for (_, l) in methods:
+        colors.append(_colors[l])
+
 plt.clf()
 
 no_runs_found = False
@@ -176,15 +190,15 @@ else:
                     colors, linestyles, marker, n_runs, limit, min_limit=min_limit)
 
 
-# if benchmark != 'cc18':
-#     plt.xscale("log")
+if benchmark != 'cc18':
+    plt.xscale("log")
 if benchmark != 'svm' and benchmark != 'bnn':
     plt.yscale("log")
 plt.tick_params(which='both', direction="in")
 if benchmark == 'svm' or benchmark == 'bnn' or benchmark == "cc18":
     plt.legend(loc='upper right', framealpha=1, prop={'size': 40, 'weight': 'normal'})
 else:
-    plt.legend(loc='lower left', framealpha=1, prop={'size': 30, 'weight': 'normal'})
+    plt.legend(loc='lower left', framealpha=1, prop={'size': 40, 'weight': 'normal'})
 plt.title(args.title)
 
 if benchmark == 'rl':

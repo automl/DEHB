@@ -82,6 +82,22 @@ linestyles = [(0, (1, 5)),  # loosely dotted
               (0, (3, 1, 1, 1, 1, 1)),
               'solid']
 
+colors = ["C%d" % i for i in range(len(rank_lists.columns))]
+if len(rank_lists.columns) <= 8:
+    _colors = dict()
+    _colors["RS"] = "C0"
+    _colors["HB"] = "C7"
+    _colors["BOHB"] = "C1"
+    _colors["TPE"] = "C3"
+    _colors["SMAC"] = "C4"
+    _colors["RE"] = "C5"
+    _colors["DE"] = "C6"
+    _colors["DEHB"] = "C2"
+    colors = []
+    for l in rank_lists.columns:
+        colors.append(_colors[l])
+
+
 landmarks = np.arange(start=0, stop=rank_lists.shape[0], step=5)  # for smoothing
 plt.clf()
 xlims = [np.inf, -np.inf]
