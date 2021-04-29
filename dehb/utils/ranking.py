@@ -1,3 +1,5 @@
+import os
+import sys
 import glob
 import pickle
 import numpy as np
@@ -8,13 +10,14 @@ from matplotlib import pyplot as plt
 rcParams['font.family'] = 'serif'
 
 
+basedir = sys.argv[1]
+
 # Load run statistics to create (benchmark x algorithm) table showing mean final performance
+list_of_mean_files = glob.glob(os.path.join(basedir, 'examples/*/results/mean_df.pkl')) + \
+                     glob.glob(os.path.join(basedir, 'examples/*/results/*/mean_df.pkl'))
 
-list_of_mean_files = glob.glob('dehb/examples/*/results/mean_df.pkl') + \
-                     glob.glob('dehb/examples/*/results/*/mean_df.pkl')
-
-list_of_std_files = glob.glob('dehb/examples/*/results/std_df.pkl') + \
-                    glob.glob('dehb/examples/*/results/*/std_df.pkl')
+list_of_std_files = glob.glob(os.path.join(basedir, 'examples/*/results/std_df.pkl')) + \
+                    glob.glob(os.path.join(basedir, 'examples/*/results/*/std_df.pkl'))
 mean_dfs = {}
 for filename in list_of_mean_files:
     benchname = filename.split('/')[-2]
@@ -33,8 +36,8 @@ std_dfs.to_pickle("all_std_dfs.pkl")
 
 # Load run statistics to create a relative ranking plot over time
 
-rank_list_candidates = glob.glob('dehb/examples/*/results/rank_df.pkl') + \
-                       glob.glob('dehb/examples/*/results/*/rank_df.pkl')
+rank_list_candidates = glob.glob(os.path.join(basedir, 'examples/*/results/rank_df.pkl')) + \
+                       glob.glob(os.path.join(basedir, 'examples/*/results/*/rank_df.pkl'))
 list_of_rank_files = []
 for name in rank_list_candidates:
     # ignore benchmarks where the runtime is not wallclock time in seconds

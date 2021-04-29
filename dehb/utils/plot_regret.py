@@ -196,7 +196,7 @@ if benchmark != 'svm' and benchmark != 'bnn':
     plt.yscale("log")
 plt.tick_params(which='both', direction="in")
 if benchmark == 'svm' or benchmark == 'bnn' or benchmark == "cc18":
-    plt.legend(loc='upper right', framealpha=1, prop={'size': 40, 'weight': 'normal'})
+    plt.legend(loc='upper right', framealpha=1, prop={'size': 30, 'weight': 'normal'})
 else:
     plt.legend(loc='lower left', framealpha=1, prop={'size': 30, 'weight': 'normal'})
 plt.title(args.title)
@@ -229,14 +229,19 @@ else:
 
 if benchmark == 'rl':
     # plt.xlim(1e2, 1e5)
-    plt.xlim(min_time, max_time)
+    plt.xlim(1e2, max_time)
+    # plt.xlim(min_time, max_time)
 elif benchmark == 'bnn':
     plt.xlim(min_limit, max_time)
     # plt.xlim(1e4, min(max_time*10, limit))
 elif benchmark == 'countingones':
-    plt.xlim(min_time, max_time)
+    # plt.xlim(min_time, max_time)
+    plt.xlim(min_time, 1e4)
 elif benchmark == 'cc18':
     plt.xlim(0.1, max_time)
+elif benchmark == "paramnet":
+    print("Max time: {}".format(max_time))
+    plt.xlim(min_time, max_time)
 else:
     plt.xlim(min_time, max_time)
     # plt.xlim(max(min_time/10, 1e0), min(max_time*10, 1e7))
