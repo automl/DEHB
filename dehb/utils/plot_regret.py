@@ -101,6 +101,8 @@ parser.add_argument('--regret', default='test', type=str, choices=['validation',
                     help='type of regret')
 parser.add_argument('--output', default='pdf', type=str, choices=['pdf', 'png'],
                     help='type of plot file')
+parser.add_argument('--fix_colors', default=False, action="store_true",
+                    help='if fixing colours for the fixed algorithms')
 
 args = parser.parse_args()
 path = args.path
@@ -162,7 +164,7 @@ max_regret = 0
 
 # plot setup
 colors = ["C%d" % i for i in range(len(methods))]
-if len(methods) <= 8:
+if args.fix_color and len(methods) <= 8:
     _colors = dict()
     _colors["RS"] = "C0"
     _colors["HB"] = "C7"
