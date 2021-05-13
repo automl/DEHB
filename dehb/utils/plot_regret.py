@@ -164,7 +164,7 @@ max_regret = 0
 
 # plot setup
 colors = ["C%d" % i for i in range(len(methods))]
-if args.fix_color and len(methods) <= 8:
+if args.fix_colors and len(methods) <= 8:
     _colors = dict()
     _colors["RS"] = "C0"
     _colors["HB"] = "C7"
