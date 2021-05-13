@@ -1,3 +1,9 @@
+import ConfigSpace
+import numpy as np
+from matplotlib import pyplot as plt
+from dehb.utils.plot_mds import generate_colors
+
+
 def prep(traj, runtime, history):
     global X, budgets, fitness, fidelities, configs
     budgets = [elem[-1]  for elem in history]
@@ -9,8 +15,8 @@ def prep(traj, runtime, history):
     for budget in np.unique(budgets):
         fidelities[budget] = np.where(budgets == budget)[0]
 
-    xlim = (np.min(X[:,0])-0.5, np.max(X[:,0])+0.5)
-    ylim = (np.min(X[:,1])-0.5, np.max(X[:,1])+0.5)
+    xlim = (np.min(X[:, 0])-0.5, np.max(X[:, 0])+0.5)
+    ylim = (np.min(X[:, 1])-0.5, np.max(X[:, 1])+0.5)
 
     b_size = len(np.unique(budgets))
     plt.clf()
@@ -31,7 +37,6 @@ def prep(traj, runtime, history):
                           label='incumbent', marker='v', s=70)
         ax[m, n].legend(prop={'size': 7})
     plt.suptitle('Trajectory for different budgets', fontsize=20)
-
 
 
 def expanded_dimensions(cs):
