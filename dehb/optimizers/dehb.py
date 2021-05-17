@@ -676,6 +676,16 @@ class DEHB(DEHBBase):
         except Exception as e:
             self.logger.warning("Incumbent not saved: {}".format(repr(e)))
 
+    def _save_history(self, name=None):
+        if name is None:
+            name = time.strftime("%x %X %Z", time.localtime(self.start))
+            name = name.replace("/", '-').replace(":", '-').replace(" ", '_')
+        try:
+            with open(os.path.join(self.output_path, "history_{}.pkl".format(name)), 'wb') as f:
+                pickle.dump(self.history, f)
+        except Exception as e:
+            self.logger.warning("History not saved: {}".format(repr(e)))
+
     def _verbosity_debug(self):
         for bracket in self.active_brackets:
             self.logger.debug("Bracket ID {}:\n{}".format(
@@ -698,7 +708,7 @@ class DEHB(DEHBBase):
 
     @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None, single_node_with_gpus=False,
-            verbose=False, debug=False, save_intermediate=True, **kwargs):
+            verbose=False, debug=False, save_intermediate=True, save_history=True, **kwargs):
         """ Main interface to run optimization by DEHB
 
         This function waits on workers and if a worker is free, asks for a configuration and a
@@ -727,8 +737,6 @@ class DEHB(DEHBBase):
 
         self.start = time.time()
         if verbose:
-            if self.client is not None:
-                print("Client information: ", self.client)
             print("\nLogging at {} for optimization starting at {}\n".format(
                 os.path.join(os.getcwd(), self.log_filename),
                 time.strftime("%x %X %Z", time.localtime(self.start))
@@ -770,6 +778,8 @@ class DEHB(DEHBBase):
             self._fetch_results_from_workers()
             if save_intermediate and self.inc_config is not None:
                 self._save_incumbent()
+            if save_history and self.history is not None:
+                self._save_history()
             self.clean_inactive_brackets()
         # end of while
 
@@ -781,6 +791,8 @@ class DEHB(DEHBBase):
             self._fetch_results_from_workers()
             if save_intermediate and self.inc_config is not None:
                 self._save_incumbent()
+            if save_history and self.history is not None:
+                self._save_history()
             time.sleep(0.05)  # waiting 50ms
 
         if verbose:
@@ -794,4 +806,5 @@ class DEHB(DEHBBase):
             for k, v in config.get_dictionary().items():
                 self.logger.info("{}: {}".format(k, v))
         self._save_incumbent()
+        self._save_history()
         return np.array(self.traj), np.array(self.runtime), np.array(self.history, dtype=object)
