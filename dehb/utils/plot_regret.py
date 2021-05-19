@@ -197,61 +197,63 @@ if benchmark != 'cc18':
 if benchmark != 'svm' and benchmark != 'bnn':
     plt.yscale("log")
 plt.tick_params(which='both', direction="in")
-if benchmark == 'svm' or benchmark == 'bnn' or benchmark == "cc18":
-    plt.legend(loc='upper right', framealpha=1, prop={'size': 30, 'weight': 'normal'})
+if benchmark == 'svm' or benchmark == 'bnn' or benchmark == "cc18" or benchmark == "paramnet":
+    plt.legend(loc='upper right', framealpha=1, prop={'size': 40, 'weight': 'normal'})
 elif benchmark == "rl":
-    plt.legend(loc='lower left', framealpha=1, prop={'size': 30, 'weight': 'normal'}, ncol=2)
-else:
-    plt.legend(loc='lower left', framealpha=1, prop={'size': 30, 'weight': 'normal'})
-plt.title(args.title)
+    plt.legend(loc='lower left', framealpha=1, prop={'size': 40, 'weight': 'normal'}, ncol=1)
+else:  #elif benchmark == "countingones":
+    plt.legend(loc='lower left', framealpha=1, prop={'size': 40, 'weight': 'normal'})
+plt.title(args.title, size=40)
 
 if benchmark == 'rl':
-    plt.xlabel("time $[s]$", fontsize=30)
+    plt.xlabel("time $[s]$", fontsize=45)
 elif benchmark == 'bnn':
-    plt.xlabel("MCMC steps", fontsize=30)
+    plt.xlabel("MCMC steps", fontsize=45)
 elif benchmark == 'countingones':
-    plt.xlabel("cummulative budget / $b_{max}$", fontsize=30)
+    plt.xlabel("cummulative budget / $b_{max}$", fontsize=45)
 elif benchmark == 'speed':
     plt.xlabel("Runtime sans function evalution")
 elif plot_type == "wallclock":
-    plt.xlabel("estimated wallclock time $[s]$", fontsize=30)
+    plt.xlabel("estimated wallclock time $[s]$", fontsize=45)
 elif plot_type == "fevals":
-    plt.xlabel("number of function evaluations", fontsize=30)
+    plt.xlabel("number of function evaluations", fontsize=45)
 
 if benchmark == 'svm':
-    plt.ylabel("{} error".format(regret_type), fontsize=30)
+    plt.ylabel("{} error".format(regret_type), fontsize=45)
 elif benchmark == 'rl':
-    plt.ylabel("epochs until convergence", fontsize=30)
+    plt.ylabel("epochs until convergence", fontsize=45)
 elif benchmark == 'bnn':
-    plt.ylabel("negative log-likelihood", fontsize=30)
+    plt.ylabel("negative log-likelihood", fontsize=45)
 elif benchmark == 'countingones':
-    plt.ylabel("normalized {} regret".format(regret_type), fontsize=30)
+    plt.ylabel("normalized {} regret".format(regret_type), fontsize=40)
 elif benchmark == 'countingones':
-    plt.ylabel("number of function evaluations", fontsize=30)
+    plt.ylabel("number of function evaluations", fontsize=45)
 else:
-    plt.ylabel("{} regret".format(regret_type), fontsize=30)
+    plt.ylabel("{} regret".format(regret_type), fontsize=45)
 
 if benchmark == 'rl':
     # plt.xlim(1e2, 1e5)
     plt.xlim(1e2, max_time)
     # plt.xlim(min_time, max_time)
 elif benchmark == 'bnn':
-    plt.xlim(min_limit, max_time)
-    # plt.xlim(1e4, min(max_time*10, limit))
+    # plt.xlim(min_limit, max_time)
+    plt.xlim(50000, max_time)  # min(max_time*10, limit))
 elif benchmark == 'countingones':
-    # plt.xlim(min_time, max_time)
-    plt.xlim(min_time, 1e4)
+    plt.xlim(min_time, max_time)
+    # plt.xlim(min_time, 1e4)
 elif benchmark == 'cc18':
     plt.xlim(0.1, max_time)
 elif benchmark == "paramnet":
     print("Max time: {}".format(max_time))
     plt.xlim(min_time, max_time)
+elif benchmark == "101":
+    plt.xlim(1e2, max_time)
 else:
     plt.xlim(min_time, max_time)
     # plt.xlim(max(min_time/10, 1e0), min(max_time*10, 1e7))
 
 if benchmark == 'bnn':
-    plt.ylim(3, 75)
+    plt.ylim(3, 10)  # 75)
 elif benchmark == 'rl':
     plt.ylim(1e2, 1e4)
 elif benchmark == 'cc18':

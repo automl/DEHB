@@ -12,7 +12,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
 
     # plot limits
     min_time = np.inf
-    max_time = np.inf
+    max_time = 0  # np.inf
     min_regret = 1
     max_regret = 0
 
@@ -121,7 +121,7 @@ def create_plot(plt, methods, path, regret_type, fill_trajectory,
 
             available_models.append(label)
             # Stats to dynamically impose limits on the axes of the plots
-            max_time = min(max_time, time[idx][-1])
+            max_time = max(max_time, time[idx][-1])
             min_regret = min(min_regret, np.mean(te, axis=1)[idx][-1])
             max_regret = max(max_regret, np.mean(te, axis=1)[idx][0])
 
