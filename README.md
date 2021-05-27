@@ -104,10 +104,10 @@ represents the *mutation* strategy while `bin` represents the *binomial crossove
 * *mutation_factor*: (default=0.5) A fraction within [0, 1] weighing the difference operation in DE
 * *crossover_prob*: (default=0.5) A probability within [0, 1] weighing the traits from a parent or the mutant
 
-
 ---
 
-To cite the paper or code:
+### To cite the paper or code
+
 ```bibtex
 @article{awad2021dehb,
   title={DEHB: Evolutionary Hyberband for Scalable, Robust and Efficient Hyperparameter Optimization},
