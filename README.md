@@ -1,6 +1,5 @@
 # DEHB: Evolutionary Hyperband for Scalable, Robust and Efficient Hyperparameter Optimization
 
-
 ### Getting started
 ```bash
 git clone https://github.com/automl/DEHB.git
@@ -104,3 +103,15 @@ represents the *mutation* strategy while `bin` represents the *binomial crossove
   Mutation and crossover strategies can be combined with a `_` separator, for e.g.: `rand2dir_exp`.
 * *mutation_factor*: (default=0.5) A fraction within [0, 1] weighing the difference operation in DE
 * *crossover_prob*: (default=0.5) A probability within [0, 1] weighing the traits from a parent or the mutant
+
+
+---
+
+To cite the paper or code:
+```bibtex
+@article{awad2021dehb,
+  title={DEHB: Evolutionary Hyberband for Scalable, Robust and Efficient Hyperparameter Optimization},
+  author={Awad, Noor and Mallik, Neeratyoy and Hutter, Frank},
+  journal={arXiv preprint arXiv:2105.09821},
+  year={2021}
+}
