@@ -1,6 +1,6 @@
 #! /bin/bash
 
-#SBATCH -p mldlc_gpu-rtx2080
+#SBATCH -p cluster-name
 #SBATCH --gres=gpu:0
 #SBATCH --mem 0
 #SBATCH -c 2
