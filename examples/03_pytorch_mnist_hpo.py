@@ -305,9 +305,10 @@ def main():
                 # if client is not None and of type Client, n_workers is ignored
                 # if client is None, a Dask client with n_workers is set up
                 client=client, n_workers=args.n_workers)
-    traj, runtime, history = dehb.run(total_cost=args.runtime, verbose=args.verbose, device=device,
+    traj, runtime, history = dehb.run(total_cost=args.runtime, verbose=args.verbose, 
+                                      # arguments below are part of **kwargs shared across workers
                                       train_set=train_set, valid_set=valid_set, test_set=test_set,
-                                      single_node_with_gpus=single_node_with_gpus)
+                                      single_node_with_gpus=single_node_with_gpus, device=device)
     # end of DEHB optimisation
 
     # Saving optimisation trace history
