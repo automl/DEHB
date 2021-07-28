@@ -8,9 +8,12 @@ from typing import List
 from copy import deepcopy
 from loguru import logger
 from distributed import Client
+import pickle
+import json
+from typing import Dict, Union
+from pathlib import Path
 
-from dehb.optimizers import DE, AsyncDE
-from dehb.utils import SHBracketManager
+from dehb import AsyncDE, SHBracketManager
 
 
 logger.configure(handlers=[{"sink": sys.stdout, "level": "INFO"}])
@@ -157,7 +160,10 @@ class DEHB(DEHBBase):
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=0.5,
                  crossover_prob=0.5, strategy='rand1_bin', min_budget=None,
                  max_budget=None, eta=3, min_clip=None, max_clip=None, configspace=True,
-                 boundary_fix_type='random', max_age=np.inf, n_workers=None, client=None, **kwargs):
+                 boundary_fix_type='random', max_age=np.inf, n_workers=None, client=None,
+                 client_resources: Union[Dict, None] = None,
+                 checkpoint_file: Union[Path, None] = None, restore_checkpoint: bool = False,
+                 **kwargs):
         super().__init__(cs=cs, f=f, dimensions=dimensions, mutation_factor=mutation_factor,
                          crossover_prob=crossover_prob, strategy=strategy, min_budget=min_budget,
                          max_budget=max_budget, eta=eta, min_clip=min_clip, max_clip=max_clip,
@@ -197,6 +203,11 @@ class DEHB(DEHBBase):
         self.available_gpus = None
         self.gpu_usage = None
         self.single_node_with_gpus = None
+
+        self.client_resources = client_resources
+        self.checkpoint_file = checkpoint_file
+        if restore_checkpoint:
+            self.restore_checkpoint()
 
     def __getstate__(self):
         """ Allows the object to picklable while having Dask client as a class attribute.
@@ -563,9 +574,11 @@ class DEHB(DEHBBase):
             if self.single_node_with_gpus:
                 # managing GPU allocation for the job to be submitted
                 job_info.update({"gpu_devices": self._get_gpu_id_with_low_load()})
-            self.futures.append(
-                self.client.submit(self._f_objective, job_info)
-            )
+
+            if isinstance(self.client_resources, Dict) and len(self.client_resources) > 0:
+                self.futures.append(self.client.submit(self._f_objective, job_info, resources=self.client_resources))
+            else:
+                self.futures.append(self.client.submit(self._f_objective, job_info))
         else:
             # skipping scheduling to Dask worker to avoid added overheads in the synchronous case
             self.futures.append(self._f_objective(job_info))
@@ -624,10 +637,19 @@ class DEHB(DEHBBase):
                 )
             # book-keeping
             self._update_trackers(
-                traj=self.inc_score, runtime=cost, history=(
-                    config.tolist(), float(fitness), float(cost), float(budget), info
-                )
+                traj=self.inc_score,
+                runtime=cost,
+                history=(bracket_id, config.tolist(), float(fitness), float(cost), float(budget), info)
             )
+
+            new_result = json.dumps([
+                self.iteration_counter, bracket_id,
+                {'configuration': config.tolist(), 'fidelity': float(budget),
+                 'fitness': float(fitness), 'cost': float(cost), 'info': info}], sort_keys=True
+            )
+            with open(Path(self.output_path) / 'results.json', 'a+') as fh:
+                fh.write(new_result)
+
         # remove processed future
         self.futures = np.delete(self.futures, [i for i, _ in done_list]).tolist()
 
@@ -705,6 +727,72 @@ class DEHB(DEHBBase):
         self.logger.info(
             "{}/{} {}".format(remaining[0], remaining[1], remaining[2])
         )
+    def save_checkpoint(self, checkpoint_file: Union[str, Path, None] = None):
+
+        assert checkpoint_file is not None or self.checkpoint_file is not None
+        checkpoint_file = checkpoint_file or self.checkpoint_file
+        checkpoint_file = Path(checkpoint_file)
+
+        checkpoint = {'de': {budget: [value.population, value.fitness, value.parent_counter]
+                             for budget, value in self.de.items()},
+                      'state': {'iteration_counter': self.iteration_counter,
+                                'inc_score': self.inc_score,
+                                'inc_config': self.inc_config,
+                                'inc_info': self.inc_info,
+                                'start_at': self.start,
+                                'save_at': time.time(),
+                                },
+                      'trajectory': self.traj,
+                      'history': self.history,
+                      'run_time': self.runtime,
+                      }
+
+        with checkpoint_file.open('wb') as fh:
+            pickle.dump(checkpoint, fh)
+
+    def load_checkpoint(self, checkpoint_file: Path):
+        with checkpoint_file.open('rb') as fh:
+            checkpoint = pickle.load(fh)
+        return checkpoint
+
+    def restore_checkpoint(self):
+        assert self.checkpoint_file is not None
+        checkpoint = self.load_checkpoint(self.checkpoint_file)
+
+        for budget, values in checkpoint['de'].items():
+            self.de[budget].population = values[0]
+            self.de[budget].fitness = values[1]
+            self.de[budget].parent_counter = values[2]
+
+        self.inc_score = checkpoint['state']['inc_score']
+        self.inc_config = checkpoint['state']['inc_config']
+        self.inc_info = checkpoint['state']['inc_info']
+        self.start = time.time() - (checkpoint['state']['save_at'] - checkpoint['state']['start_at'])
+        self.traj = checkpoint['trajectory']
+        self.history = checkpoint['history']
+        self.run_time = checkpoint['run_time']
+
+        already_seen_brackets = set()
+        for run in checkpoint['history']:
+            bracket_id, config, fitness, cost, budget, info = run
+            bracket = None
+
+            if bracket_id not in already_seen_brackets:
+                bracket = self._start_new_bracket()
+                already_seen_brackets.add(bracket_id)
+            else:
+                for cand_bracket in self.active_brackets:
+                    if cand_bracket.bracket_id == bracket_id:
+                        bracket = cand_bracket
+                        break
+
+            assert bracket is not None and bracket_id == bracket.bracket_id
+            bracket.register_job(int(budget))
+            bracket.complete_job(int(budget))
+
+        # TODO: Iteration counter should match the checkpoint iteration counter after
+        #       "replaying" the brackets
+        assert self.iteration_counter == checkpoint['state']['iteration_counter']
 
     @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None, single_node_with_gpus=False,
