@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import time
+import pickle
 import numpy as np
 import ConfigSpace
 from typing import List
