@@ -495,7 +495,7 @@ class DEHB(DEHBBase):
             filler = self.de[budget]._min_pop_size - len(mutation_pop) + 1
             new_pop = self.de[budget]._init_mutant_population(
                 pop_size=filler, population=self._concat_pops(),
-                target=None, best=self.inc_config
+                target=target, best=self.inc_config
             )
             mutation_pop = np.concatenate((mutation_pop, new_pop))
         # generate mutant from among individuals in mutation_pop
@@ -803,9 +803,12 @@ class DEHB(DEHBBase):
             ))
             self.logger.info("Incumbent score: {}".format(self.inc_score))
             self.logger.info("Incumbent config: ")
-            config = self.vector_to_configspace(self.inc_config)
-            for k, v in config.get_dictionary().items():
-                self.logger.info("{}: {}".format(k, v))
+            if self.configspace:
+                config = self.vector_to_configspace(self.inc_config)
+                for k, v in config.get_dictionary().items():
+                    self.logger.info("{}: {}".format(k, v))
+            else:
+                self.logger.info("{}".format(self.inc_config))
         self._save_incumbent()
         self._save_history()
         return np.array(self.traj), np.array(self.runtime), np.array(self.history, dtype=object)
