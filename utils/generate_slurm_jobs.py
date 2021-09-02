@@ -12,9 +12,11 @@ def scheduler_command(scheduler_file):
 
 def worker_command(scheduler_file, worker_name, gpu=False, gpu_per_worker=1):
     cmd = "dask-worker --scheduler-file {} --name \"{}_\"$SLURM_ARRAY_TASK_ID --no-nanny"
+    extra_args = " --reconnect --nprocs 1 --nthreads 1"
     cmd = cmd.format(scheduler_file, worker_name)
     if gpu:
         cmd += " --resources \"GPU={}\"".format(gpu_per_worker)
+    cmd += extra_args
     cmd += "\n"
     return cmd
 
