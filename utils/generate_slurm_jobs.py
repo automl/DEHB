@@ -1,3 +1,19 @@
+"""
+Generates 2 scripts to deploy a Dask cluster to SLURM.
+
+Example use:
+```
+python utils/generate_slurm_jobs.py --worker_p [gpu_node] --scheduler_p [cpu_node] --gpu \
+    --nworkers 4 --scheduler_path ./scheduler --output_path temp --setup_file ./setup.sh`
+```
+
+Generated files can be submitted:
+```
+sbatch temp/scheduler.sh
+sbatch temp/workers.sh
+```
+"""
+
 import os
 import argparse
 from pathlib import Path
@@ -41,6 +57,10 @@ def slurm_header(args, worker=False):
         cmds.append("#SBATCH --gres=gpu:{}".format(args.gpu_per_worker))
         # making an array job for the workers
         cmds.append("#SBATCH -a 1-{}".format(args.nworkers))
+    log_pattern = args.slurm_dump_path / "slurm_%j-%a-%x.{}"
+    # adding error directory
+    cmds.append("#SBATCH -e {}".format(log_pattern.format("err")))
+    cmds.append("#SBATCH -o {}".format(log_pattern.format("out")))
     cmds.append("\n")
     cmds = "\n".join(cmds)
     return cmds
@@ -68,6 +88,9 @@ def input_arguments():
     )
     parser.add_argument(
         "--output_path", default="./", type=str, help="The path to dump the generated script"
+    )
+    parser.add_argument(
+        "--slurm_dump_path", default="./slurm-logs", type=str, help="Path to dump the slurm logs"
     )
     parser.add_argument(
         "--nworkers", default=10, type=int, help="Number of workers to run"
@@ -104,6 +127,7 @@ def input_arguments():
 if __name__ == "__main__":
     args = input_arguments()
 
+    args.slurm_dump_path = Path(args.slurm_dump_path).absolute()
     scheduler = Path(args.scheduler_path).absolute() / args.scheduler_file
     os.makedirs(Path(args.scheduler_path).absolute(), exist_ok=True)
     output_path = Path(args.output_path).absolute()
