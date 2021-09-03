@@ -128,7 +128,7 @@ if __name__ == "__main__":
     # generating worker script
     cmd = slurm_header(args, worker=True)
     cmd += setup_cmd
-    cmd += worker_command(scheduler, args.worker_name)
+    cmd += worker_command(scheduler, args.worker_name, args.gpu)
     with open(worker_file, "w") as f:
         f.writelines(cmd)
     print("Saving worker job script to {}".format(worker_file))
