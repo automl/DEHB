@@ -31,8 +31,6 @@ def slurm_header(args, worker=False):
     if not worker:
         # adding cpu request
         cmds.append("#SBATCH -c {}".format(args.c))
-    # adding memory request
-    cmds.append("#SBATCH --mem {}".format(args.mem))
     # adding timelimit
     cmds.append("#SBATCH -t {}".format(args.t))
     # adding job name
@@ -93,9 +91,6 @@ def input_arguments():
         "--worker_p", default=None, required=True, type=str, help="The node to submit workers"
     )
     parser.add_argument(
-        "--mem", default=0, type=int, help="Memory requested"
-    )
-    parser.add_argument(
         "-t", default="1:00:00", type=str, help="TIMELIMIT"
     )
     parser.add_argument(
@@ -120,7 +115,7 @@ if __name__ == "__main__":
     # generating scheduler script
     cmd = slurm_header(args, worker=False)
     cmd += setup_cmd
-    cmd += scheduler_command(scheduler)
+    cmd += scheduler_command(scheduler_file=scheduler)
     cmd += "\n"
     with open(scheduler_file, "w") as f:
         f.writelines(cmd)
@@ -128,7 +123,12 @@ if __name__ == "__main__":
     # generating worker script
     cmd = slurm_header(args, worker=True)
     cmd += setup_cmd
-    cmd += worker_command(scheduler, args.worker_name, args.gpu)
+    cmd += worker_command(
+        scheduler_file=scheduler,
+        worker_name=args.worker_name,
+        gpu=args.gpu,
+        gpu_per_worker=args.gpu_per_worker
+    )
     with open(worker_file, "w") as f:
         f.writelines(cmd)
     print("Saving worker job script to {}".format(worker_file))
