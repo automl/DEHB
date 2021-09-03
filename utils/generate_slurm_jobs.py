@@ -57,7 +57,7 @@ def slurm_header(args, worker=False):
         cmds.append("#SBATCH --gres=gpu:{}".format(args.gpu_per_worker))
         # making an array job for the workers
         cmds.append("#SBATCH -a 1-{}".format(args.nworkers))
-    log_pattern = args.slurm_dump_path / "slurm_%j-%a-%x.{}"
+    log_pattern = str(args.slurm_dump_path / "slurm_%j-%a-%x.{}")
     # adding error directory
     cmds.append("#SBATCH -e {}".format(log_pattern.format("err")))
     cmds.append("#SBATCH -o {}".format(log_pattern.format("out")))
