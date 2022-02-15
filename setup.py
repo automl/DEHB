@@ -24,7 +24,7 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=[
         '*.tests', '*.tests.*', 'tests.*', 'tests'],
     ),
-    python_requires='>3.5, <=3.9',
+    python_requires='>3.5',
     install_requires=read_file('./requirements.txt').split('\n'),
     test_suite='pytest',
     platforms=['Linux'],
