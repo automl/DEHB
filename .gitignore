@@ -23,3 +23,7 @@ dask-worker-space/
 dehb/examples/*/results
 dehb/examples/*/*/results
 .ipynb_checkpoints/
+temp/
+examples/*/results
+examples/*/*/results
+examples/data
