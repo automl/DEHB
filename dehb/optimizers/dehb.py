@@ -473,7 +473,7 @@ class DEHB(DEHBBase):
         # identify lower budget/fidelity to transfer information from
         lower_budget, num_configs = bracket.get_lower_budget_promotions(budget)
 
-        if self.iteration_counter < self.max_SH_iter:
+        if self.iteration_counter == 0:
             # promotions occur only in the first set of SH brackets under Hyperband
             # for the first rung/budget in the current bracket, no promotion is possible and
             # evolution can begin straight away
