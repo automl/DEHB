@@ -110,7 +110,7 @@ represents the *mutation* strategy while `bin` represents the *binomial crossove
 
 ```bibtex
 @article{awad2021dehb,
-  title={DEHB: Evolutionary Hyberband for Scalable, Robust and Efficient Hyperparameter Optimization},
+  title={DEHB: Evolutionary Hyperband for Scalable, Robust and Efficient Hyperparameter Optimization},
   author={Awad, Noor and Mallik, Neeratyoy and Hutter, Frank},
   journal={arXiv preprint arXiv:2105.09821},
   year={2021}
