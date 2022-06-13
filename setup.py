@@ -16,7 +16,7 @@ project_urls = {
     "Source Code": "https://github.com/automl.org/dehb",
 }
 copyright = f"Copyright {datetime.date.today().strftime('%Y')}, Neeratyoy, Noor, Frank"
-version = "0.0.1"
+version = "0.0.2"
 
 HERE = os.path.dirname(os.path.realpath(__file__))
 
