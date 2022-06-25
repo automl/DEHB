@@ -116,8 +116,6 @@ represents the *mutation* strategy while `bin` represents the *binomial crossove
   author    = {N. Awad and N. Mallik and F. Hutter},
   title     = {{DEHB}: Evolutionary Hyberband for Scalable, Robust and Efficient Hyperparameter Optimization},
   pages     = {2147--2153},
-  title     = {Proceedings of the Thirtieth International Joint Conference on
-               Artificial Intelligence, {IJCAI-21}},
   booktitle = {Proceedings of the Thirtieth International Joint Conference on
                Artificial Intelligence, {IJCAI-21}},
   publisher = {ijcai.org},
