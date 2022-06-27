@@ -1,10 +1,13 @@
 # DEHB: Evolutionary Hyperband for Scalable, Robust and Efficient Hyperparameter Optimization
 
-### Getting started
+### Installation
 ```bash
+# from pypi
+pip install dehb
+
+# to run examples, install from github
 git clone https://github.com/automl/DEHB.git
-cd DEHB/
-pip install -r requirements.txt
+pip install -e DEHB  # -e stands for editable, lets you modify the code and rerun things
 ```
 
 ### Tutorials/Example notebooks
@@ -16,7 +19,7 @@ pip install -r requirements.txt
 
 To run PyTorch example: (*note additional requirements*) 
 ```bash
-PYTHONPATH=$PWD python examples/03_pytorch_mnist_hpo.py \
+python examples/03_pytorch_mnist_hpo.py \
      --min_budget 1 --max_budget 3 --verbose --runtime 60
 ```
 
@@ -50,7 +53,7 @@ to it by that DEHB run.
 
 To run the PyTorch MNIST example on a single node using 2 workers:  
 ```bash
-PYTHONPATH=$PWD python examples/03_pytorch_mnist_hpo.py --min_budget 1 --max_budget 3 \
+python examples/03_pytorch_mnist_hpo.py --min_budget 1 --max_budget 3 \
   --verbose --runtime 60 --n_workers 2 --single_node_with_gpus
 ```
 
@@ -74,7 +77,7 @@ To run the PyTorch MNIST example on a multi-node setup using 4 workers:
 ```bash
 bash utils/run_dask_setup.sh -f dask_dump/scheduler.json -e env_name -n 4
 sleep 5
-PYTHONPATH=$PWD python examples/03_pytorch_mnist_hpo.py --min_budget 1 --max_budget 3 \
+python examples/03_pytorch_mnist_hpo.py --min_budget 1 --max_budget 3 \
   --verbose --runtime 60 --scheduler_file dask_dump/scheduler.json 
 ```
 
@@ -109,9 +112,15 @@ represents the *mutation* strategy while `bin` represents the *binomial crossove
 ### To cite the paper or code
 
 ```bibtex
-@article{awad2021dehb,
-  title={DEHB: Evolutionary Hyberband for Scalable, Robust and Efficient Hyperparameter Optimization},
-  author={Awad, Noor and Mallik, Neeratyoy and Hutter, Frank},
-  journal={arXiv preprint arXiv:2105.09821},
-  year={2021}
+@inproceedings{awad-ijcai21,
+  author    = {N. Awad and N. Mallik and F. Hutter},
+  title     = {{DEHB}: Evolutionary Hyberband for Scalable, Robust and Efficient Hyperparameter Optimization},
+  pages     = {2147--2153},
+  title     = {Proceedings of the Thirtieth International Joint Conference on
+               Artificial Intelligence, {IJCAI-21}},
+  booktitle = {Proceedings of the Thirtieth International Joint Conference on
+               Artificial Intelligence, {IJCAI-21}},
+  publisher = {ijcai.org},
+  editor    = {Z. Zhou},
+  year      = {2021}
 }
