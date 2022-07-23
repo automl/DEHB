@@ -709,7 +709,7 @@ class DEHB(DEHBBase):
 
     @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None, single_node_with_gpus=False,
-            verbose=False, debug=False, save_intermediate=True, save_history=True, **kwargs):
+            verbose=False, debug=False, save_intermediate=True, save_history=True, name=None, **kwargs):
         """ Main interface to run optimization by DEHB
 
         This function waits on workers and if a worker is free, asks for a configuration and a
@@ -778,9 +778,9 @@ class DEHB(DEHBBase):
                     self._verbosity_debug()
             self._fetch_results_from_workers()
             if save_intermediate and self.inc_config is not None:
-                self._save_incumbent()
+                self._save_incumbent(name)
             if save_history and self.history is not None:
-                self._save_history()
+                self._save_history(name)
             self.clean_inactive_brackets()
         # end of while
 
@@ -791,9 +791,9 @@ class DEHB(DEHBBase):
         while len(self.futures) > 0:
             self._fetch_results_from_workers()
             if save_intermediate and self.inc_config is not None:
-                self._save_incumbent()
+                self._save_incumbent(name)
             if save_history and self.history is not None:
-                self._save_history()
+                self._save_history(name)
             time.sleep(0.05)  # waiting 50ms
 
         if verbose:
@@ -809,6 +809,6 @@ class DEHB(DEHBBase):
                     self.logger.info("{}: {}".format(k, v))
             else:
                 self.logger.info("{}".format(self.inc_config))
-        self._save_incumbent()
-        self._save_history()
+        self._save_incumbent(name)
+        self._save_history(name)
         return np.array(self.traj), np.array(self.runtime), np.array(self.history, dtype=object)
