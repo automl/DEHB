@@ -548,7 +548,7 @@ class DE(DEBase):
 class AsyncDE(DE):
     def __init__(self, cs=None, f=None, dimensions=None, pop_size=None, max_age=np.inf,
                  mutation_factor=None, crossover_prob=None, strategy='rand1_bin',
-                 budget=None, async_strategy='deferred', **kwargs):
+                 budget=None, async_strategy='immediate', **kwargs):
         '''Extends DE to be Asynchronous with variations
 
         Parameters
@@ -807,4 +807,4 @@ class AsyncDE(DE):
         if verbose:
             print("\nRun complete!")
 
-        return (np.array(self.traj), np.array(self.runtime), np.array(self.history))
+        return np.array(self.traj), np.array(self.runtime), np.array(self.history)
