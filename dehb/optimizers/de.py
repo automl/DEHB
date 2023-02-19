@@ -542,7 +542,7 @@ class DE(DEBase):
         if verbose:
             print("\nRun complete!")
 
-        return np.array(self.traj), np.array(self.runtime), np.array(self.history)
+        return np.array(self.traj), np.array(self.runtime), np.array(self.history, dtype=object)
 
 
 class AsyncDE(DE):
@@ -807,4 +807,4 @@ class AsyncDE(DE):
         if verbose:
             print("\nRun complete!")
 
-        return np.array(self.traj), np.array(self.runtime), np.array(self.history)
+        return np.array(self.traj), np.array(self.runtime), np.array(self.history, dtype=object)
