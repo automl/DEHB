@@ -158,12 +158,14 @@ class DEHB(DEHBBase):
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=0.5,
                  crossover_prob=0.5, strategy='rand1_bin', min_budget=None,
                  max_budget=None, eta=3, min_clip=None, max_clip=None, configspace=True,
-                 boundary_fix_type='random', max_age=np.inf, n_workers=None, client=None, **kwargs):
+                 boundary_fix_type='random', max_age=np.inf, n_workers=None, client=None,
+                 async_strategy="immediate", **kwargs):
         super().__init__(cs=cs, f=f, dimensions=dimensions, mutation_factor=mutation_factor,
                          crossover_prob=crossover_prob, strategy=strategy, min_budget=min_budget,
                          max_budget=max_budget, eta=eta, min_clip=min_clip, max_clip=max_clip,
                          configspace=configspace, boundary_fix_type=boundary_fix_type,
                          max_age=max_age, **kwargs)
+        self.de_params.update({"async_strategy": async_strategy})
         self.iteration_counter = -1
         self.de = {}
         self._max_pop_size = None
