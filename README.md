@@ -1,5 +1,5 @@
 # DEHB: Evolutionary Hyperband for Scalable, Robust and Efficient Hyperparameter Optimization
-
+[![Coverage Status](https://coveralls.io/repos/github/automl/DEHB/badge.svg)](https://coveralls.io/github/automl/DEHB)
 ### Installation
 ```bash
 # from pypi
