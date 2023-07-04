@@ -73,6 +73,9 @@ jobs:
       run: |
         pytest ${{ env.pytest-args }} ${{ env.test-dir }}
 
+    - name: Coveralls GitHub Action
+      uses: coverallsapp/github-action@v2
+
     - name: Check for files left behind by test
       run: |
         before="${{ steps.status-before.outputs.BEFORE }}"
