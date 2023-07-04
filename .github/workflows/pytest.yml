@@ -76,6 +76,11 @@ jobs:
     - name: Coveralls GitHub Action
       uses: coverallsapp/github-action@v2
 
+    - name: Remove Coverage file
+      uses: JesseTG/rm@v1.0.3
+      with:
+        path: coverage.lcov
+
     - name: Check for files left behind by test
       run: |
         before="${{ steps.status-before.outputs.BEFORE }}"
