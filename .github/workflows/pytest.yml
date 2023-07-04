@@ -72,6 +72,11 @@ jobs:
     - name: Tests
       run: |
         pytest ${{ env.pytest-args }} ${{ env.test-dir }}
+        
+    - name: Remove unused coverage file to avoid memory error for windows
+      uses: JesseTG/rm@v1.0.3
+      with:
+        path: .coverage
 
     - name: Coveralls GitHub Action
       uses: coverallsapp/github-action@v2
