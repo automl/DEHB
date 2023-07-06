@@ -75,7 +75,7 @@ jobs:
 
     - name: Coveralls GitHub Action
       uses: coverallsapp/github-action@v2
-      if: ${{ matrix.os == "ubuntu-latest"}}$
+      if: matrix.os == 'ubuntu-latest'
 
     - name: Remove Coverage file
       uses: JesseTG/rm@v1.0.3
