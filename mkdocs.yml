@@ -1,0 +1,71 @@
+site_name: DEHB
+
+nav:
+  - Home: index.md
+  - Code Reference:
+    - DEHB: references/dehb.md
+    - DE: references/de.md
+    - Bracket Manager: references/bracket_manager.md
+
+theme:
+  name: material
+  logo: assets/automl_org.png
+  favicon: assets/automl_org.png
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - content.code.annotate
+    - content.code.copy
+    - navigation.footer
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - toc.follow
+    - header.autohide
+    - search.suggest
+    - search.highlight
+    - search.share
+  font:
+    text: Roboto
+    code: Roboto Mono
+  palette:
+    - scheme: slate
+      media: "(prefers-color-scheme: dark)"
+      primary: indigo
+      accent: deep purple
+      toggle:
+        icon: material/eye-outline
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - scheme: default
+      media: "(prefers-color-scheme: light)"
+      primary: indigo
+      accent: deep purple
+      toggle:
+        icon: material/eye
+        name: Switch to dark mode
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      enable_inventory: true
+      custom_templates: docs/_templates
+      handlers:
+        python:
+          options:  # https://mkdocstrings.github.io/python/usage/
+            docstring_section_style: spacy
+            show_docstring_attributes: true
+            show_docstring_description: true
+            show_root_heading: false
+            show_root_toc_entry: false
+            show_object_full_path: false
+            merge_init_into_class: true
+            docstring_style: google
+            show_if_no_docstring: false
+            show_bases: true
+            show_source: true
+            members_order: "source"
+            show_signature: true
+            separate_signature: false
+            show_signature_annotations: false
