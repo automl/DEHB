@@ -4,7 +4,10 @@
 [tool.pytest.ini_options]
 testpaths = ["tests"]             # path to the test directory
 minversion = "3.8"
-addopts = "--cov=dehb" # Should be package name
+addopts = "--cov=dehb --cov-report=lcov" # Should be package name
+pythonpath = [
+  "."
+]
 
 [tool.coverage.run]
 branch = true

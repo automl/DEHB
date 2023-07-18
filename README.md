@@ -1,5 +1,9 @@
 # DEHB: Evolutionary Hyperband for Scalable, Robust and Efficient Hyperparameter Optimization
-
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Tests](https://github.com/automl/DEHB/actions/workflows/pytest.yml/badge.svg)](https://github.com/automl/DEHB/actions/workflows/pytest.yml)
+[![Coverage Status](https://coveralls.io/repos/github/automl/DEHB/badge.svg)](https://coveralls.io/github/automl/DEHB)
+[![PyPI](https://img.shields.io/pypi/v/dehb)](https://pypi.org/project/dehb/)
+[![Static Badge](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20-blue)](https://pypi.org/project/dehb/)
 ### Installation
 ```bash
 # from pypi
@@ -16,6 +20,7 @@ pip install -e DEHB  # -e stands for editable, lets you modify the code and reru
 * [01 - Using DEHB to optimize 4 hyperparameters of a Scikit-learn's Random Forest on a classification dataset](examples/01_Optimizing_RandomForest_using_DEHB.ipynb)
 * [02 - Optimizing Scikit-learn's Random Forest without using ConfigSpace to represent the hyperparameter space](examples/02_using%20DEHB_without_ConfigSpace.ipynb)
 * [03 - Hyperparameter Optimization for MNIST in PyTorch](examples/03_pytorch_mnist_hpo.py)
+* [04 - A generic template to use MODEHB for multi-objectives Hyperparameter Optimization](examples/04_mo_pytorch_mnist_hpo.py)
 
 To run PyTorch example: (*note additional requirements*) 
 ```bash
@@ -81,7 +86,8 @@ python examples/03_pytorch_mnist_hpo.py --min_budget 1 --max_budget 3 \
   --verbose --runtime 60 --scheduler_file dask_dump/scheduler.json 
 ```
 
-
+### Running DEHB to optimize multiple objectives
+To run multi-objective optimization we require 1 extra parameter mo_strategy: we provide MO-optimization using Non-dominated sorted (NDS) with crowding distance (NSGA-II) and NDS with eps-net(EPSNET). Find 04_mo_pytorch_mnist_hpo.py example to help you to get started
 
 ### DEHB Hyperparameters
 
@@ -121,4 +127,11 @@ represents the *mutation* strategy while `bin` represents the *binomial crossove
   publisher = {ijcai.org},
   editor    = {Z. Zhou},
   year      = {2021}
+}
+
+@online{Awad-arXiv-2023,
+title = {MO-DEHB: Evolutionary-based Hyperband for Multi-Objective Optimization},
+author = {Noor Awad and Ayushi Sharma and Frank Hutter},
+year = {2023},
+keywords = {}
 }
