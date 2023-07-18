@@ -53,6 +53,7 @@ plugins:
       custom_templates: docs/_templates
       handlers:
         python:
+          paths: [src]
           options:  # https://mkdocstrings.github.io/python/usage/
             docstring_section_style: spacy
             show_docstring_attributes: true
