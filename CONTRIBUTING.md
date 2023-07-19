@@ -53,7 +53,7 @@ We welcome code contributions to DEHB! To contribute code, please follow these s
 6. Write tests to cover your changes if applicable.
 7. Commit your changes with a clear and descriptive commit message.
 8. Push your branch to your forked repository on GitHub.
-9. Submit a pull request to the main repository.
+9. Submit a pull request to the main repository targeting the ```development``` branch.
 
 ## Submitting a Pull Request
 
