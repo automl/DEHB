@@ -10,8 +10,8 @@ from copy import deepcopy
 from loguru import logger
 from distributed import Client
 
-from dehb.optimizers import DE, AsyncDE
-from dehb.utils import SHBracketManager
+from src.dehb.optimizers import DE, AsyncDE
+from src.dehb.utils import SHBracketManager
 
 
 logger.configure(handlers=[{"sink": sys.stdout, "level": "INFO"}])

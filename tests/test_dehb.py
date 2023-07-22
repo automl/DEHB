@@ -3,7 +3,7 @@ import typing
 import ConfigSpace
 import numpy as np
 import time
-from dehb.optimizers.dehb import DEHB
+from src.dehb.optimizers.dehb import DEHB
 
 def create_toy_searchspace():
     """Creates a toy searchspace with a single hyperparameter.

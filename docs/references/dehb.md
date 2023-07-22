@@ -1,0 +1,3 @@
+# DEHB
+
+::: dehb.optimizers.dehb
