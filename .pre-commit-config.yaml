@@ -29,7 +29,6 @@ repos:
     rev: v1.3.0
     hooks:
       - id: mypy
-        exclude: "test_comm_task"  # Pre-commit mypy hates this one, crashes on (l106)
         additional_dependencies:
           - "attrs"
           - "types-pyyaml"

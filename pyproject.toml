@@ -140,7 +140,6 @@ exclude = [
   "PD901",   #  X is a bad variable name. (pandas)
   "TCH",
 ]
-"src/amltk/__version__.py" = ["D100"]
 "__init__.py" = ["I002"]
 "examples/*" = ["INP001", "I002", "E741", "D101", "D103", "T20", "D415"]
 "docs/*" = ["INP001"]
