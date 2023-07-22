@@ -2,7 +2,7 @@ default_language_version:
   python: python3
 files: |
   (?x)^(
-    dehb|
+    src|
     tests
   )/.*\.py$
 repos:
