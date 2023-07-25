@@ -27,6 +27,18 @@ class DEHBBase:
                  crossover_prob=None, strategy=None, min_budget=None,
                  max_budget=None, eta=None, min_clip=None, max_clip=None,
                  boundary_fix_type='random', max_age=np.inf, **kwargs):
+        # Miscellaneous
+        self.output_path = kwargs['output_path'] if 'output_path' in kwargs else './'
+        os.makedirs(self.output_path, exist_ok=True)
+        self.logger = logger
+        log_suffix = time.strftime("%x %X %Z")
+        log_suffix = log_suffix.replace("/", '-').replace(":", '-').replace(" ", '_')
+        self.logger.add(
+            "{}/dehb_{}.log".format(self.output_path, log_suffix),
+            **_logger_props
+        )
+        self.log_filename = "{}/dehb_{}.log".format(self.output_path, log_suffix)
+
         # Benchmark related variables
         self.cs = cs
         self.configspace = True if isinstance(self.cs, ConfigSpace.ConfigurationSpace) else False
@@ -59,7 +71,19 @@ class DEHBBase:
         # Hyperband related variables
         self.min_budget = min_budget
         self.max_budget = max_budget
-        assert self.max_budget > self.min_budget, "only (Max Budget > Min Budget) supported!"
+        if self.max_budget <= self.min_budget:
+            self.logger.error("Only (Max Budget > Min Budget) is supported for DEHB.")
+            if self.max_budget == self.min_budget:
+                self.logger.error(
+                    "If you have a fixed fidelity, " \
+                    "you can instead run DE as follows: " \
+                    "AsyncDE(confispace, f=target_function, dimensions=" \
+                    f"{self.dimensions}, pop_size={self.dimensions * 2}," \
+                    f"max_age={self.max_age}, mutation_factor=" \
+                    f"{self.mutation_factor}, crossover_prob={self.crossover_prob},"\
+                    f"strategy={self.strategy}, budget={self.max_budget}," \
+                    f"boundary_fix_type={self.fix_type})")
+            sys.exit()
         self.eta = eta
         self.min_clip = min_clip
         self.max_clip = max_clip
@@ -75,17 +99,6 @@ class DEHBBase:
                                                      -np.linspace(start=self.max_SH_iter - 1,
                                                                   stop=0, num=self.max_SH_iter))
 
-        # Miscellaneous
-        self.output_path = kwargs['output_path'] if 'output_path' in kwargs else './'
-        os.makedirs(self.output_path, exist_ok=True)
-        self.logger = logger
-        log_suffix = time.strftime("%x %X %Z")
-        log_suffix = log_suffix.replace("/", '-').replace(":", '-').replace(" ", '_')
-        self.logger.add(
-            "{}/dehb_{}.log".format(self.output_path, log_suffix),
-            **_logger_props
-        )
-        self.log_filename = "{}/dehb_{}.log".format(self.output_path, log_suffix)
         # Updating DE parameter list
         self.de_params.update({"output_path": self.output_path})
 
