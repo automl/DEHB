@@ -77,7 +77,7 @@ class DEHBBase:
                 self.logger.error(
                     "If you have a fixed fidelity, " \
                     "you can instead run DE as follows: " \
-                    "AsyncDE(confispace, f=target_function, dimensions=" \
+                    "AsyncDE(cs=configspace, f=target_function, dimensions=" \
                     f"{self.dimensions}, pop_size={self.dimensions * 2}," \
                     f"max_age={self.max_age}, mutation_factor=" \
                     f"{self.mutation_factor}, crossover_prob={self.crossover_prob},"\
