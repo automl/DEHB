@@ -102,6 +102,6 @@ class TestInitialization:
     def test_higher_min_budget(self):
         """Test that verifies, that DEHB breaks if min_budget > max_budget."""
         cs = create_toy_searchspace()
-        with pytest.raises(SystemExit):
+        with pytest.raises(AssertionError):
             create_toy_optimizer(configspace=cs, min_budget=28, max_budget=27, eta=3,
                                         objective_function=objective_function)

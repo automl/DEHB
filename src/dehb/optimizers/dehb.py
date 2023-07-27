@@ -83,7 +83,7 @@ class DEHBBase:
                     f"{self.mutation_factor}, crossover_prob={self.crossover_prob}, "\
                     f"strategy={self.strategy}, budget={self.max_budget}, " \
                     f"boundary_fix_type={self.fix_type})")
-            sys.exit()
+            raise AssertionError()
         self.eta = eta
         self.min_clip = min_clip
         self.max_clip = max_clip
