@@ -76,13 +76,8 @@ class DEHBBase:
             if self.max_budget == self.min_budget:
                 self.logger.error(
                     "If you have a fixed fidelity, " \
-                    "you can instead run DE as follows: " \
-                    "AsyncDE(cs=configspace, f=target_function, dimensions=" \
-                    f"{self.dimensions}, pop_size={self.dimensions * 2}, " \
-                    f"max_age={self.max_age}, mutation_factor=" \
-                    f"{self.mutation_factor}, crossover_prob={self.crossover_prob}, "\
-                    f"strategy={self.strategy}, budget={self.max_budget}, " \
-                    f"boundary_fix_type={self.fix_type})")
+                    "you can instead run DE. For more information checkout: " \
+                    "https://automl.github.io/DEHB/references/de")
             raise AssertionError()
         self.eta = eta
         self.min_clip = min_clip
