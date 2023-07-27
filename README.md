@@ -27,7 +27,7 @@ python examples/03_pytorch_mnist_hpo.py \
 ### Running DEHB in a parallel setting
 
 DEHB has been designed to interface a [Dask client](https://distributed.dask.org/en/latest/api.html#distributed.Client).
-DEHB can either create a Dask client during instantiation and close/kill the client during garbage colleciton. 
+DEHB can either create a Dask client during instantiation and close/kill the client during garbage collection. 
 Or a client can be passed as an argument during instantiation.
 
 * Setting `n_workers` during instantiation \
@@ -35,14 +35,14 @@ Or a client can be passed as an argument during instantiation.
     If set to `>1` then a Dask Client is initialized with as many workers as `n_workers`. \
     This parameter is ignored if `client` is not None.
 * Setting `client` during instantiation \
-    When `None` (default), the a Dask client is created using `n_workers` specified. \
-    Else, any custom configured Dask Client can be created and passed as the `client` argument to DEHB.
+    When `None` (default), a Dask client is created using `n_workers` specified. \
+    Else, any custom-configured Dask Client can be created and passed as the `client` argument to DEHB.
   
 #### Using GPUs in a parallel run
 
-Certain target function evaluations (especially for Deep Learning) requires computations to be 
+Certain target function evaluations (especially for Deep Learning) require computations to be 
 carried out on GPUs. The GPU devices are often ordered by device ID and if not configured, all 
-spawned worker processes access these devices in the same order and can either run out of memory, or
+spawned worker processes access these devices in the same order and can either run out of memory or
 not exhibit parallelism.
 
 For `n_workers>1` and when running on a single node (or local), the `single_node_with_gpus` can be 
@@ -63,7 +63,7 @@ python examples/03_pytorch_mnist_hpo.py --min_budget 1 --max_budget 3 \
 Multi-node parallelism is often contingent on the cluster setup to be deployed on. Dask provides useful 
 frameworks to interface various cluster designs. As long as the `client` passed to DEHB during 
 instantiation is of type `dask.distributed.Client`, DEHB can interact with this client and 
-distribute its optimisation process in a parallel manner. 
+distribute its optimization process in a parallel manner. 
 
 For instance, `Dask-CLI` can be used to create a `dask-scheduler` which can dump its connection 
 details to a file on a cluster node accessible to all processes. Multiple `dask-worker` can then be
@@ -71,7 +71,7 @@ created to interface the `dask-scheduler` by connecting to the details read from
 dask-worker can be triggered on any remote machine. Each worker can be configured as required, 
 including mapping to specific GPU devices. 
 
-Some helper scripts can be found [here](utils/), that can be used as reference to run DEHB in a multi-node 
+Some helper scripts can be found [here](utils/), that can be used as a reference to run DEHB in a multi-node 
 manner on clusters managed by SLURM. (*not expected to work off-the-shelf*)
 
 To run the PyTorch MNIST example on a multi-node setup using 4 workers:
