@@ -28,16 +28,7 @@ class DEHBBase:
                  max_budget=None, eta=None, min_clip=None, max_clip=None,
                  boundary_fix_type='random', max_age=np.inf, **kwargs):
         # Miscellaneous
-        self.output_path = kwargs['output_path'] if 'output_path' in kwargs else './'
-        os.makedirs(self.output_path, exist_ok=True)
-        self.logger = logger
-        log_suffix = time.strftime("%x %X %Z")
-        log_suffix = log_suffix.replace("/", '-').replace(":", '-').replace(" ", '_')
-        self.logger.add(
-            "{}/dehb_{}.log".format(self.output_path, log_suffix),
-            **_logger_props
-        )
-        self.log_filename = "{}/dehb_{}.log".format(self.output_path, log_suffix)
+        self._setup_logger(kwargs)
 
         # Benchmark related variables
         self.cs = cs
@@ -103,6 +94,19 @@ class DEHBBase:
         self.inc_score = np.inf
         self.inc_config = None
         self.history = []
+
+    def _setup_logger(self, kwargs):
+        """Sets up the logger."""
+        self.output_path = kwargs['output_path'] if 'output_path' in kwargs else './'
+        os.makedirs(self.output_path, exist_ok=True)
+        self.logger = logger
+        log_suffix = time.strftime("%x %X %Z")
+        log_suffix = log_suffix.replace("/", '-').replace(":", '-').replace(" ", '_')
+        self.logger.add(
+            "{}/dehb_{}.log".format(self.output_path, log_suffix),
+            **_logger_props
+        )
+        self.log_filename = "{}/dehb_{}.log".format(self.output_path, log_suffix)
 
     def reset(self):
         self.inc_score = np.inf

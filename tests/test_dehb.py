@@ -40,7 +40,7 @@ def create_toy_optimizer(configspace: ConfigSpace.ConfigurationSpace, min_budget
     dim = len(configspace.get_hyperparameters())
     return DEHB(f=objective_function, cs=configspace, dimensions=dim,
                 min_budget=min_budget,
-                max_budget=max_budget, eta=eta, n_workers=1)
+                max_budget=max_budget, eta=eta, n_workers=2)
 
 
 def objective_function(x: ConfigSpace.Configuration, budget: float, **kwargs):
@@ -104,4 +104,11 @@ class TestInitialization:
         cs = create_toy_searchspace()
         with pytest.raises(AssertionError):
             create_toy_optimizer(configspace=cs, min_budget=28, max_budget=27, eta=3,
+                                        objective_function=objective_function)
+
+    def test_equal_min_max_budget(self):
+        """Test that verifies, that DEHB breaks if min_budget == max_budget."""
+        cs = create_toy_searchspace()
+        with pytest.raises(AssertionError):
+            create_toy_optimizer(configspace=cs, min_budget=27, max_budget=27, eta=3,
                                         objective_function=objective_function)
