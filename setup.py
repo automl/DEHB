@@ -48,12 +48,10 @@ extras_require = {
         "pytest-xdist",
         "pytest-timeout",
         # Docs
-        "automl_sphinx_theme",
+        "mkdocs-material",
+        "mkdocstrings",
         # Others
-        "isort",
-        "black",
-        "pydocstyle",
-        "flake8",
+        "ruff",
         "pre-commit",
     ]
 }
@@ -79,6 +77,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Natural Language :: English",
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
