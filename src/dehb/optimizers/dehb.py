@@ -32,7 +32,7 @@ class DEHBBase:
         self.configspace = True if isinstance(self.cs, ConfigSpace.ConfigurationSpace) else False
         if self.configspace:
             self.dimensions = len(self.cs.get_hyperparameters())
-        elif dimensions is None or not isinstance(dimensions, (int, np.int)):
+        elif dimensions is None or not isinstance(dimensions, (int, np.integer)):
             assert "Need to specify `dimensions` as an int when `cs` is not available/specified!"
         else:
             self.dimensions = dimensions
