@@ -40,7 +40,7 @@ def create_toy_optimizer(configspace: ConfigSpace.ConfigurationSpace, min_budget
     dim = len(configspace.get_hyperparameters())
     return DEHB(f=objective_function, cs=configspace, dimensions=dim,
                 min_budget=min_budget,
-                max_budget=max_budget, eta=eta, n_workers=2)
+                max_budget=max_budget, eta=eta, n_workers=1)
 
 
 def objective_function(x: ConfigSpace.Configuration, budget: float, **kwargs):
