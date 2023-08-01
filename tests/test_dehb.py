@@ -1,9 +1,11 @@
-import pytest
+import time
 import typing
+
 import ConfigSpace
 import numpy as np
-import time
+import pytest
 from src.dehb.optimizers.dehb import DEHB
+
 
 def create_toy_searchspace():
     """Creates a toy searchspace with a single hyperparameter.
@@ -66,8 +68,7 @@ class TestBudgetExhaustion():
     evaluations and number of brackets to run.
     """
     def test_runtime_exhaustion(self):
-        """Test for runtime budget exhaustion.
-        """
+        """Test for runtime budget exhaustion."""
         cs = create_toy_searchspace()
         dehb = create_toy_optimizer(configspace=cs, min_budget=3, max_budget=27, eta=3,
                                         objective_function=objective_function)
@@ -77,8 +78,7 @@ class TestBudgetExhaustion():
         assert dehb._is_run_budget_exhausted(total_cost=1), "Run budget should be exhausted"
 
     def test_fevals_exhaustion(self):
-        """Test for function evaluations budget exhaustion.
-        """
+        """Test for function evaluations budget exhaustion."""
         cs = create_toy_searchspace()
         dehb = create_toy_optimizer(configspace=cs, min_budget=3, max_budget=27, eta=3,
                                     objective_function=objective_function)
@@ -88,8 +88,7 @@ class TestBudgetExhaustion():
         assert dehb._is_run_budget_exhausted(fevals=1), "Run budget should be exhausted"
 
     def test_brackets_exhaustion(self):
-        """Test for bracket budget exhaustion.
-        """
+        """Test for bracket budget exhaustion."""
         cs = create_toy_searchspace()
         dehb = create_toy_optimizer(configspace=cs, min_budget=3, max_budget=27, eta=3,
                                         objective_function=objective_function)
@@ -98,3 +97,18 @@ class TestBudgetExhaustion():
 
         assert dehb._is_run_budget_exhausted(brackets=1), "Run budget should be exhausted"
 
+class TestInitialization:
+    """Class that bundles all tests regarding the initialization of DEHB."""
+    def test_higher_min_budget(self):
+        """Test that verifies, that DEHB breaks if min_budget > max_budget."""
+        cs = create_toy_searchspace()
+        with pytest.raises(AssertionError):
+            create_toy_optimizer(configspace=cs, min_budget=28, max_budget=27, eta=3,
+                                        objective_function=objective_function)
+
+    def test_equal_min_max_budget(self):
+        """Test that verifies, that DEHB breaks if min_budget == max_budget."""
+        cs = create_toy_searchspace()
+        with pytest.raises(AssertionError):
+            create_toy_optimizer(configspace=cs, min_budget=27, max_budget=27, eta=3,
+                                        objective_function=objective_function)
