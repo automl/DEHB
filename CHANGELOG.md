@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Use of deprecated numpy method ```np.int``` in dehb setup (#41)
 - If condition for proper Client cleanup, since it was never ```True``` (#45)
+- Data leak in example ```01_Optimizing_RandomForest_using_DEHB``` (#23)
 
 ### Changed
 
