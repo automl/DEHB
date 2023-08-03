@@ -10,8 +10,8 @@ from copy import deepcopy
 from loguru import logger
 from distributed import Client
 
-from dehb.optimizers import DE, AsyncDE
-from dehb.utils import SHBracketManager
+from src.dehb.optimizers import DE, AsyncDE
+from src.dehb.utils import SHBracketManager
 
 
 logger.configure(handlers=[{"sink": sys.stdout, "level": "INFO"}])
@@ -27,12 +27,15 @@ class DEHBBase:
                  crossover_prob=None, strategy=None, min_budget=None,
                  max_budget=None, eta=None, min_clip=None, max_clip=None,
                  boundary_fix_type='random', max_age=np.inf, **kwargs):
+        # Miscellaneous
+        self._setup_logger(kwargs)
+
         # Benchmark related variables
         self.cs = cs
         self.configspace = True if isinstance(self.cs, ConfigSpace.ConfigurationSpace) else False
         if self.configspace:
             self.dimensions = len(self.cs.get_hyperparameters())
-        elif dimensions is None or not isinstance(dimensions, (int, np.int)):
+        elif dimensions is None or not isinstance(dimensions, (int, np.integer)):
             assert "Need to specify `dimensions` as an int when `cs` is not available/specified!"
         else:
             self.dimensions = dimensions
@@ -59,7 +62,14 @@ class DEHBBase:
         # Hyperband related variables
         self.min_budget = min_budget
         self.max_budget = max_budget
-        assert self.max_budget > self.min_budget, "only (Max Budget > Min Budget) supported!"
+        if self.max_budget <= self.min_budget:
+            self.logger.error("Only (Max Budget > Min Budget) is supported for DEHB.")
+            if self.max_budget == self.min_budget:
+                self.logger.error(
+                    "If you have a fixed fidelity, " \
+                    "you can instead run DE. For more information checkout: " \
+                    "https://automl.github.io/DEHB/references/de")
+            raise AssertionError()
         self.eta = eta
         self.min_clip = min_clip
         self.max_clip = max_clip
@@ -75,7 +85,18 @@ class DEHBBase:
                                                      -np.linspace(start=self.max_SH_iter - 1,
                                                                   stop=0, num=self.max_SH_iter))
 
-        # Miscellaneous
+        # Updating DE parameter list
+        self.de_params.update({"output_path": self.output_path})
+
+        # Global trackers
+        self.population = None
+        self.fitness = None
+        self.inc_score = np.inf
+        self.inc_config = None
+        self.history = []
+
+    def _setup_logger(self, kwargs):
+        """Sets up the logger."""
         self.output_path = kwargs['output_path'] if 'output_path' in kwargs else './'
         os.makedirs(self.output_path, exist_ok=True)
         self.logger = logger
@@ -86,15 +107,6 @@ class DEHBBase:
             **_logger_props
         )
         self.log_filename = "{}/dehb_{}.log".format(self.output_path, log_suffix)
-        # Updating DE parameter list
-        self.de_params.update({"output_path": self.output_path})
-
-        # Global trackers
-        self.population = None
-        self.fitness = None
-        self.inc_score = np.inf
-        self.inc_config = None
-        self.history = []
 
     def reset(self):
         self.inc_score = np.inf

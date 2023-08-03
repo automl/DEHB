@@ -7,7 +7,7 @@ import datetime
 
 name = "DEHB"
 package_name = "dehb"
-author = "Neeratyoy, Noor, Frank"
+author = "Neeratyoy, Noor, Janis, Frank"
 author_email = "mallik@cs.uni-freiburg.de"
 description = "Evolutionary Hyperband for Scalable, Robust and Efficient Hyperparameter Optimization"
 url = "https://github.com/automl/DEHB"
@@ -16,7 +16,7 @@ project_urls = {
     "Source Code": "https://github.com/automl.org/dehb",
 }
 copyright = f"Copyright {datetime.date.today().strftime('%Y')}, Neeratyoy, Noor, Frank"
-version = "0.0.5"
+version = "0.1.0"
 
 HERE = os.path.dirname(os.path.realpath(__file__))
 
@@ -48,12 +48,11 @@ extras_require = {
         "pytest-xdist",
         "pytest-timeout",
         # Docs
-        "automl_sphinx_theme",
+        "mkdocs-material",
+        "mkdocstrings",
         # Others
-        "isort",
+        "ruff",
         "black",
-        "pydocstyle",
-        "flake8",
         "pre-commit",
     ]
 }
@@ -79,6 +78,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Natural Language :: English",
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
