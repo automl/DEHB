@@ -12,8 +12,8 @@ author_email = "mallik@cs.uni-freiburg.de"
 description = "Evolutionary Hyperband for Scalable, Robust and Efficient Hyperparameter Optimization"
 url = "https://github.com/automl/DEHB"
 project_urls = {
-    "Documentation": "https://automl.org.github.io/DEHB/main",
-    "Source Code": "https://github.com/automl.org/dehb",
+    "Documentation": "https://automl.github.io/DEHB/",
+    "Source Code": "https://github.com/automl/DEHB",
 }
 copyright = f"Copyright {datetime.date.today().strftime('%Y')}, Neeratyoy, Noor, Frank"
 version = "0.1.0"
