@@ -160,6 +160,8 @@ class DEBase():
             elif type(hyper) == ConfigSpace.CategoricalHyperparameter:
                 ranges = np.arange(start=0, stop=1, step=1/len(hyper.choices))
                 param_value = hyper.choices[np.where((vector[i] < ranges) == False)[0][-1]]
+            elif type(hyper) == ConfigSpace.Constant:
+                param_value = hyper.default_value
             else:  # handles UniformFloatHyperparameter & UniformIntegerHyperparameter
                 # rescaling continuous values
                 if hyper.log:
@@ -199,6 +201,8 @@ class DEBase():
             elif type(hyper) == ConfigSpace.CategoricalHyperparameter:
                 nlevels = len(hyper.choices)
                 vector[i] = hyper.choices.index(config[name]) / nlevels
+            elif type(hyper) == ConfigSpace.Constant:
+                vector[i] = 0
             else:
                 bounds = (hyper.lower, hyper.upper)
                 param_value = config[name]
