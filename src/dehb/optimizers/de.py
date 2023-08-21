@@ -202,7 +202,7 @@ class DEBase():
                 nlevels = len(hyper.choices)
                 vector[i] = hyper.choices.index(config[name]) / nlevels
             elif type(hyper) == ConfigSpace.Constant:
-                vector[i] = 0
+                vector[i] = 0 # set constant to 0, so that it wont be affected by mutation
             else:
                 bounds = (hyper.lower, hyper.upper)
                 param_value = config[name]
