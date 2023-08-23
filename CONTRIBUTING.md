@@ -72,7 +72,7 @@ To maintain consistency and readability, we follow a set of code style and guide
 
 - Use meaningful variable and function names.
 - Write clear and concise comments to explain your code.
-- Write docstrings in Google style.
+- Write docstrings in [Google style](https://google.github.io/styleguide/pyguide.html).
 - Follow the project's indentation and formatting conventions. This can be checked by using pre-commit (```pre-commit run --all-files```).
 - Keep lines of code within a reasonable length (recommended maximum: 100 characters).
 - Write comprehensive and meaningful commit messages.

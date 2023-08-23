@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.7] - 2023-08-23
+
+### Added
+- Support for `Constant` hyperparameters (#52)
+- Unittests to test conversion from vector to configuration
+- Landing page of documentation
+
 ## [0.0.6] - 2023-08-04
 
 ### Added
@@ -25,6 +32,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - README.md to feature badges
+- Folder structure to have package fully contained in ```src/```
 
-[unreleased]: https://github.com/automl/compare/v0.0.6...HEAD
+> **_NOTE:_**  For versions <= 0.0.5 we do not provide release tags, since we changed our release pipeline from version 0.0.6 onwards.
+
+## 0.0.5 - 2023-02-19
+
+### Fixed
+
+- Add ```dtype``` option to history ```np.array```
+
+## 0.0.4 - 2022-09-18
+
+### Changed
+
+- Update default hyperparameters to match the hyperparameters in the DEHB paper.
+
+## 0.0.3 - 2022-08-17
+
+### Added
+
+- Add option to append custom name to output file name
+## 0.0.1 & 0.0.2 - 2022-06-13
+
+### Added
+- Initial project release and push to PyPI
+
+[unreleased]: https://github.com/automl/compare/v0.0.7...master
+[0.0.7]: https://github.com/automl/releases/tag/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/automl/releases/tag/v0.0.6
