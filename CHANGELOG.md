@@ -58,6 +58,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial project release and push to PyPI
 
-[unreleased]: https://github.com/automl/compare/v0.0.7...master
-[0.0.7]: https://github.com/automl/releases/tag/v0.0.6...v0.0.7
-[0.0.6]: https://github.com/automl/releases/tag/v0.0.6
+[unreleased]: https://github.com/automl/DEHB/compare/v0.0.7...master
+[0.0.7]: https://github.com/automl/DEHB/compare/v0.0.6...v0.0.7
+[0.0.6]: https://github.com/automl/DEHB/releases/tag/v0.0.6
