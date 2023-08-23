@@ -5,6 +5,9 @@
 [![Coverage Status](https://coveralls.io/repos/github/automl/DEHB/badge.svg)](https://coveralls.io/github/automl/DEHB)
 [![PyPI](https://img.shields.io/pypi/v/dehb)](https://pypi.org/project/dehb/)
 [![Static Badge](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20-blue)](https://pypi.org/project/dehb/)
+
+> **_NOTE:_**  This branch includes the experiments for MO-DEHB and is only temporary, while waiting for the implementation of MO-DEHB. As soon as the implementaion of MO-DEHB is embedded into the current DEHB implementation, this branch will be merged to master.
+
 ### Installation
 ```bash
 # from pypi
