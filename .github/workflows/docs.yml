@@ -8,13 +8,6 @@ on:
   push:
     branches:
       - master
-      - development
-
-  # Trigger on any push to a PR that targets main
-  pull_request:
-    branches:
-      - master
-      - development
 
 permissions:
   contents: write
