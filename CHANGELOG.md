@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.7] - 2023-08-23
+
+### Added
+- Support for `Constant` hyperparameters (#52)
+- Unittests to test conversion from vector to configuration
+- Landing page of documentation
+
 ## [0.0.6] - 2023-08-04
 
 ### Added
@@ -51,5 +58,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial project release and push to PyPI
 
-[unreleased]: https://github.com/automl/compare/v0.0.6...HEAD
+[unreleased]: https://github.com/automl/compare/v0.0.7...master
+[0.0.7]: https://github.com/automl/releases/tag/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/automl/releases/tag/v0.0.6
