@@ -86,9 +86,6 @@ python examples/03_pytorch_mnist_hpo.py --min_budget 1 --max_budget 3 \
   --verbose --runtime 60 --scheduler_file dask_dump/scheduler.json 
 ```
 
-### Running DEHB to optimize multiple objectives
-To run multi-objective optimization we require 1 extra parameter mo_strategy: we provide MO-optimization using Non-dominated sorted (NDS) with crowding distance (NSGA-II) and NDS with eps-net(EPSNET). Find 04_mo_pytorch_mnist_hpo.py example to help you to get started
-
 ### DEHB Hyperparameters
 
 *We recommend the default settings*.
