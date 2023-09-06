@@ -72,7 +72,7 @@ optimizer = DEHB(
     output_path="./logs",
 )
 
-# Run optimization for 10 brackets. Output files will be save to ./logs
+# Run optimization for 1 bracket. Output files will be save to ./logs
 traj, runtime, history = optimizer.run(brackets=1, verbose=True)
 config, fitness, runtime, budget, _ = history[0]
 print("config", config)
