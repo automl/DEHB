@@ -25,7 +25,10 @@ pip install -e DEHB  # -e stands for editable, lets you modify the code and reru
 To run PyTorch example: (*note additional requirements*) 
 ```bash
 python examples/03_pytorch_mnist_hpo.py \
-     --min_budget 1 --max_budget 3 --verbose --runtime 60
+    --min_budget 1 \
+    --max_budget 3 \
+    --runtime 60 \
+    --verbose
 ```
 
 ### Running DEHB in a parallel setting
@@ -58,8 +61,13 @@ to it by that DEHB run.
 
 To run the PyTorch MNIST example on a single node using 2 workers:  
 ```bash
-python examples/03_pytorch_mnist_hpo.py --min_budget 1 --max_budget 3 \
-  --verbose --runtime 60 --n_workers 2 --single_node_with_gpus
+python examples/03_pytorch_mnist_hpo.py \
+    --min_budget 1 \
+    --max_budget 3 \
+    --runtime 60 \
+    --n_workers 2 \
+    --single_node_with_gpus \
+    --verbose
 ```
 
 #### Multi-node runs
@@ -80,10 +88,18 @@ manner on clusters managed by SLURM. (*not expected to work off-the-shelf*)
 
 To run the PyTorch MNIST example on a multi-node setup using 4 workers:
 ```bash
-bash utils/run_dask_setup.sh -f dask_dump/scheduler.json -e env_name -n 4
+bash utils/run_dask_setup.sh \
+    -f dask_dump/scheduler.json \
+    -e env_name \
+    -n 4
+
 sleep 5
-python examples/03_pytorch_mnist_hpo.py --min_budget 1 --max_budget 3 \
-  --verbose --runtime 60 --scheduler_file dask_dump/scheduler.json 
+python examples/03_pytorch_mnist_hpo.py \
+    --min_budget 1 \
+    --max_budget 3 \
+    --runtime 60 \
+    --scheduler_file dask_dump/scheduler.json \
+    --verbose
 ```
 
 ### DEHB Hyperparameters
@@ -127,8 +143,8 @@ represents the *mutation* strategy while `bin` represents the *binomial crossove
 }
 
 @online{Awad-arXiv-2023,
-title = {MO-DEHB: Evolutionary-based Hyperband for Multi-Objective Optimization},
-author = {Noor Awad and Ayushi Sharma and Frank Hutter},
-year = {2023},
-keywords = {}
+title       = {MO-DEHB: Evolutionary-based Hyperband for Multi-Objective Optimization},
+author      = {Noor Awad and Ayushi Sharma and Frank Hutter},
+year        = {2023},
+keywords    = {}
 }
