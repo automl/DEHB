@@ -20,7 +20,8 @@ sbatch temp/workers.sh
 
 Alternatively, to enable GPU usage by the workers,
 ```bash
-python utils/generate_slurm_jobs.py --worker_p [cpu_node] --scheduler_p [cpu_node] --nworkers 10 \
+python utils/generate_slurm_jobs.py \
+    --worker_p [cpu_node] --scheduler_p [cpu_node] --nworkers 10 \
     --scheduler_path ./scheduler --scheduler_file scheduler_gpu.json --output_path temp \
     --setup_file ./setup.sh --gpu
 # generates 2 shell scripts
@@ -34,8 +35,13 @@ One or more DEHB processes can share this pool of 10 workers.
 For example, running a DEHB optimization by specifiying `scheduler_file` makes that DEHB process, 
 connect to the Dask cluster runnning.
 ```bash
-python examples/03_pytorch_mnist_hpo.py --min_budget 1 --max_budget 9 --verbose \
-    --scheduler_file scheduler/scheduler_gpu.json --runtime 200 --seed 123
+python examples/03_pytorch_mnist_hpo.py \
+    --min_budget 1 \
+    --max_budget 9 \
+    --runtime 200 \
+    --seed 123 \
+    --scheduler_file scheduler/scheduler_gpu.json \
+    --verbose
 ```
 The decoupled Dask cluster remains alive even after the DEHB optimization is over. 
 It can be reused by other DEHB runs or processes. 

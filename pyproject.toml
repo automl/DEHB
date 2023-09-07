@@ -4,7 +4,7 @@
 urls = { Documentation = "https://automl.github.io/DEHB/", Github = "https://github.com/automl/DEHB" }
 
 name = "DEHB"
-version = "0.7.0"
+version = "0.0.7"
 dependencies = [
   "numpy>=1.18.2",
   "loguru>=0.5.3",

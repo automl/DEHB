@@ -89,10 +89,11 @@ manner on clusters managed by SLURM. (*not expected to work off-the-shelf*)
 To run the PyTorch MNIST example on a multi-node setup using 4 workers:
 ```bash
 bash utils/run_dask_setup.sh \
-    -f dask_dump/scheduler.json \
+    -f dask_dump/scheduler.json \  # This is how the workers will be discovered by DEHB
     -e env_name \
     -n 4
 
+# Make sure to sleep to allow the workers to setup properly
 sleep 5
 python examples/03_pytorch_mnist_hpo.py \
     --min_budget 1 \
