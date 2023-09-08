@@ -13,11 +13,16 @@ To start using the `dehb` package, you can install it via pip. You can either in
 ```bash
 # Install from pypi
 pip install dehb
-
-# Install as editable from github
-git clone https://github.com/automl/DEHB.git
-pip install -e DEHB  # -e stands for editable, lets you modify the code and rerun things
 ```
+
+!!! note "From Source"
+
+    To install directly from from source
+
+    ```bash
+    git clone https://github.com/automl/DEHB.git
+    pip install -e DEHB  # -e stands for editable, lets you modify the code and rerun things
+    ```
 
 ## Getting Started
 
@@ -26,47 +31,54 @@ In the following sections we provide some basic examplatory setup for running DE
 ### Basic single worker setup
 A basic setup for optimizing can be done as follows. Please note, that this is example should solely show a simple setup of `dehb`. More in-depth examples can be found in the [examples folder](../examples/). First we need to setup a `ConfigurationSpace`, from which Configurations will be sampled:
 
-```python
-import ConfigSpace
+```python exec="true" source="material-block" result="python" title="Configuration Space" session="someid"
+from ConfigSpace import ConfigurationSpace, Configuration
 
-cs = ConfigSpace.ConfigurationSpace()
-cs.add_hyperparameter(ConfigSpace.UniformFloatHyperparameter("x0", lower=3, upper=10, log=False))
+cs = ConfigurationSpace({"x0": (3.0, 10.0), "x1": ["red", "green"]})
+print(cs)
 ```
 
 Next, we need an `object_function`, which we are aiming to optimize:
-```python
+```python exec="true" source="material-block" result="python" title="Configuration Space" session="someid"
 import numpy as np
-def objective_function(x, budget, **kwargs):
-    """Toy objective function.
 
-    Args:
-        x (ConfigSpace.Configuration): Configuration to evaluate
-        budget (float): Budget to evaluate x on
+def objective_function(x: Configuration, budget: float, **kwargs):
+    # Replace this with your actual objective value (y) and cost.
+    cost = (10 if x["x1"] == "red" else 100) + budget
+    y = x["x0"] + np.random.uniform()
+    return {"fitness": y, "cost": x["x0"]}
 
-    Returns:
-        dict: Result dictionary
-    """
-    # This obviously does not make sense in a real world example. Replace this with your actual objective value (y) and cost.
-    y = np.random.uniform()
-    cost = 5
-    result = {
-        "fitness": y,
-        "cost": cost
-    }
-    return result
+sample_config = cs.sample_configuration()
+print(sample_config)
+
+result = objective_function(sample_config, budget=10)
+print(result)
 ```
 
 Finally, we can setup our optimizer and run DEHB:
 
-```python
+```python exec="true" source="material-block" result="python" title="Configuration Space" session="someid"
 from dehb import DEHB
 
 dim = len(cs.get_hyperparameters())
-optimizer = DEHB(f=objective_function, cs=cs, dimensions=dim, min_budget=3, output_path="./logs",
-                max_budget=27, eta=3, n_workers=1)
+optimizer = DEHB(
+    f=objective_function,
+    cs=cs,
+    dimensions=dim,
+    min_budget=3,
+    max_budget=27,
+    eta=3,
+    n_workers=1,
+    output_path="./logs",
+)
 
-# Run optimization for 10 brackets. Output files will be save to ./logs
-traj, runtime, history = opt.run(brackets=10, verbose=True)
+# Run optimization for 1 bracket. Output files will be saved to ./logs
+traj, runtime, history = optimizer.run(brackets=1, verbose=True)
+config, fitness, runtime, budget, _ = history[0]
+print("config", config)
+print("fitness", fitness)
+print("runtime", runtime)
+print("budget", budget)
 ```
 
 ### Running DEHB in a parallel setting
@@ -99,8 +111,13 @@ to it by that DEHB run.
 
 To run the PyTorch MNIST example on a single node using 2 workers:  
 ```bash
-python examples/03_pytorch_mnist_hpo.py --min_budget 1 --max_budget 3 \
-  --verbose --runtime 60 --n_workers 2 --single_node_with_gpus
+python examples/03_pytorch_mnist_hpo.py \
+    --min_budget 1 \
+    --max_budget 3 \
+    --runtime 60 \
+    --n_workers 2 \
+    --single_node_with_gpus \
+    --verbose
 ```
 
 #### Multi-node runs
@@ -121,10 +138,20 @@ manner on clusters managed by SLURM. (*not expected to work off-the-shelf*)
 
 To run the PyTorch MNIST example on a multi-node setup using 4 workers:
 ```bash
-bash utils/run_dask_setup.sh -f dask_dump/scheduler.json -e env_name -n 4
+bash utils/run_dask_setup.sh \
+    -n 4 \
+    -f dask_dump/scheduler.json \   # This is how the workers will be discovered by DEHB
+    -e env_name
+
+# Make sure to sleep to allow the workers to setup properly
 sleep 5
-python examples/03_pytorch_mnist_hpo.py --min_budget 1 --max_budget 3 \
-  --verbose --runtime 60 --scheduler_file dask_dump/scheduler.json 
+
+python examples/03_pytorch_mnist_hpo.py \
+    --min_budget 1 \
+    --max_budget 3 \
+    --runtime 60 \
+    --scheduler_file dask_dump/scheduler.json \
+    --verbose
 ```
 
 ## To cite the paper or code
@@ -142,9 +169,9 @@ If you use DEHB in one of your research projects, please cite our paper(s):
 }
 
 @online{Awad-arXiv-2023,
-title = {MO-DEHB: Evolutionary-based Hyperband for Multi-Objective Optimization},
-author = {Noor Awad and Ayushi Sharma and Frank Hutter},
-year = {2023},
-keywords = {}
+    title       = {MO-DEHB: Evolutionary-based Hyperband for Multi-Objective Optimization},
+    author      = {Noor Awad and Ayushi Sharma and Frank Hutter},
+    year        = {2023},
+    keywords    = {}
 }
 ```

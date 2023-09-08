@@ -1,5 +1,4 @@
-#! /bin/bash
-
+#!/bin/bash
 #SBATCH -p cluster-name
 #SBATCH --gres=gpu:1
 #SBATCH --mem 0
@@ -12,13 +11,22 @@ do
         f) filename=${OPTARG};;    # specified as -f
         e) envname=${OPTARG};;     # specified as -e
         w) workername=${OPTARG};;  # specified as -w
+        *) echo "usage: $0 [-f] [-e] [-w]"
+           echo "  -f: filename of scheduler file"
+           echo "  -e: name of conda environment"
+           echo "  -w: name of worker"
+           exit 1 ;;
     esac
 done
 
 # setting up environment
-source $HOME/anaconda3/bin/activate $envname
+source "$HOME/anaconda3/bin/activate" "$envname"
 
 # creating a Dask worker
-PYTHONPATH=$PWD dask-worker --scheduler-file $filename --name $workername --resources "GPU=1" --no-nanny
+PYTHONPATH=$PWD dask-worker \
+  --scheduler-file "$filename" \
+  --name "$workername" \
+  --resources "GPU=1" \
+  --no-nanny
 
 # for more options: https://docs.dask.org/en/latest/setup/cli.html#dask-worker
