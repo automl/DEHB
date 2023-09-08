@@ -1,33 +1,83 @@
 # For TOML reference
 # https://learnxinyminutes.com/docs/toml/
+[project]
+urls = { Documentation = "https://automl.github.io/DEHB/", Github = "https://github.com/automl/DEHB" }
+
+name = "DEHB"
+version = "0.0.7"
+dependencies = [
+  "numpy>=1.18.2",
+  "loguru>=0.5.3",
+  "dask>=2.27.0",
+  "distributed>=2.27.0",
+  "ConfigSpace>=0.4.16",
+]
+classifiers = [
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Natural Language :: English",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Education",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+license = { file = "LICENSE.txt" }
+readme = "README.md"
+description = "Evolutionary Hyperband for Scalable, Robust and Efficient Hyperparameter Optimization"
+authors = [
+  { name = "Neeratyoy Mallik", email = "mallik@cs.uni-freiburg.de" },
+  { name = "Noor Awad" },
+  { name = "Frank Hutter" },
+  { name = "Janis Fix", email = "fixj@cs.uni-freiburg.de" },
+]
+requires-python = ">=3.8"
+[project.optional-dependencies]
+dev = [
+  # Test
+  "pytest>=4.6",
+  "pytest-cov",
+  "pytest-xdist",
+  "pytest-timeout",
+  # Docs
+  "mkdocs",
+  "mkdocs-material",
+  "mkdocstrings[python]",
+  "markdown-exec[ansi]",
+  # Others
+  "ruff",
+  "black",
+  "pre-commit",
+]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]             # path to the test directory
+testpaths = ["tests"]                   # path to the test directory
 minversion = "3.8"
 addopts = "--cov=src --cov-report=lcov" # Should be package name
-pythonpath = [
-  "."
-]
+pythonpath = ["."]
 
 [tool.coverage.run]
 branch = true
 context = "dehb" # Should be package name
 omit = [
-    "dehb/__init__.py", # Has variables only needed for setup.py
+  "dehb/__init__.py", # Has variables only needed for setup.py
 ]
 
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
 exclude_lines = [
-    "pragma: no cover",
-    '\.\.\.',
-    "raise NotImplementedError",
-    "if TYPE_CHECKING",
+  "pragma: no cover",
+  '\.\.\.',
+  "raise NotImplementedError",
+  "if TYPE_CHECKING",
 ] # These are lines to exclude from coverage
 
 [tool.black]
 target-version = ['py38']
+line-length = 100
 
 # https://github.com/charliermarsh/ruff
 [tool.ruff]

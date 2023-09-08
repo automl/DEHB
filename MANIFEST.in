@@ -5,6 +5,5 @@
 
 # Include individual files
 include LICENSE.txt
-include requirements.txt
 prune tests
 prune examples
