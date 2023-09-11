@@ -27,5 +27,11 @@ jobs:
         with:
           key: ${{ github.ref }}
           path: .cache
+      - uses: SebRollen/toml-action@v1.0.2
+        id: read_toml
+        with:
+          file: 'pyproject.toml'
+          field: 'project.version'
       - run: pip install ".[dev]"
-      - run: mkdocs gh-deploy --force
+      - run: mike deploy --push --update-aliases ${{ steps.read_toml.outputs.value }} latest
+      - run: mike set-default --push latest

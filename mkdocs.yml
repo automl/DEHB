@@ -101,3 +101,7 @@ plugins:
             show_signature: true
             separate_signature: false
             show_signature_annotations: false
+
+extra:
+  version:
+    provider: mike
