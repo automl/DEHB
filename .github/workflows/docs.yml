@@ -33,5 +33,9 @@ jobs:
           file: 'pyproject.toml'
           field: 'project.version'
       - run: pip install ".[dev]"
+      - name: Configure Git user
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
       - run: mike deploy --push --update-aliases ${{ steps.read_toml.outputs.value }} latest
       - run: mike set-default --push latest
