@@ -12,6 +12,7 @@ from distributed import Client
 
 from .de import DE, AsyncDE
 from ..utils import SHBracketManager
+from ..utils import ConfigRepository
 
 
 logger.configure(handlers=[{"sink": sys.stdout, "level": "INFO"}])
@@ -29,6 +30,7 @@ class DEHBBase:
                  boundary_fix_type='random', max_age=np.inf, **kwargs):
         # Miscellaneous
         self._setup_logger(kwargs)
+        self.config_repository = ConfigRepository()
 
         # Benchmark related variables
         self.cs = cs
@@ -236,19 +238,21 @@ class DEHB(DEHBBase):
             # reprioritising a CUDA device order specific to this worker process
             os.environ.update({"CUDA_VISIBLE_DEVICES": job_info["gpu_devices"]})
 
-        config, budget, parent_id = job_info['config'], job_info['budget'], job_info['parent_id']
-        bracket_id = job_info['bracket_id']
+        config, config_id = job_info["config"], job_info["config_id"]
+        budget, parent_id = job_info["budget"], job_info["parent_id"]
+        bracket_id = job_info["bracket_id"]
         kwargs = job_info["kwargs"]
         res = self.de[budget].f_objective(config, budget, **kwargs)
-        info = res["info"] if "info" in res else dict()
+        info = res["info"] if "info" in res else {}
         run_info = {
-            'fitness': res["fitness"],
-            'cost': res["cost"],
-            'config': config,
-            'budget': budget,
-            'parent_id': parent_id,
-            'bracket_id': bracket_id,
-            'info': info
+            "fitness": res["fitness"],
+            "cost": res["cost"],
+            "config": config,
+            "config_id": config_id,
+            "budget": budget,
+            "parent_id": parent_id,
+            "bracket_id": bracket_id,
+            "info": info,
         }
 
         if "gpu_devices" in job_info:
@@ -374,7 +378,15 @@ class DEHB(DEHBBase):
             # adding attributes to DEHB objects to allow communication across subpopulations
             self.de[b].parent_counter = 0
             self.de[b].promotion_pop = None
+            self.de[b].promotion_pop_ids = None
             self.de[b].promotion_fitness = None
+
+            pop_ids = []
+            # announce configs to config repository
+            for config in self.de[b].population:
+                config_id = self.config_repository.announce_config(config, b)
+                pop_ids.append(config_id)
+            self.de[b].population_ids = np.array(pop_ids)
 
     def _concat_pops(self, exclude_budget=None):
         """ Concatenates all subpopulations
@@ -429,6 +441,7 @@ class DEHB(DEHBBase):
         # finding the individuals that have been evaluated (fitness < np.inf)
         evaluated_configs = np.where(self.de[low_budget].fitness != np.inf)[0]
         promotion_candidate_pop = self.de[low_budget].population[evaluated_configs]
+        promotion_candidate_pop_ids = self.de[low_budget].population_ids[evaluated_configs]
         promotion_candidate_fitness = self.de[low_budget].fitness[evaluated_configs]
         # ordering the evaluated individuals based on their fitness values
         pop_idx = np.argsort(promotion_candidate_fitness)
@@ -437,6 +450,7 @@ class DEHB(DEHBBase):
         if self.de[high_budget].promotion_pop is None or \
                 len(self.de[high_budget].promotion_pop) == 0:
             self.de[high_budget].promotion_pop = np.empty((0, self.dimensions))
+            self.de[high_budget].promotion_pop_ids = np.array([], dtype=np.int64)
             self.de[high_budget].promotion_fitness = np.array([])
 
             # iterating over the evaluated individuals from the lower budget and including them
@@ -444,6 +458,7 @@ class DEHB(DEHBBase):
             # this is done to ensure diversity of population and avoid redundant evaluations
             for idx in pop_idx:
                 individual = promotion_candidate_pop[idx]
+                individual_id = promotion_candidate_pop_ids[idx]
                 # checks if the candidate individual already exists in the high budget population
                 if np.any(np.all(individual == self.de[high_budget].population, axis=1)):
                     # skipping already present individual to allow diversity and reduce redundancy
@@ -451,24 +466,31 @@ class DEHB(DEHBBase):
                 self.de[high_budget].promotion_pop = np.append(
                     self.de[high_budget].promotion_pop, [individual], axis=0
                 )
+                self.de[high_budget].promotion_pop_ids = np.append(
+                    self.de[high_budget].promotion_pop_ids, individual_id
+                )
                 self.de[high_budget].promotion_fitness = np.append(
                     self.de[high_budget].promotion_pop, promotion_candidate_fitness[pop_idx]
                 )
             # retaining only n_configs
             self.de[high_budget].promotion_pop = self.de[high_budget].promotion_pop[:n_configs]
+            self.de[high_budget].promotion_pop_ids = self.de[high_budget].promotion_pop_ids[:n_configs]
             self.de[high_budget].promotion_fitness = \
                 self.de[high_budget].promotion_fitness[:n_configs]
 
         if len(self.de[high_budget].promotion_pop) > 0:
             config = self.de[high_budget].promotion_pop[0]
+            config_id = self.de[high_budget].promotion_pop_ids[0]
             # removing selected configuration from population
             self.de[high_budget].promotion_pop = self.de[high_budget].promotion_pop[1:]
+            self.de[high_budget].promotion_pop_ids = self.de[high_budget].promotion_pop_ids[1:]
             self.de[high_budget].promotion_fitness = self.de[high_budget].promotion_fitness[1:]
         else:
             # in case of an edge failure case where all high budget individuals are same
             # just choose the best performing individual from the lower budget (again)
             config = self.de[low_budget].population[pop_idx[0]]
-        return config
+            config_id = self.de[low_budget].population_ids[pop_idx[0]]
+        return config, config_id
 
     def _get_next_parent_for_subpop(self, budget):
         """ Maintains a looping counter over a subpopulation, to iteratively select a parent
@@ -494,8 +516,8 @@ class DEHB(DEHBBase):
             # for the subsequent rungs, individuals will be promoted from the lower_budget
             if budget != bracket.budgets[0]:
                 # TODO: check if generalizes to all budget spacings
-                config = self._get_promotion_candidate(lower_budget, budget, num_configs)
-                return config, parent_id
+                config, config_id = self._get_promotion_candidate(lower_budget, budget, num_configs)
+                return config, config_id, parent_id
 
         # DE evolution occurs when either all individuals in the subpopulation have been evaluated
         # at least once, i.e., has fitness < np.inf, which can happen if
@@ -519,7 +541,10 @@ class DEHB(DEHBBase):
         # perform crossover with selected parent
         config = self.de[budget].crossover(target=target, mutant=mutant)
         config = self.de[budget].boundary_check(config)
-        return config, parent_id
+
+        # announce new config
+        config_id = self.config_repository.announce_config(config, budget)
+        return config, config_id, parent_id
 
     def _get_next_job(self):
         """ Loads a configuration and budget to be evaluated next by a free worker
@@ -543,10 +568,11 @@ class DEHB(DEHBBase):
                 bracket = self._start_new_bracket()
         # budget that the SH bracket allots
         budget = bracket.get_next_job_budget()
-        config, parent_id = self._acquire_config(bracket, budget)
+        config, config_id, parent_id = self._acquire_config(bracket, budget)
         # notifies the Bracket Manager that a single config is to run for the budget chosen
         job_info = {
             "config": config,
+            "config_id": config_id,
             "budget": budget,
             "parent_id": parent_id,
             "bracket_id": bracket.bracket_id
@@ -619,16 +645,19 @@ class DEHB(DEHBBase):
             fitness, cost = run_info["fitness"], run_info["cost"]
             info = run_info["info"] if "info" in run_info else dict()
             budget, parent_id = run_info["budget"], run_info["parent_id"]
-            config = run_info["config"]
+            config, config_id = run_info["config"], run_info["config_id"]
             bracket_id = run_info["bracket_id"]
             for bracket in self.active_brackets:
                 if bracket.bracket_id == bracket_id:
                     # bracket job complete
                     bracket.complete_job(budget)  # IMPORTANT to perform synchronous SH
 
+            self.config_repository.tell_result(config_id, budget, fitness, cost)
+
             # carry out DE selection
             if fitness <= self.de[budget].fitness[parent_id]:
                 self.de[budget].population[parent_id] = config
+                self.de[budget].population_ids[parent_id] = config_id
                 self.de[budget].fitness[parent_id] = fitness
             # updating incumbents
             if self.de[budget].fitness[parent_id] < self.inc_score:
@@ -763,7 +792,7 @@ class DEHB(DEHBBase):
                 break
             if self.is_worker_available():
                 job_info = self._get_next_job()
-                if brackets is not None and job_info['bracket_id'] >= brackets:
+                if brackets is not None and job_info["bracket_id"] >= brackets:
                     # ignore submission and only collect results
                     # when brackets are chosen as run budget, an extra bracket is created
                     # since iteration_counter is incremented in _get_next_job() and then checked
@@ -780,11 +809,12 @@ class DEHB(DEHBBase):
                     # submits job_info to a worker for execution
                     self.submit_job(job_info, **kwargs)
                     if verbose:
-                        budget = job_info['budget']
+                        budget = job_info["budget"]
+                        config_id = job_info["config_id"]
                         self._verbosity_runtime(fevals, brackets, total_cost)
                         self.logger.info(
-                            "Evaluating a configuration with budget {} under "
-                            "bracket ID {}".format(budget, job_info['bracket_id'])
+                            "Evaluating configuration {} with budget {} under "
+                            "bracket ID {}".format(config_id, budget, job_info["bracket_id"])
                         )
                         self.logger.info(
                             "Best score seen/Incumbent score: {}".format(self.inc_score)
