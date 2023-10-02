@@ -142,10 +142,3 @@ represents the *mutation* strategy while `bin` represents the *binomial crossove
   editor    = {Z. Zhou},
   year      = {2021}
 }
-
-@online{Awad-arXiv-2023,
-title       = {MO-DEHB: Evolutionary-based Hyperband for Multi-Objective Optimization},
-author      = {Noor Awad and Ayushi Sharma and Frank Hutter},
-year        = {2023},
-keywords    = {}
-}
