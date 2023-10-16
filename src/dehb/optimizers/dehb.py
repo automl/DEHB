@@ -373,20 +373,14 @@ class DEHB(DEHBBase):
         self.de = {}
         for i, b in enumerate(self._max_pop_size.keys()):
             self.de[b] = AsyncDE(**self.de_params, budget=b, pop_size=self._max_pop_size[b])
-            self.de[b].population = self.de[b].init_population(pop_size=self._max_pop_size[b])
+            self.de[b].population, self.de[b].population_ids = self.de[b].init_population(
+                pop_size=self._max_pop_size[b])
             self.de[b].fitness = np.array([np.inf] * self._max_pop_size[b])
             # adding attributes to DEHB objects to allow communication across subpopulations
             self.de[b].parent_counter = 0
             self.de[b].promotion_pop = None
             self.de[b].promotion_pop_ids = None
             self.de[b].promotion_fitness = None
-
-            pop_ids = []
-            # announce configs to config repository
-            for config in self.de[b].population:
-                config_id = self.config_repository.announce_config(config, b)
-                pop_ids.append(config_id)
-            self.de[b].population_ids = np.array(pop_ids)
 
     def _concat_pops(self, exclude_budget=None):
         """ Concatenates all subpopulations
