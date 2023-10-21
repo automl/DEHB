@@ -2,6 +2,10 @@ site_name: DEHB
 
 nav:
   - Home: index.md
+  - Getting Started:
+    - Single Worker: getting_started/single_worker.md
+    - Parallel: getting_started/parallel.md
+  - Contributing: CONTRIBUTING.md
   - Code Reference:
     - DEHB: references/dehb.md
     - DE: references/de.md
