@@ -12,7 +12,7 @@ class ConfigItem:
     budgets: dict
 
 @dataclass
-class BudgetItem:
+class ResultItem:
     score: float
     cost: float
     info: dict
@@ -27,7 +27,7 @@ class ConfigRepository:
     def announce_config(self, config: np.array, budget: float) -> int:
         config_id = len(self.configs)
         budget_info = {
-                budget: BudgetItem(np.inf, -1, {}),
+                budget: ResultItem(np.inf, -1, {}),
             }
         config_item = ConfigItem(config_id, config, budget_info)
         self.configs.append(config_item)
@@ -48,7 +48,7 @@ class ConfigRepository:
 
         config_item = self.configs[config_id]
         budget_info = {
-                budget: BudgetItem(np.inf, -1, {}),
+                budget: ResultItem(np.inf, -1, {}),
             }
         config_item.budgets[budget] = budget_info
 
@@ -57,7 +57,7 @@ class ConfigRepository:
 
         # If configuration has been promoted, there is no budget information yet
         if budget not in config_item.budgets:
-            config_item.budgets[budget] = BudgetItem(score, cost, info)
+            config_item.budgets[budget] = ResultItem(score, cost, info)
         else:
             config_item.budgets[budget].score = score
             config_item.budgets[budget].cost = cost

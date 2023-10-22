@@ -22,15 +22,15 @@ def create_toy_searchspace():
         ConfigSpace.UniformFloatHyperparameter("x0", lower=3, upper=10, log=False))
     return cs
 
-def create_toy_optimizer(configspace: ConfigSpace.ConfigurationSpace, min_budget: float,
-                         max_budget: float, eta: int,
+def create_toy_optimizer(configspace: ConfigSpace.ConfigurationSpace, min_fidelity: float,
+                         max_fidelity: float, eta: int,
                          objective_function: typing.Callable):
     """Creates a DEHB instance.
 
     Args:
         configspace (ConfigurationSpace): Searchspace to use
-        min_budget (float): Minimum budget for DEHB
-        max_budget (float): Maximum budget for DEHB
+        min_fidelity (float): Minimum fidelity for DEHB
+        max_fidelity (float): Maximum fidelity for DEHB
         eta (int): Eta parameter of DEHB
         objective_function (Callable): Function to optimize
 
@@ -39,16 +39,16 @@ def create_toy_optimizer(configspace: ConfigSpace.ConfigurationSpace, min_budget
     """
     dim = len(configspace.get_hyperparameters())
     return DEHB(f=objective_function, cs=configspace, dimensions=dim,
-                min_budget=min_budget,
-                max_budget=max_budget, eta=eta, n_workers=1)
+                min_fidelity=min_fidelity,
+                max_fidelity=max_fidelity, eta=eta, n_workers=1)
 
 
-def objective_function(x: ConfigSpace.Configuration, budget: float, **kwargs):
+def objective_function(x: ConfigSpace.Configuration, fidelity: float, **kwargs):
     """Toy objective function.
 
     Args:
         x (ConfigSpace.Configuration): Configuration to evaluate
-        budget (float): Budget to evaluate x on
+        fidelity (float): fidelity to evaluate x on
 
     Returns:
         dict: Result dictionary
@@ -99,16 +99,16 @@ class TestBudgetExhaustion():
 
 class TestInitialization:
     """Class that bundles all tests regarding the initialization of DEHB."""
-    def test_higher_min_budget(self):
-        """Test that verifies, that DEHB breaks if min_budget > max_budget."""
+    def test_higher_min_fidelity(self):
+        """Test that verifies, that DEHB breaks if min_fidelity > max_fidelity."""
         cs = create_toy_searchspace()
         with pytest.raises(AssertionError):
-            create_toy_optimizer(configspace=cs, min_budget=28, max_budget=27, eta=3,
+            create_toy_optimizer(configspace=cs, min_fidelity=28, max_fidelity=27, eta=3,
                                         objective_function=objective_function)
 
-    def test_equal_min_max_budget(self):
-        """Test that verifies, that DEHB breaks if min_budget == max_budget."""
+    def test_equal_min_max_fidelity(self):
+        """Test that verifies, that DEHB breaks if min_fidelity == max_fidelity."""
         cs = create_toy_searchspace()
         with pytest.raises(AssertionError):
-            create_toy_optimizer(configspace=cs, min_budget=27, max_budget=27, eta=3,
+            create_toy_optimizer(configspace=cs, min_fidelity=27, max_fidelity=27, eta=3,
                                         objective_function=objective_function)

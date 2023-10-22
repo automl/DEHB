@@ -25,8 +25,8 @@ _logger_props = {
 
 class DEHBBase:
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=None,
-                 crossover_prob=None, strategy=None, min_budget=None,
-                 max_budget=None, eta=None, min_clip=None, max_clip=None,
+                 crossover_prob=None, strategy=None, min_fidelity=None,
+                 max_fidelity=None, eta=None, min_clip=None, max_clip=None,
                  boundary_fix_type='random', max_age=np.inf, **kwargs):
         # Miscellaneous
         self._setup_logger(kwargs)
@@ -62,11 +62,11 @@ class DEHBBase:
         }
 
         # Hyperband related variables
-        self.min_budget = min_budget
-        self.max_budget = max_budget
-        if self.max_budget <= self.min_budget:
-            self.logger.error("Only (Max Budget > Min Budget) is supported for DEHB.")
-            if self.max_budget == self.min_budget:
+        self.min_fidelity = min_fidelity
+        self.max_fidelity = max_fidelity
+        if self.max_fidelity <= self.min_fidelity:
+            self.logger.error("Only (Max Fidelity > Min Fidelity) is supported for DEHB.")
+            if self.max_fidelity == self.min_fidelity:
                 self.logger.error(
                     "If you have a fixed fidelity, " \
                     "you can instead run DE. For more information checkout: " \
@@ -76,14 +76,14 @@ class DEHBBase:
         self.min_clip = min_clip
         self.max_clip = max_clip
 
-        # Precomputing budget spacing and number of configurations for HB iterations
+        # Precomputing fidelity spacing and number of configurations for HB iterations
         self.max_SH_iter = None
-        self.budgets = None
-        if self.min_budget is not None and \
-           self.max_budget is not None and \
+        self.fidelities = None
+        if self.min_fidelity is not None and \
+           self.max_fidelity is not None and \
            self.eta is not None:
-            self.max_SH_iter = -int(np.log(self.min_budget / self.max_budget) / np.log(self.eta)) + 1
-            self.budgets = self.max_budget * np.power(self.eta,
+            self.max_SH_iter = -int(np.log(self.min_fidelity / self.max_fidelity) / np.log(self.eta)) + 1
+            self.fidelities = self.max_fidelity * np.power(self.eta,
                                                      -np.linspace(start=self.max_SH_iter - 1,
                                                                   stop=0, num=self.max_SH_iter))
 
@@ -126,7 +126,7 @@ class DEHBBase:
     def get_next_iteration(self, iteration):
         '''Computes the Successive Halving spacing
 
-        Given the iteration index, computes the budget spacing to be used and
+        Given the iteration index, computes the fidelity spacing to be used and
         the number of configurations to be used for the SH iterations.
 
         Parameters
@@ -139,12 +139,12 @@ class DEHBBase:
         Returns
         -------
         ns : array
-        budgets : array
+        fidelities : array
         '''
         # number of 'SH runs'
         s = self.max_SH_iter - 1 - (iteration % self.max_SH_iter)
-        # budget spacing for this iteration
-        budgets = self.budgets[(-s-1):]
+        # fidelity spacing for this iteration
+        fidelities = self.fidelities[(-s-1):]
         # number of configurations in that bracket
         n0 = int(np.floor((self.max_SH_iter)/(s+1)) * self.eta**s)
         ns = [max(int(n0*(self.eta**(-i))), 1) for i in range(s+1)]
@@ -153,7 +153,7 @@ class DEHBBase:
         elif self.min_clip is not None:
             ns = np.clip(ns, a_min=self.min_clip, a_max=np.max(ns))
 
-        return ns, budgets
+        return ns, fidelities
 
     def get_incumbents(self):
         """ Returns a tuple of the (incumbent configuration, incumbent score/fitness). """
@@ -170,13 +170,13 @@ class DEHBBase:
 
 class DEHB(DEHBBase):
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=0.5,
-                 crossover_prob=0.5, strategy='rand1_bin', min_budget=None,
-                 max_budget=None, eta=3, min_clip=None, max_clip=None, configspace=True,
+                 crossover_prob=0.5, strategy='rand1_bin', min_fidelity=None,
+                 max_fidelity=None, eta=3, min_clip=None, max_clip=None, configspace=True,
                  boundary_fix_type='random', max_age=np.inf, n_workers=None, client=None,
                  async_strategy="immediate", **kwargs):
         super().__init__(cs=cs, f=f, dimensions=dimensions, mutation_factor=mutation_factor,
-                         crossover_prob=crossover_prob, strategy=strategy, min_budget=min_budget,
-                         max_budget=max_budget, eta=eta, min_clip=min_clip, max_clip=max_clip,
+                         crossover_prob=crossover_prob, strategy=strategy, min_fidelity=min_fidelity,
+                         max_fidelity=max_fidelity, eta=eta, min_clip=min_clip, max_clip=max_clip,
                          configspace=configspace, boundary_fix_type=boundary_fix_type,
                          max_age=max_age, **kwargs)
         self.de_params.update({"async_strategy": async_strategy})
@@ -239,17 +239,17 @@ class DEHB(DEHBBase):
             os.environ.update({"CUDA_VISIBLE_DEVICES": job_info["gpu_devices"]})
 
         config, config_id = job_info["config"], job_info["config_id"]
-        budget, parent_id = job_info["budget"], job_info["parent_id"]
+        fidelity, parent_id = job_info["fidelity"], job_info["parent_id"]
         bracket_id = job_info["bracket_id"]
         kwargs = job_info["kwargs"]
-        res = self.de[budget].f_objective(config, budget, **kwargs)
+        res = self.de[fidelity].f_objective(config, fidelity, **kwargs)
         info = res["info"] if "info" in res else {}
         run_info = {
             "fitness": res["fitness"],
             "cost": res["cost"],
             "config": config,
             "config_id": config_id,
-            "budget": budget,
+            "fidelity": fidelity,
             "parent_id": parent_id,
             "bracket_id": bracket_id,
             "info": info,
@@ -299,13 +299,13 @@ class DEHB(DEHBBase):
 
     def vector_to_configspace(self, config):
         assert hasattr(self, "de")
-        assert len(self.budgets) > 0
-        return self.de[self.budgets[0]].vector_to_configspace(config)
+        assert len(self.fidelities) > 0
+        return self.de[self.fidelities[0]].vector_to_configspace(config)
 
     def configspace_to_vector(self, config):
         assert hasattr(self, "de")
-        assert len(self.budgets) > 0
-        return self.de[self.budgets[0]].configspace_to_vector(config)
+        assert len(self.fidelities) > 0
+        return self.de[self.fidelities[0]].configspace_to_vector(config)
 
     def reset(self):
         super().reset()
@@ -357,7 +357,7 @@ class DEHB(DEHBBase):
         self.inc_info = info
 
     def _get_pop_sizes(self):
-        """Determines maximum pop size for each budget
+        """Determines maximum pop size for each fidelity
         """
         self._max_pop_size = {}
         for i in range(self.max_SH_iter):
@@ -368,29 +368,29 @@ class DEHB(DEHBBase):
                 ) if r_j in self._max_pop_size.keys() else n[j]
 
     def _init_subpop(self):
-        """ List of DE objects corresponding to the budgets (fidelities)
+        """ List of DE objects corresponding to the fidelities
         """
         self.de = {}
-        for i, b in enumerate(self._max_pop_size.keys()):
-            self.de[b] = AsyncDE(**self.de_params, budget=b, pop_size=self._max_pop_size[b])
-            self.de[b].population, self.de[b].population_ids = self.de[b].init_population(
-                pop_size=self._max_pop_size[b])
-            self.de[b].fitness = np.array([np.inf] * self._max_pop_size[b])
+        for i, f in enumerate(self._max_pop_size.keys()):
+            self.de[f] = AsyncDE(**self.de_params, fidelity=f, pop_size=self._max_pop_size[f])
+            self.de[f].population = self.de[f].init_population(pop_size=self._max_pop_size[f])
+            self.de[f].population_ids = self.de[f].announce_population(self.de[f].population, f)
+            self.de[f].fitness = np.array([np.inf] * self._max_pop_size[f])
             # adding attributes to DEHB objects to allow communication across subpopulations
-            self.de[b].parent_counter = 0
-            self.de[b].promotion_pop = None
-            self.de[b].promotion_pop_ids = None
-            self.de[b].promotion_fitness = None
+            self.de[f].parent_counter = 0
+            self.de[f].promotion_pop = None
+            self.de[f].promotion_pop_ids = None
+            self.de[f].promotion_fitness = None
 
-    def _concat_pops(self, exclude_budget=None):
+    def _concat_pops(self, exclude_fidelity=None):
         """ Concatenates all subpopulations
         """
-        budgets = list(self.budgets)
-        if exclude_budget is not None:
-            budgets.remove(exclude_budget)
+        fidelities = list(self.fidelities)
+        if exclude_fidelity is not None:
+            fidelities.remove(exclude_fidelity)
         pop = []
-        for budget in budgets:
-            pop.extend(self.de[budget].population.tolist())
+        for fidelity in fidelities:
+            pop.extend(self.de[fidelity].population.tolist())
         return np.array(pop)
 
     def _start_new_bracket(self):
@@ -398,9 +398,9 @@ class DEHB(DEHBBase):
         """
         # start new bracket
         self.iteration_counter += 1  # iteration counter gives the bracket count or bracket ID
-        n_configs, budgets = self.get_next_iteration(self.iteration_counter)
+        n_configs, fidelities = self.get_next_iteration(self.iteration_counter)
         bracket = SHBracketManager(
-            n_configs=n_configs, budgets=budgets, bracket_id=self.iteration_counter
+            n_configs=n_configs, fidelities=fidelities, bracket_id=self.iteration_counter
         )
         self.active_brackets.append(bracket)
         return bracket
@@ -426,91 +426,91 @@ class DEHB(DEHBBase):
             return False
         return True
 
-    def _get_promotion_candidate(self, low_budget, high_budget, n_configs):
-        """ Manages the population to be promoted from the lower to the higher budget.
+    def _get_promotion_candidate(self, low_fidelity, high_fidelity, n_configs):
+        """ Manages the population to be promoted from the lower to the higher fidelity.
 
         This is triggered or in action only during the first full HB bracket, which is equivalent
         to the number of brackets <= max_SH_iter.
         """
         # finding the individuals that have been evaluated (fitness < np.inf)
-        evaluated_configs = np.where(self.de[low_budget].fitness != np.inf)[0]
-        promotion_candidate_pop = self.de[low_budget].population[evaluated_configs]
-        promotion_candidate_pop_ids = self.de[low_budget].population_ids[evaluated_configs]
-        promotion_candidate_fitness = self.de[low_budget].fitness[evaluated_configs]
+        evaluated_configs = np.where(self.de[low_fidelity].fitness != np.inf)[0]
+        promotion_candidate_pop = self.de[low_fidelity].population[evaluated_configs]
+        promotion_candidate_pop_ids = self.de[low_fidelity].population_ids[evaluated_configs]
+        promotion_candidate_fitness = self.de[low_fidelity].fitness[evaluated_configs]
         # ordering the evaluated individuals based on their fitness values
         pop_idx = np.argsort(promotion_candidate_fitness)
 
         # creating population for promotion if none promoted yet or nothing to promote
-        if self.de[high_budget].promotion_pop is None or \
-                len(self.de[high_budget].promotion_pop) == 0:
-            self.de[high_budget].promotion_pop = np.empty((0, self.dimensions))
-            self.de[high_budget].promotion_pop_ids = np.array([], dtype=np.int64)
-            self.de[high_budget].promotion_fitness = np.array([])
+        if self.de[high_fidelity].promotion_pop is None or \
+                len(self.de[high_fidelity].promotion_pop) == 0:
+            self.de[high_fidelity].promotion_pop = np.empty((0, self.dimensions))
+            self.de[high_fidelity].promotion_pop_ids = np.array([], dtype=np.int64)
+            self.de[high_fidelity].promotion_fitness = np.array([])
 
-            # iterating over the evaluated individuals from the lower budget and including them
-            # in the promotion population for the higher budget only if it's not in the population
+            # iterating over the evaluated individuals from the lower fidelity and including them
+            # in the promotion population for the higher fidelity only if it's not in the population
             # this is done to ensure diversity of population and avoid redundant evaluations
             for idx in pop_idx:
                 individual = promotion_candidate_pop[idx]
                 individual_id = promotion_candidate_pop_ids[idx]
-                # checks if the candidate individual already exists in the high budget population
-                if np.any(np.all(individual == self.de[high_budget].population, axis=1)):
+                # checks if the candidate individual already exists in the high fidelity population
+                if np.any(np.all(individual == self.de[high_fidelity].population, axis=1)):
                     # skipping already present individual to allow diversity and reduce redundancy
                     continue
-                self.de[high_budget].promotion_pop = np.append(
-                    self.de[high_budget].promotion_pop, [individual], axis=0
+                self.de[high_fidelity].promotion_pop = np.append(
+                    self.de[high_fidelity].promotion_pop, [individual], axis=0
                 )
-                self.de[high_budget].promotion_pop_ids = np.append(
-                    self.de[high_budget].promotion_pop_ids, individual_id
+                self.de[high_fidelity].promotion_pop_ids = np.append(
+                    self.de[high_fidelity].promotion_pop_ids, individual_id
                 )
-                self.de[high_budget].promotion_fitness = np.append(
-                    self.de[high_budget].promotion_pop, promotion_candidate_fitness[pop_idx]
+                self.de[high_fidelity].promotion_fitness = np.append(
+                    self.de[high_fidelity].promotion_pop, promotion_candidate_fitness[pop_idx]
                 )
             # retaining only n_configs
-            self.de[high_budget].promotion_pop = self.de[high_budget].promotion_pop[:n_configs]
-            self.de[high_budget].promotion_pop_ids = self.de[high_budget].promotion_pop_ids[:n_configs]
-            self.de[high_budget].promotion_fitness = \
-                self.de[high_budget].promotion_fitness[:n_configs]
+            self.de[high_fidelity].promotion_pop = self.de[high_fidelity].promotion_pop[:n_configs]
+            self.de[high_fidelity].promotion_pop_ids = self.de[high_fidelity].promotion_pop_ids[:n_configs]
+            self.de[high_fidelity].promotion_fitness = \
+                self.de[high_fidelity].promotion_fitness[:n_configs]
 
-        if len(self.de[high_budget].promotion_pop) > 0:
-            config = self.de[high_budget].promotion_pop[0]
-            config_id = self.de[high_budget].promotion_pop_ids[0]
+        if len(self.de[high_fidelity].promotion_pop) > 0:
+            config = self.de[high_fidelity].promotion_pop[0]
+            config_id = self.de[high_fidelity].promotion_pop_ids[0]
             # removing selected configuration from population
-            self.de[high_budget].promotion_pop = self.de[high_budget].promotion_pop[1:]
-            self.de[high_budget].promotion_pop_ids = self.de[high_budget].promotion_pop_ids[1:]
-            self.de[high_budget].promotion_fitness = self.de[high_budget].promotion_fitness[1:]
+            self.de[high_fidelity].promotion_pop = self.de[high_fidelity].promotion_pop[1:]
+            self.de[high_fidelity].promotion_pop_ids = self.de[high_fidelity].promotion_pop_ids[1:]
+            self.de[high_fidelity].promotion_fitness = self.de[high_fidelity].promotion_fitness[1:]
         else:
-            # in case of an edge failure case where all high budget individuals are same
-            # just choose the best performing individual from the lower budget (again)
-            config = self.de[low_budget].population[pop_idx[0]]
-            config_id = self.de[low_budget].population_ids[pop_idx[0]]
+            # in case of an edge failure case where all high fidelity individuals are same
+            # just choose the best performing individual from the lower fidelity (again)
+            config = self.de[low_fidelity].population[pop_idx[0]]
+            config_id = self.de[low_fidelity].population_ids[pop_idx[0]]
         return config, config_id
 
-    def _get_next_parent_for_subpop(self, budget):
+    def _get_next_parent_for_subpop(self, fidelity):
         """ Maintains a looping counter over a subpopulation, to iteratively select a parent
         """
-        parent_id = self.de[budget].parent_counter
-        self.de[budget].parent_counter += 1
-        self.de[budget].parent_counter = self.de[budget].parent_counter % self._max_pop_size[budget]
+        parent_id = self.de[fidelity].parent_counter
+        self.de[fidelity].parent_counter += 1
+        self.de[fidelity].parent_counter = self.de[fidelity].parent_counter % self._max_pop_size[fidelity]
         return parent_id
 
-    def _acquire_config(self, bracket, budget):
-        """ Generates/chooses a configuration based on the budget and iteration number
+    def _acquire_config(self, bracket, fidelity):
+        """ Generates/chooses a configuration based on the fidelity and iteration number
         """
         # select a parent/target
-        parent_id = self._get_next_parent_for_subpop(budget)
-        target = self.de[budget].population[parent_id]
-        # identify lower budget/fidelity to transfer information from
-        lower_budget, num_configs = bracket.get_lower_budget_promotions(budget)
+        parent_id = self._get_next_parent_for_subpop(fidelity)
+        target = self.de[fidelity].population[parent_id]
+        # identify lower fidelity to transfer information from
+        lower_fidelity, num_configs = bracket.get_lower_fidelity_promotions(fidelity)
 
         if self.iteration_counter < self.max_SH_iter:
             # promotions occur only in the first set of SH brackets under Hyperband
-            # for the first rung/budget in the current bracket, no promotion is possible and
+            # for the first rung/fidelity in the current bracket, no promotion is possible and
             # evolution can begin straight away
-            # for the subsequent rungs, individuals will be promoted from the lower_budget
-            if budget != bracket.budgets[0]:
-                # TODO: check if generalizes to all budget spacings
-                config, config_id = self._get_promotion_candidate(lower_budget, budget, num_configs)
+            # for the subsequent rungs, individuals will be promoted from the lower_fidelity
+            if fidelity != bracket.fidelities[0]:
+                # TODO: check if generalizes to all fidelity spacings
+                config, config_id = self._get_promotion_candidate(lower_fidelity, fidelity, num_configs)
                 return config, config_id, parent_id
 
         # DE evolution occurs when either all individuals in the subpopulation have been evaluated
@@ -518,30 +518,30 @@ class DEHB(DEHBBase):
         # iteration_counter <= max_SH_iter but certainly never when iteration_counter > max_SH_iter
 
         # a single DE evolution --- (mutation + crossover) occurs here
-        mutation_pop_idx = np.argsort(self.de[lower_budget].fitness)[:num_configs]
-        mutation_pop = self.de[lower_budget].population[mutation_pop_idx]
-        # generate mutants from previous budget subpopulation or global population
-        if len(mutation_pop) < self.de[budget]._min_pop_size:
-            filler = self.de[budget]._min_pop_size - len(mutation_pop) + 1
-            new_pop = self.de[budget]._init_mutant_population(
+        mutation_pop_idx = np.argsort(self.de[lower_fidelity].fitness)[:num_configs]
+        mutation_pop = self.de[lower_fidelity].population[mutation_pop_idx]
+        # generate mutants from previous fidelity subpopulation or global population
+        if len(mutation_pop) < self.de[fidelity]._min_pop_size:
+            filler = self.de[fidelity]._min_pop_size - len(mutation_pop) + 1
+            new_pop = self.de[fidelity]._init_mutant_population(
                 pop_size=filler, population=self._concat_pops(),
                 target=target, best=self.inc_config
             )
             mutation_pop = np.concatenate((mutation_pop, new_pop))
         # generate mutant from among individuals in mutation_pop
-        mutant = self.de[budget].mutation(
+        mutant = self.de[fidelity].mutation(
             current=target, best=self.inc_config, alt_pop=mutation_pop
         )
         # perform crossover with selected parent
-        config = self.de[budget].crossover(target=target, mutant=mutant)
-        config = self.de[budget].boundary_check(config)
+        config = self.de[fidelity].crossover(target=target, mutant=mutant)
+        config = self.de[fidelity].boundary_check(config)
 
         # announce new config
-        config_id = self.config_repository.announce_config(config, budget)
+        config_id = self.config_repository.announce_config(config, fidelity)
         return config, config_id, parent_id
 
     def _get_next_job(self):
-        """ Loads a configuration and budget to be evaluated next by a free worker
+        """ Loads a configuration and fidelity to be evaluated next by a free worker
         """
         bracket = None
         if len(self.active_brackets) == 0 or \
@@ -560,14 +560,14 @@ class DEHB(DEHBBase):
             if bracket is None:
                 # start new bracket when existing list has all waiting brackets
                 bracket = self._start_new_bracket()
-        # budget that the SH bracket allots
-        budget = bracket.get_next_job_budget()
-        config, config_id, parent_id = self._acquire_config(bracket, budget)
-        # notifies the Bracket Manager that a single config is to run for the budget chosen
+        # fidelity that the SH bracket allots
+        fidelity = bracket.get_next_job_fidelity()
+        config, config_id, parent_id = self._acquire_config(bracket, fidelity)
+        # notifies the Bracket Manager that a single config is to run for the fidelity chosen
         job_info = {
             "config": config,
             "config_id": config_id,
-            "budget": budget,
+            "fidelity": fidelity,
             "parent_id": parent_id,
             "bracket_id": bracket.bracket_id
         }
@@ -590,7 +590,7 @@ class DEHB(DEHBBase):
         return gpu_ids
 
     def submit_job(self, job_info, **kwargs):
-        """ Asks a free worker to run the objective function on config and budget
+        """ Asks a free worker to run the objective function on config and fidelity
         """
         job_info["kwargs"] = self.shared_data if self.shared_data is not None else kwargs
         # submit to to Dask client
@@ -609,7 +609,7 @@ class DEHB(DEHBBase):
         for bracket in self.active_brackets:
             if bracket.bracket_id == job_info['bracket_id']:
                 # registering is IMPORTANT for Bracket Manager to perform SH
-                bracket.register_job(job_info['budget'])
+                bracket.register_job(job_info['fidelity'])
                 break
 
     def _fetch_results_from_workers(self):
@@ -638,32 +638,32 @@ class DEHB(DEHBBase):
             # update bracket information
             fitness, cost = run_info["fitness"], run_info["cost"]
             info = run_info["info"] if "info" in run_info else dict()
-            budget, parent_id = run_info["budget"], run_info["parent_id"]
+            fidelity, parent_id = run_info["fidelity"], run_info["parent_id"]
             config, config_id = run_info["config"], run_info["config_id"]
             bracket_id = run_info["bracket_id"]
             for bracket in self.active_brackets:
                 if bracket.bracket_id == bracket_id:
                     # bracket job complete
-                    bracket.complete_job(budget)  # IMPORTANT to perform synchronous SH
+                    bracket.complete_job(fidelity)  # IMPORTANT to perform synchronous SH
 
-            self.config_repository.tell_result(config_id, budget, fitness, cost)
+            self.config_repository.tell_result(config_id, fidelity, fitness, cost, info)
 
             # carry out DE selection
-            if fitness <= self.de[budget].fitness[parent_id]:
-                self.de[budget].population[parent_id] = config
-                self.de[budget].population_ids[parent_id] = config_id
-                self.de[budget].fitness[parent_id] = fitness
+            if fitness <= self.de[fidelity].fitness[parent_id]:
+                self.de[fidelity].population[parent_id] = config
+                self.de[fidelity].population_ids[parent_id] = config_id
+                self.de[fidelity].fitness[parent_id] = fitness
             # updating incumbents
-            if self.de[budget].fitness[parent_id] < self.inc_score:
+            if self.de[fidelity].fitness[parent_id] < self.inc_score:
                 self._update_incumbents(
-                    config=self.de[budget].population[parent_id],
-                    score=self.de[budget].fitness[parent_id],
+                    config=self.de[fidelity].population[parent_id],
+                    score=self.de[fidelity].fitness[parent_id],
                     info=info
                 )
             # book-keeping
             self._update_trackers(
                 traj=self.inc_score, runtime=cost, history=(
-                    config.tolist(), float(fitness), float(cost), float(budget), info
+                    config.tolist(), float(fitness), float(cost), float(fidelity), info
                 )
             )
         # remove processed future
@@ -750,7 +750,7 @@ class DEHB(DEHBBase):
         """ Main interface to run optimization by DEHB
 
         This function waits on workers and if a worker is free, asks for a configuration and a
-        budget to evaluate on and submits it to the worker. In each loop, it checks if a job
+        fidelity to evaluate on and submits it to the worker. In each loop, it checks if a job
         is complete, fetches the results, carries the necessary processing of it asynchronously
         to the worker computations.
 
@@ -803,12 +803,12 @@ class DEHB(DEHBBase):
                     # submits job_info to a worker for execution
                     self.submit_job(job_info, **kwargs)
                     if verbose:
-                        budget = job_info["budget"]
+                        fidelity = job_info["fidelity"]
                         config_id = job_info["config_id"]
                         self._verbosity_runtime(fevals, brackets, total_cost)
                         self.logger.info(
-                            "Evaluating configuration {} with budget {} under "
-                            "bracket ID {}".format(config_id, budget, job_info["bracket_id"])
+                            "Evaluating configuration {} with fidelity {} under "
+                            "bracket ID {}".format(config_id, fidelity, job_info["bracket_id"])
                         )
                         self.logger.info(
                             "Best score seen/Incumbent score: {}".format(self.inc_score)
