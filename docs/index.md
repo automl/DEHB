@@ -24,6 +24,9 @@ pip install dehb
     pip install -e DEHB  # -e stands for editable, lets you modify the code and rerun things
     ```
 
+## Contributing
+Please have a look at our [contributing guidelines](https://github.com/automl/DEHB/blob/master/CONTRIBUTING.md).
+
 ## To cite the paper or code
 If you use DEHB in one of your research projects, please cite our paper(s):
 ```bibtex
@@ -36,12 +39,5 @@ If you use DEHB in one of your research projects, please cite our paper(s):
   publisher = {ijcai.org},
   editor    = {Z. Zhou},
   year      = {2021}
-}
-
-@online{Awad-arXiv-2023,
-    title       = {MO-DEHB: Evolutionary-based Hyperband for Multi-Objective Optimization},
-    author      = {Noor Awad and Ayushi Sharma and Frank Hutter},
-    year        = {2023},
-    keywords    = {}
 }
 ```
