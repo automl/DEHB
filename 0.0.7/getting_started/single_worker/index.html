@@ -9,7 +9,7 @@
       
       
       
-        <link rel="prev" href="../../home/cite/">
+        <link rel="prev" href="../..">
       
       
         <link rel="next" href="../parallel/">
@@ -201,15 +201,11 @@
   
 
 
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../../home/" class="md-tabs__link">
-        Home
-      </a>
-    </li>
-  
+  <li class="md-tabs__item">
+    <a href="../.." class="md-tabs__link">
+      Home
+    </a>
+  </li>
 
       
         
@@ -302,72 +298,10 @@
   
   
   
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-      
-      
-      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
-      
-      
-      
-        <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
-          Home
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
-        <label class="md-nav__title" for="__nav_1">
-          <span class="md-nav__icon md-icon"></span>
-          Home
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../../home/" class="md-nav__link">
-        Introduction
+      <a href="../.." class="md-nav__link">
+        Home
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../home/installation/" class="md-nav__link">
-        Installation
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../home/cite/" class="md-nav__link">
-        How to Cite
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -645,10 +579,10 @@
 </code></pre></div>
 <div class="result">
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">Configuration</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="p">{</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="s1">&#39;x0&#39;</span><span class="p">:</span> <span class="mf">9.040285627425668</span><span class="p">,</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="s1">&#39;x1&#39;</span><span class="p">:</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  <span class="s1">&#39;x0&#39;</span><span class="p">:</span> <span class="mf">5.146577400361577</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  <span class="s1">&#39;x1&#39;</span><span class="p">:</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">})</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">{</span><span class="s1">&#39;fitness&#39;</span><span class="p">:</span> <span class="mf">9.461669809837716</span><span class="p">,</span> <span class="s1">&#39;cost&#39;</span><span class="p">:</span> <span class="mf">9.040285627425668</span><span class="p">}</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">{</span><span class="s1">&#39;fitness&#39;</span><span class="p">:</span> <span class="mf">5.502723867549041</span><span class="p">,</span> <span class="s1">&#39;cost&#39;</span><span class="p">:</span> <span class="mf">5.146577400361577</span><span class="p">}</span>
 </code></pre></div>
 </div></p>
 <p>Finally, we can setup our optimizer and run DEHB:</p>
@@ -675,9 +609,9 @@
 <a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;budget&quot;</span><span class="p">,</span> <span class="n">budget</span><span class="p">)</span>
 </code></pre></div>
 <div class="result">
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">config</span> <span class="p">[</span><span class="mf">0.9423611717115702</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">]</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">fitness</span> <span class="mf">10.565943004485671</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">runtime</span> <span class="mf">9.596528201980991</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">config</span> <span class="p">[</span><span class="mf">0.07363401483759024</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">fitness</span> <span class="mf">3.5315135160295608</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">runtime</span> <span class="mf">3.515438103863132</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">budget</span> <span class="mf">3.0</span>
 </code></pre></div>
 </div>
@@ -702,7 +636,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../../home/cite/" class="md-footer__link md-footer__link--prev" aria-label="Previous: How to Cite" rel="prev">
+          <a href="../.." class="md-footer__link md-footer__link--prev" aria-label="Previous: Home" rel="prev">
             <div class="md-footer__button md-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
             </div>
@@ -711,7 +645,7 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                How to Cite
+                Home
               </div>
             </div>
           </a>
