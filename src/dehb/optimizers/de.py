@@ -94,23 +94,6 @@ class DEBase():
 
         return self._min_pop_size
 
-    def announce_population(self, population: np.array, fidelity=None) -> np.array:
-        """Announce population to config helper, retrieving ids for the population.
-
-        Args:
-            population (np.array): Population to announce
-            fidelity (float, optional): Fidelity on which pop is evaluated or None.
-                                        Defaults to None.
-
-        Returns:
-            np.array: population ids
-        """
-        population_ids = []
-        for indiv in population:
-            conf_id = self.config_repository.announce_config(indiv, float(fidelity or 0))
-            population_ids.append(conf_id)
-        return np.array(population_ids)
-
     def init_population(self, pop_size: int) -> List:
         if self.configspace:
             # sample from ConfigSpace s.t. conditional constraints (if any) are maintained
@@ -338,7 +321,7 @@ class DE(DEBase):
         '''Creates new population of 'pop_size' and evaluates individuals.
         '''
         self.population = self.init_population(self.pop_size)
-        self.population_ids = self.announce_population(self.population, fidelity)
+        self.population_ids = self.config_repository.announce_population(self.population, fidelity)
         self.fitness = np.array([np.inf for i in range(self.pop_size)])
         self.age = np.array([self.max_age] * self.pop_size)
 

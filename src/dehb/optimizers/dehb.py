@@ -372,9 +372,10 @@ class DEHB(DEHBBase):
         """
         self.de = {}
         for i, f in enumerate(self._max_pop_size.keys()):
-            self.de[f] = AsyncDE(**self.de_params, fidelity=f, pop_size=self._max_pop_size[f])
+            self.de[f] = AsyncDE(**self.de_params, pop_size=self._max_pop_size[f],
+                                 config_repository=self.config_repository)
             self.de[f].population = self.de[f].init_population(pop_size=self._max_pop_size[f])
-            self.de[f].population_ids = self.de[f].announce_population(self.de[f].population, f)
+            self.de[f].population_ids = self.config_repository.announce_population(self.de[f].population, f)
             self.de[f].fitness = np.array([np.inf] * self._max_pop_size[f])
             # adding attributes to DEHB objects to allow communication across subpopulations
             self.de[f].parent_counter = 0

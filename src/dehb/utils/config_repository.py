@@ -9,7 +9,7 @@ import numpy as np
 class ConfigItem:
     config_id: int
     config: np.array
-    fidelitites: dict
+    fidelities: dict
 
 @dataclass
 class ResultItem:
@@ -32,6 +32,23 @@ class ConfigRepository:
         config_item = ConfigItem(config_id, config, result_item)
         self.configs.append(config_item)
         return config_id
+
+    def announce_population(self, population: np.array, fidelity=None) -> np.array:
+        """Announce population, retrieving ids for the population.
+
+        Args:
+            population (np.array): Population to announce
+            fidelity (float, optional): Fidelity on which pop is evaluated or None.
+                                        Defaults to None.
+
+        Returns:
+            np.array: population ids
+        """
+        population_ids = []
+        for indiv in population:
+            conf_id = self.announce_config(indiv, float(fidelity or 0))
+            population_ids.append(conf_id)
+        return np.array(population_ids)
 
     def announce_fidelity(self, config_id: int, fidelity: float):
         """Announce the evaluation of a new fidelity for a given config.
