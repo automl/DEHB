@@ -70,7 +70,7 @@ class TestBudgetExhaustion():
     def test_runtime_exhaustion(self):
         """Test for runtime budget exhaustion."""
         cs = create_toy_searchspace()
-        dehb = create_toy_optimizer(configspace=cs, min_budget=3, max_budget=27, eta=3,
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
                                         objective_function=objective_function)
 
         dehb.start = time.time() - 10
@@ -80,7 +80,7 @@ class TestBudgetExhaustion():
     def test_fevals_exhaustion(self):
         """Test for function evaluations budget exhaustion."""
         cs = create_toy_searchspace()
-        dehb = create_toy_optimizer(configspace=cs, min_budget=3, max_budget=27, eta=3,
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
                                     objective_function=objective_function)
 
         dehb.traj.append("Just needed for the test")
@@ -90,7 +90,7 @@ class TestBudgetExhaustion():
     def test_brackets_exhaustion(self):
         """Test for bracket budget exhaustion."""
         cs = create_toy_searchspace()
-        dehb = create_toy_optimizer(configspace=cs, min_budget=3, max_budget=27, eta=3,
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
                                         objective_function=objective_function)
 
         dehb.iteration_counter = 5
