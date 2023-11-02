@@ -47,14 +47,15 @@ class DEBase():
             self.config_repository = ConfigRepository()
 
         # Global trackers
-        self.inc_score = np.inf
-        self.inc_config = None
-        self.inc_id = -1
-        self.population = None
-        self.population_ids = None
-        self.fitness = None
-        self.age = None
-        self.history = []
+        self.inc_score : float
+        self.inc_config : np.ndarray[float]
+        self.inc_id : int
+        self.population : np.ndarray[np.ndarray[float]]
+        self.population_ids :np.ndarray[int]
+        self.fitness : np.ndarray[float]
+        self.age : int
+        self.history : list[object]
+        self.reset()
 
     def reset(self):
         self.inc_score = np.inf
@@ -130,7 +131,7 @@ class DEBase():
             selection = np.random.choice(np.arange(len(self.population)), size, replace=False)
             return self.population[selection]
 
-    def boundary_check(self, vector: np.array) -> np.array:
+    def boundary_check(self, vector: np.ndarray) -> np.ndarray:
         '''
         Checks whether each of the dimensions of the input vector are within [0, 1].
         If not, values of those dimensions are replaced with the type of fix selected.
@@ -155,7 +156,7 @@ class DEBase():
             vector[violations] = np.clip(vector[violations], a_min=0, a_max=1)
         return vector
 
-    def vector_to_configspace(self, vector: np.array) -> ConfigSpace.Configuration:
+    def vector_to_configspace(self, vector: np.ndarray) -> ConfigSpace.Configuration:
         '''Converts numpy array to ConfigSpace object
 
         Works when self.cs is a ConfigSpace object and the input vector is in the domain [0, 1].
@@ -193,7 +194,7 @@ class DEBase():
         )
         return new_config
 
-    def configspace_to_vector(self, config: ConfigSpace.Configuration) -> np.array:
+    def configspace_to_vector(self, config: ConfigSpace.Configuration) -> np.ndarray:
         '''Converts ConfigSpace object to numpy array scaled to [0,1]
 
         Works when self.cs is a ConfigSpace object and the input config is a ConfigSpace object.
