@@ -112,3 +112,37 @@ class TestInitialization:
         with pytest.raises(AssertionError):
             create_toy_optimizer(configspace=cs, min_fidelity=27, max_fidelity=27, eta=3,
                                         objective_function=objective_function)
+
+class TestConfigID:
+    """Class that bundles all tests regarding config ID functionality."""
+    def test_initialization(self):
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    objective_function=objective_function)
+        # calculate how many configurations have been sampled for the initial populations
+        num_configs = 0
+        for de_inst in dehb.de.values():
+            num_configs += len(de_inst.population)
+
+        # config repository should be exactly this long
+        assert len(dehb.config_repository.configs) == num_configs
+
+    def test_single_bracket(self):
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    objective_function=objective_function)
+        # calculate how many configurations have been sampled for the initial populations
+        num_initial_configs = 0
+        for de_inst in dehb.de.values():
+            num_initial_configs += len(de_inst.population)
+
+        # run for a single bracket
+        dehb.run(brackets=1, verbose=True)
+
+        # for the first bracket, we only mutate on the lowest fidelity and then promote the best
+        # configs to the next fidelity. Please note, that this is only the case for the first
+        # DEHB bracket!
+        # Note: The final + 1 is due to the inner workings of DEHB. If the run budget is exhausted,
+        # we keep evolving new configurations without evaluating them, since we are only waiting to
+        # to fetch all results started ahead of the budget exhaustion.
+        assert len(dehb.config_repository.configs) == num_initial_configs + 9 + 1
