@@ -604,7 +604,7 @@ details to a file on a cluster node accessible to all processes. Multiple <code>
 created to interface the <code>dask-scheduler</code> by connecting to the details read from the file dumped. Each
 dask-worker can be triggered on any remote machine. Each worker can be configured as required, 
 including mapping to specific GPU devices. </p>
-<p>Some helper scripts can be found <a href="../utils/">here</a>, that can be used as a reference to run DEHB in a multi-node 
+<p>Some helper scripts can be found <a href="https://github.com/automl/DEHB/tree/master/utils">here</a>, that can be used as a reference to run DEHB in a multi-node 
 manner on clusters managed by SLURM. (<em>not expected to work off-the-shelf</em>)</p>
 <p>To run the PyTorch MNIST example on a multi-node setup using 4 workers:
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>bash<span class="w"> </span>utils/run_dask_setup.sh<span class="w"> </span><span class="se">\</span>
