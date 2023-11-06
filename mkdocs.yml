@@ -2,6 +2,9 @@ site_name: DEHB
 
 nav:
   - Home: index.md
+  - Getting Started:
+    - Single Worker: getting_started/single_worker.md
+    - Parallel: getting_started/parallel.md
   - Code Reference:
     - DEHB: references/dehb.md
     - DE: references/de.md
@@ -101,3 +104,7 @@ plugins:
             show_signature: true
             separate_signature: false
             show_signature_annotations: false
+
+extra:
+  version:
+    provider: mike
