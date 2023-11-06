@@ -1,5 +1,5 @@
 ### Basic single worker setup
-A basic setup for optimizing can be done as follows. Please note, that this is example should solely show a simple setup of `dehb`. More in-depth examples can be found in the [examples folder](../examples/). First we need to setup a `ConfigurationSpace`, from which Configurations will be sampled:
+A basic setup for optimizing can be done as follows. Please note, that this is example should solely show a simple setup of `dehb`. More in-depth examples can be found in the [examples folder](https://github.com/automl/DEHB/tree/master/examples). First we need to setup a `ConfigurationSpace`, from which Configurations will be sampled:
 
 ```python exec="true" source="material-block" result="python" title="Configuration Space" session="someid"
 from ConfigSpace import ConfigurationSpace, Configuration

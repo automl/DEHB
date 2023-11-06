@@ -4,7 +4,7 @@
 
 `dehb` is a python package implementing the [DEHB](https://arxiv.org/abs/2105.09821) algorithm. It offers an intuitive interface to optimize user-defined problems using DEHB.
 
-This documentation explains how to use `dehb` and demonstrates its features. In the following section you will be guided how to install the `dehb` package and how to use it in your own projects. Examples with more hands-on material can be found in the [examples folder](../examples/).
+This documentation explains how to use `dehb` and demonstrates its features. In the following section you will be guided how to install the `dehb` package and how to use it in your own projects. Examples with more hands-on material can be found in the [examples folder](https://github.com/automl/DEHB/tree/master/examples).
 
 ## Installation
 
