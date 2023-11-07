@@ -42,7 +42,7 @@ class ConfigRepository:
         """Resets the config repository, clearing all collected configurations and results."""
         self.configs = []
 
-    def announce_config(self, config: np.ndarray, fidelity: float) -> int:
+    def announce_config(self, config: np.ndarray, fidelity=None) -> int:
         """Announces a new configuration with the respective fidelity it should be evaluated on.
 
         The configuration is then added to the list of so far seen configurations and the ID of the
@@ -50,12 +50,14 @@ class ConfigRepository:
 
         Args:
             config (np.ndarray): New configuration
-            fidelity (float): Fidelity on which `config` is evaluated
+            fidelity (float, optional): Fidelity on which `config` is evaluated or None.
+                                        Defaults to None.
 
         Returns:
             int: ID of configuration
         """
         config_id = len(self.configs)
+        fidelity = float(fidelity or 0)
         result_dict = {
                 fidelity: ResultItem(np.inf, -1, {}),
             }
@@ -80,7 +82,7 @@ class ConfigRepository:
             population_ids.append(conf_id)
         return np.array(population_ids)
 
-    def announce_fidelity(self, config_id: int, fidelity: float):
+    def announce_fidelity(self, config_id: int, fidelity: float) -> bool:
         """Announce the evaluation of a new fidelity for a given config.
 
         This function may only be used if the config already exists in the repository.
@@ -88,16 +90,20 @@ class ConfigRepository:
         Args:
             config_id (int): ID of Configuration
             fidelity (float): Fidelity on which the config will be evaluated
+
+        Returns:
+            bool: Success/Failure of operation
         """
         if config_id >= len(self.configs) or config_id < 0:
             # TODO: Error message
-            return
+            return False
 
         config_item = self.configs[config_id]
         result_item = {
                 fidelity: ResultItem(np.inf, -1, {}),
             }
         config_item.results[fidelity] = result_item
+        return True
 
     def tell_result(self, config_id: int, fidelity: float, score: float, cost: float, info: dict):
         """Logs the achieved performance, cost etc. of a specific configuration-fidelity pair.

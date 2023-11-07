@@ -116,6 +116,7 @@ class TestInitialization:
 class TestConfigID:
     """Class that bundles all tests regarding config ID functionality."""
     def test_initialization(self):
+        """Verifies, that the initial population is properly tracked by the config repository."""
         cs = create_toy_searchspace()
         dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
                                     objective_function=objective_function)
@@ -128,6 +129,7 @@ class TestConfigID:
         assert len(dehb.config_repository.configs) == num_configs
 
     def test_single_bracket(self):
+        """Verifies, that the population is continously tracked over the run of a single bracket."""
         cs = create_toy_searchspace()
         dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
                                     objective_function=objective_function)
