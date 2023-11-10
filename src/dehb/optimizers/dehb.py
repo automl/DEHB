@@ -541,7 +541,7 @@ class DEHB(DEHBBase):
         config_id = self.config_repository.announce_config(config, fidelity)
         return config, config_id, parent_id
 
-    def _get_next_job(self):
+    def ask(self):
         """ Loads a configuration and fidelity to be evaluated next by a free worker
         """
         bracket = None
@@ -636,37 +636,8 @@ class DEHB(DEHBBase):
             else:
                 # Dask not invoked in the synchronous case
                 run_info = future
-            # update bracket information
-            fitness, cost = run_info["fitness"], run_info["cost"]
-            info = run_info["info"] if "info" in run_info else dict()
-            fidelity, parent_id = run_info["fidelity"], run_info["parent_id"]
-            config, config_id = run_info["config"], run_info["config_id"]
-            bracket_id = run_info["bracket_id"]
-            for bracket in self.active_brackets:
-                if bracket.bracket_id == bracket_id:
-                    # bracket job complete
-                    bracket.complete_job(fidelity)  # IMPORTANT to perform synchronous SH
-
-            self.config_repository.tell_result(config_id, fidelity, fitness, cost, info)
-
-            # carry out DE selection
-            if fitness <= self.de[fidelity].fitness[parent_id]:
-                self.de[fidelity].population[parent_id] = config
-                self.de[fidelity].population_ids[parent_id] = config_id
-                self.de[fidelity].fitness[parent_id] = fitness
-            # updating incumbents
-            if self.de[fidelity].fitness[parent_id] < self.inc_score:
-                self._update_incumbents(
-                    config=self.de[fidelity].population[parent_id],
-                    score=self.de[fidelity].fitness[parent_id],
-                    info=info
-                )
-            # book-keeping
-            self._update_trackers(
-                traj=self.inc_score, runtime=cost, history=(
-                    config.tolist(), float(fitness), float(cost), float(fidelity), info
-                )
-            )
+            # tell result
+            self.tell(run_info)
         # remove processed future
         self.futures = np.delete(self.futures, [i for i, _ in done_list]).tolist()
 
@@ -745,6 +716,39 @@ class DEHB(DEHBBase):
             "{}/{} {}".format(remaining[0], remaining[1], remaining[2])
         )
 
+    def tell(self, run_info):
+        # update bracket information
+        fitness, cost = run_info["fitness"], run_info["cost"]
+        info = run_info["info"] if "info" in run_info else dict()
+        fidelity, parent_id = run_info["fidelity"], run_info["parent_id"]
+        config, config_id = run_info["config"], run_info["config_id"]
+        bracket_id = run_info["bracket_id"]
+        for bracket in self.active_brackets:
+            if bracket.bracket_id == bracket_id:
+                # bracket job complete
+                bracket.complete_job(fidelity)  # IMPORTANT to perform synchronous SH
+
+        self.config_repository.tell_result(config_id, fidelity, fitness, cost, info)
+
+        # carry out DE selection
+        if fitness <= self.de[fidelity].fitness[parent_id]:
+            self.de[fidelity].population[parent_id] = config
+            self.de[fidelity].population_ids[parent_id] = config_id
+            self.de[fidelity].fitness[parent_id] = fitness
+        # updating incumbents
+        if self.de[fidelity].fitness[parent_id] < self.inc_score:
+            self._update_incumbents(
+                config=self.de[fidelity].population[parent_id],
+                score=self.de[fidelity].fitness[parent_id],
+                info=info
+            )
+        # book-keeping
+        self._update_trackers(
+            traj=self.inc_score, runtime=cost, history=(
+                config.tolist(), float(fitness), float(cost), float(fidelity), info
+            )
+        )
+
     @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None, single_node_with_gpus=False,
             verbose=False, debug=False, save_intermediate=True, save_history=True, name=None, **kwargs):
@@ -786,11 +790,11 @@ class DEHB(DEHBBase):
             if self._is_run_budget_exhausted(fevals, brackets, total_cost):
                 break
             if self.is_worker_available():
-                job_info = self._get_next_job()
+                job_info = self.ask()
                 if brackets is not None and job_info["bracket_id"] >= brackets:
                     # ignore submission and only collect results
                     # when brackets are chosen as run budget, an extra bracket is created
-                    # since iteration_counter is incremented in _get_next_job() and then checked
+                    # since iteration_counter is incremented in ask() and then checked
                     # in _is_run_budget_exhausted(), therefore, need to skip suggestions
                     # coming from the extra allocated bracket
                     # _is_run_budget_exhausted() will not return True until all the lower brackets
