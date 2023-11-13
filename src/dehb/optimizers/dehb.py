@@ -245,14 +245,18 @@ class DEHB(DEHBBase):
         res = self.de[fidelity].f_objective(config, fidelity, **kwargs)
         info = res["info"] if "info" in res else {}
         run_info = {
-            "fitness": res["fitness"],
-            "cost": res["cost"],
-            "config": config,
-            "config_id": config_id,
-            "fidelity": fidelity,
-            "parent_id": parent_id,
-            "bracket_id": bracket_id,
-            "info": info,
+            "job_info": {
+                "config": config,
+                "config_id": config_id,
+                "fidelity": fidelity,
+                "parent_id": parent_id,
+                "bracket_id": bracket_id,
+            },
+            "result": {
+                "fitness": res["fitness"],
+                "cost": res["cost"],
+                "info": info,
+            },
         }
 
         if "gpu_devices" in job_info:
@@ -564,13 +568,19 @@ class DEHB(DEHBBase):
         # fidelity that the SH bracket allots
         fidelity = bracket.get_next_job_fidelity()
         config, config_id, parent_id = self._acquire_config(bracket, fidelity)
+
+        # transform config to proper representation
+        if self.configspace:
+            # converts [0, 1] vector to a ConfigSpace object
+            config = self.de[fidelity].vector_to_configspace(config)
+
         # notifies the Bracket Manager that a single config is to run for the fidelity chosen
         job_info = {
             "config": config,
             "config_id": config_id,
             "fidelity": fidelity,
             "parent_id": parent_id,
-            "bracket_id": bracket.bracket_id
+            "bracket_id": bracket.bracket_id,
         }
         return job_info
 
@@ -637,7 +647,7 @@ class DEHB(DEHBBase):
                 # Dask not invoked in the synchronous case
                 run_info = future
             # tell result
-            self.tell(run_info)
+            self.tell(run_info["job_info"], run_info["result"])
         # remove processed future
         self.futures = np.delete(self.futures, [i for i, _ in done_list]).tolist()
 
@@ -716,19 +726,23 @@ class DEHB(DEHBBase):
             "{}/{} {}".format(remaining[0], remaining[1], remaining[2])
         )
 
-    def tell(self, run_info):
+    def tell(self, job_info, result):
         # update bracket information
-        fitness, cost = run_info["fitness"], run_info["cost"]
-        info = run_info["info"] if "info" in run_info else dict()
-        fidelity, parent_id = run_info["fidelity"], run_info["parent_id"]
-        config, config_id = run_info["config"], run_info["config_id"]
-        bracket_id = run_info["bracket_id"]
+        fitness, cost = result["fitness"], result["cost"]
+        info = result["info"] if "info" in result else dict()
+        fidelity, parent_id = job_info["fidelity"], job_info["parent_id"]
+        config, config_id = job_info["config"], job_info["config_id"]
+        bracket_id = job_info["bracket_id"]
         for bracket in self.active_brackets:
             if bracket.bracket_id == bracket_id:
                 # bracket job complete
                 bracket.complete_job(fidelity)  # IMPORTANT to perform synchronous SH
 
         self.config_repository.tell_result(config_id, fidelity, fitness, cost, info)
+
+        # transform config back to original representation
+        if self.configspace:
+            config = self.de[fidelity].configspace_to_vector(config)
 
         # carry out DE selection
         if fitness <= self.de[fidelity].fitness[parent_id]:
