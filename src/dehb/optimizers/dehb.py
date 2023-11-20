@@ -740,9 +740,9 @@ class DEHB(DEHBBase):
 
         self.config_repository.tell_result(config_id, fidelity, fitness, cost, info)
 
-        # transform config back to original representation
+        # get hypercube representation from config repo
         if self.configspace:
-            config = self.de[fidelity].configspace_to_vector(config)
+            config = self.config_repository.get(config_id)
 
         # carry out DE selection
         if fitness <= self.de[fidelity].fitness[parent_id]:

@@ -125,3 +125,15 @@ class ConfigRepository:
             config_item.results[fidelity].score = score
             config_item.results[fidelity].cost = cost
             config_item.results[fidelity].info = info
+
+    def get(self, config_id: int) -> np.ndarray:
+        """Get the configuration with the given ID.
+
+        Args:
+            config_id (int): ID of config
+
+        Returns:
+            np.ndarray: Config in hypercube representation
+        """
+        config_item = self.configs[config_id]
+        return config_item.config
