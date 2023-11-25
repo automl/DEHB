@@ -582,6 +582,13 @@ class DEHB(DEHBBase):
             "parent_id": parent_id,
             "bracket_id": bracket.bracket_id,
         }
+
+        # pass information of job submission to Bracket Manager
+        for bracket in self.active_brackets:
+            if bracket.bracket_id == job_info['bracket_id']:
+                # registering is IMPORTANT for Bracket Manager to perform SH
+                bracket.register_job(job_info['fidelity'])
+                break
         return job_info
 
     def _get_gpu_id_with_low_load(self):
@@ -615,13 +622,6 @@ class DEHB(DEHBBase):
         else:
             # skipping scheduling to Dask worker to avoid added overheads in the synchronous case
             self.futures.append(self._f_objective(job_info))
-
-        # pass information of job submission to Bracket Manager
-        for bracket in self.active_brackets:
-            if bracket.bracket_id == job_info['bracket_id']:
-                # registering is IMPORTANT for Bracket Manager to perform SH
-                bracket.register_job(job_info['fidelity'])
-                break
 
     def _fetch_results_from_workers(self):
         """ Iterate over futures and collect results from finished workers
