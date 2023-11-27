@@ -545,8 +545,11 @@ class DEHB(DEHBBase):
         config_id = self.config_repository.announce_config(config, fidelity)
         return config, config_id, parent_id
 
-    def ask(self):
-        """ Loads a configuration and fidelity to be evaluated next by a free worker
+    def _get_next_job(self):
+        """Loads a configuration and fidelity to be evaluated next.
+
+        Returns:
+            dict: Dicitonary containing all necessary information of the next job.
         """
         bracket = None
         if len(self.active_brackets) == 0 or \
@@ -591,6 +594,23 @@ class DEHB(DEHBBase):
                 break
         return job_info
 
+    def ask(self, n_configs=1):
+        """Get a new configuration to run next from the optimizer.
+
+        Args:
+            n_configs (int, optional): Number of configs to ask for. Defaults to 1.
+
+        Returns:
+            dict or list of dict: Job info of next configuration to evaluate.
+        """
+        if n_configs == 1:
+            return self._get_next_job()
+
+        jobs = []
+        for _ in range(n_configs):
+            jobs.append(self._get_next_job())
+        return jobs
+
     def _get_gpu_id_with_low_load(self):
         candidates = []
         for k, v in self.gpu_usage.items():
@@ -611,7 +631,7 @@ class DEHB(DEHBBase):
         """ Asks a free worker to run the objective function on config and fidelity
         """
         job_info["kwargs"] = self.shared_data if self.shared_data is not None else kwargs
-        # submit to to Dask client
+        # submit to Dask client
         if self.n_workers > 1 or isinstance(self.client, Client):
             if self.single_node_with_gpus:
                 # managing GPU allocation for the job to be submitted
@@ -727,6 +747,12 @@ class DEHB(DEHBBase):
         )
 
     def tell(self, job_info, result):
+        """Feed a result back to the optimizer.
+
+        Args:
+            job_info (dict): Job info returned by ask().
+            result (dict): Result dictionary with mandatory keys "fitness" and "cost".
+        """
         # update bracket information
         fitness, cost = result["fitness"], result["cost"]
         info = result["info"] if "info" in result else dict()
