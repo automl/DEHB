@@ -163,7 +163,7 @@ class DEBase():
         '''
         # creates a ConfigSpace object dict with all hyperparameters present, the inactive too
         new_config = ConfigSpace.util.impute_inactive_values(
-            self.cs.sample_configuration()
+            self.cs.get_default_configuration()
         ).get_dictionary()
         # iterates over all hyperparameters and normalizes each based on its type
         for i, hyper in enumerate(self.cs.get_hyperparameters()):
