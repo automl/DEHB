@@ -671,6 +671,14 @@ class DEHB(DEHBBase):
         # remove processed future
         self.futures = np.delete(self.futures, [i for i, _ in done_list]).tolist()
 
+    def _adjust_budgets(self, fevals=None, brackets=None):
+        if fevals is not None:
+            fevals = len(self.traj) + fevals
+        elif brackets is not None:
+            brackets = self.iteration_counter + brackets
+
+        return fevals, brackets
+
     def _is_run_budget_exhausted(self, fevals=None, brackets=None, total_cost=None):
         """ Checks if the DEHB run should be terminated or continued
         """
@@ -818,7 +826,8 @@ class DEHB(DEHBBase):
         if self.single_node_with_gpus:
             self.distribute_gpus()
 
-        self.start = time.time()
+        self.start = self.start = time.time()
+        fevals, brackets = self._adjust_budgets(fevals, brackets)
         if verbose:
             print("\nLogging at {} for optimization starting at {}\n".format(
                 os.path.join(os.getcwd(), self.log_filename),
