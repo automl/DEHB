@@ -672,9 +672,10 @@ class DEHB(DEHBBase):
         self.futures = np.delete(self.futures, [i for i, _ in done_list]).tolist()
 
     def _adjust_budgets(self, fevals=None, brackets=None):
-        if fevals is not None:
+        # only update budgets if it is not the first run
+        if fevals is not None and len(self.traj) > 0:
             fevals = len(self.traj) + fevals
-        elif brackets is not None:
+        elif brackets is not None and self.iteration_counter > -1:
             brackets = self.iteration_counter + brackets
 
         return fevals, brackets
