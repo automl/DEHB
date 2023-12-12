@@ -904,4 +904,6 @@ class DEHB(DEHBBase):
                 self.logger.info("{}".format(self.inc_config))
         self._save_incumbent(name)
         self._save_history(name)
+        # reset waiting jobs of active bracket to allow for continuation
+        self.active_brackets[0].reset_waiting_jobs()
         return np.array(self.traj), np.array(self.runtime), np.array(self.history, dtype=object)
