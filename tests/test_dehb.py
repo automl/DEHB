@@ -37,7 +37,7 @@ def create_toy_optimizer(configspace: ConfigSpace.ConfigurationSpace, min_fideli
     Returns:
         _type_: _description_
     """
-    dim = len(configspace.get_hyperparameters())
+    dim = len(configspace.get_hyperparameters()) if configspace else 1
     return DEHB(f=objective_function, cs=configspace, dimensions=dim,
                 min_fidelity=min_fidelity,
                 max_fidelity=max_fidelity, eta=eta, n_workers=1)
@@ -148,3 +148,35 @@ class TestConfigID:
         # we keep evolving new configurations without evaluating them, since we are only waiting to
         # to fetch all results started ahead of the budget exhaustion.
         assert len(dehb.config_repository.configs) == num_initial_configs + 9 + 1
+
+class TestAskTell:
+    """Class that bundles all tests regarding the ask and tell functionality of DEHB."""
+    def test_all_fields_available(self):
+        """Verifies, that all fields needed are present in job info returned by ask."""
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    objective_function=objective_function)
+        conf = dehb.ask()
+        assert "config" in conf
+        assert "bracket_id" in conf
+        assert "config_id" in conf
+        assert "fidelity" in conf
+
+    def test_format_configspace(self):
+        """Verifies, that the returned config by ask() is of type Configuration
+        if a configspace is passed.
+        """
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    objective_function=objective_function)
+        conf = dehb.ask()
+        assert isinstance(conf["config"], ConfigSpace.Configuration)
+
+    def test_format_no_configspace(self):
+        """Verifies, that the returned config by ask() is of type Configuration
+        if a configspace is passed.
+        """
+        dehb = create_toy_optimizer(configspace=None, min_fidelity=3, max_fidelity=27, eta=3,
+                                    objective_function=objective_function)
+        conf = dehb.ask()
+        assert isinstance(conf["config"], np.ndarray)
