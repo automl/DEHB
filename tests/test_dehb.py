@@ -169,8 +169,8 @@ class TestAskTell:
         cs = create_toy_searchspace()
         dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
                                     objective_function=objective_function)
-        conf = dehb.ask()
-        assert isinstance(conf["config"], ConfigSpace.Configuration)
+        job_info = dehb.ask()
+        assert isinstance(job_info["config"], ConfigSpace.Configuration)
 
     def test_format_no_configspace(self):
         """Verifies, that the returned config by ask() is of type Configuration
@@ -178,5 +178,63 @@ class TestAskTell:
         """
         dehb = create_toy_optimizer(configspace=None, min_fidelity=3, max_fidelity=27, eta=3,
                                     objective_function=objective_function)
-        conf = dehb.ask()
-        assert isinstance(conf["config"], np.ndarray)
+        job_info = dehb.ask()
+        assert isinstance(job_info["config"], np.ndarray)
+
+    def test_ask_multiple(self):
+        """Verifies, that ask can return multiple configs."""
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    objective_function=objective_function)
+        job_infos = dehb.ask(2)
+
+        assert len(job_infos) == 2
+        assert job_infos[0]["config"] != job_infos[1]["config"]
+
+    def test_ask_twice_different(self):
+        """Verifies, that ask can return multiple configs."""
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    objective_function=objective_function)
+        job_info_a = dehb.ask()
+        job_info_b = dehb.ask()
+        assert job_info_a != job_info_b
+
+    def test_tell_successful(self):
+        """Verifies, that tell successfully saves results."""
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    objective_function=objective_function)
+        job_info = dehb.ask()
+        id = job_info["config_id"]
+        fid = job_info["fidelity"]
+        conf = job_info["config"]
+
+        # before telling, entry should be empty
+        saved_score = dehb.config_repository.configs[id].results[fid].score
+        assert saved_score == np.inf
+
+        result = objective_function(conf, fid)
+        dehb.tell(job_info, result)
+
+        # after telling, score should be saved
+        saved_score = dehb.config_repository.configs[id].results[fid].score
+        assert saved_score == result["fitness"]
+
+    def test_tell_successful(self):
+        """Verifies, that tell successfully saves results."""
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    objective_function=objective_function)
+        # get config
+        job_info = dehb.ask()
+        # adjust config id to non existing id
+        job_info["config_id"] = 1337
+        # create random result item
+        result = {
+            "fitness": 42,
+            "cost": 123
+        }
+        # telling with wrong config_id should throw an error
+        with pytest.raises(IndexError):
+            dehb.tell(job_info, result)
