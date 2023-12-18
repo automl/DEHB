@@ -221,8 +221,8 @@ class TestAskTell:
         saved_score = dehb.config_repository.configs[id].results[fid].score
         assert saved_score == result["fitness"]
 
-    def test_tell_successful(self):
-        """Verifies, that tell successfully saves results."""
+    def test_tell_error(self):
+        """Verifies, that tell throws an error if config ID is non-existent."""
         cs = create_toy_searchspace()
         dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
                                     objective_function=objective_function)
