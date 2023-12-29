@@ -594,14 +594,18 @@ class DEHB(DEHBBase):
                 break
         return job_info
 
-    def ask(self, n_configs=1):
-        """Get a new configuration to run next from the optimizer.
+    def ask(self, n_configs: int=1):
+        """Get the next configuration to run from the optimizer.
+
+        The retrieved configuration can then be evaluated by the user.
+        After evaluation use `tell` to report the results back to the optimizer.
+        For more information, please refer to the description of `tell`.
 
         Args:
             n_configs (int, optional): Number of configs to ask for. Defaults to 1.
 
         Returns:
-            dict or list of dict: Job info of next configuration to evaluate.
+            dict or list of dict: Job info(s) of next configuration to evaluate.
         """
         if n_configs == 1:
             return self._get_next_job()
@@ -755,12 +759,17 @@ class DEHB(DEHBBase):
             "{}/{} {}".format(remaining[0], remaining[1], remaining[2])
         )
 
-    def tell(self, job_info, result):
+    def tell(self, job_info: dict, result: dict):
         """Feed a result back to the optimizer.
+
+        In order to correctly interpret the results, the `job_info` dict, retrieved by `ask`,
+        has to be given. Moreover, the `result` dict has to contain the keys `fitness` and `cost`.
+        It is also possible to add the field `info` to the `result` in order to store additional,
+        user-specific information.
 
         Args:
             job_info (dict): Job info returned by ask().
-            result (dict): Result dictionary with mandatory keys "fitness" and "cost".
+            result (dict): Result dictionary with mandatory keys `fitness` and `cost`.
         """
         # update bracket information
         fitness, cost = result["fitness"], result["cost"]
