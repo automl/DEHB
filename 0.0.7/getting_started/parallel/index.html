@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../../assets/automl_org.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.8">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
     
     
       
@@ -24,10 +24,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.4b4a2bd9.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.50c56a3b.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -45,6 +45,8 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
+    
+      <link rel="stylesheet" href="../../assets/_markdown_exec_pyodide.css">
     
       <link rel="stylesheet" href="../../assets/_markdown_exec_ansi.css">
     
@@ -69,9 +71,6 @@
     
     <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-purple">
   
-    
-    
-      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -131,9 +130,9 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
     
-      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 9a3 3 0 0 1 3 3 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 3-3m0-4.5c5 0 9.27 3.11 11 7.5-1.73 4.39-6 7.5-11 7.5S2.73 16.39 1 12c1.73-4.39 6-7.5 11-7.5M3.18 12a9.821 9.821 0 0 0 17.64 0 9.821 9.821 0 0 0-17.64 0Z"/></svg>
       </label>
     
@@ -141,15 +140,18 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
     
-      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5 5 5 0 0 1 5-5 5 5 0 0 1 5 5 5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5Z"/></svg>
       </label>
     
   
 </form>
       
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
     
     
@@ -304,6 +306,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../.." class="md-nav__link">
         
@@ -323,6 +326,7 @@
   
   
     
+  
   
   
     
@@ -364,6 +368,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../single_worker/" class="md-nav__link">
         
@@ -384,6 +389,7 @@
   
   
     
+  
   
   
     <li class="md-nav__item md-nav__item--active">
@@ -428,7 +434,9 @@
       
         <li class="md-nav__item">
   <a href="#running-dehb-in-a-parallel-setting" class="md-nav__link">
-    Running DEHB in a parallel setting
+    <span class="md-ellipsis">
+      Running DEHB in a parallel setting
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Running DEHB in a parallel setting">
@@ -436,14 +444,18 @@
         
           <li class="md-nav__item">
   <a href="#using-gpus-in-a-parallel-run" class="md-nav__link">
-    Using GPUs in a parallel run
+    <span class="md-ellipsis">
+      Using GPUs in a parallel run
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#multi-node-runs" class="md-nav__link">
-    Multi-node runs
+    <span class="md-ellipsis">
+      Multi-node runs
+    </span>
   </a>
   
 </li>
@@ -471,6 +483,7 @@
     
       
       
+  
   
   
   
@@ -513,6 +526,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../../references/dehb/" class="md-nav__link">
         
@@ -533,6 +547,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../../references/de/" class="md-nav__link">
         
@@ -550,6 +565,7 @@
             
               
                 
+  
   
   
   
@@ -601,7 +617,9 @@
       
         <li class="md-nav__item">
   <a href="#running-dehb-in-a-parallel-setting" class="md-nav__link">
-    Running DEHB in a parallel setting
+    <span class="md-ellipsis">
+      Running DEHB in a parallel setting
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Running DEHB in a parallel setting">
@@ -609,14 +627,18 @@
         
           <li class="md-nav__item">
   <a href="#using-gpus-in-a-parallel-run" class="md-nav__link">
-    Using GPUs in a parallel run
+    <span class="md-ellipsis">
+      Using GPUs in a parallel run
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#multi-node-runs" class="md-nav__link">
-    Multi-node runs
+    <span class="md-ellipsis">
+      Multi-node runs
+    </span>
   </a>
   
 </li>
@@ -709,11 +731,19 @@ manner on clusters managed by SLURM. (<em>not expected to work off-the-shelf</em
 
 
 
+
+
+
+
+
+
+
                 
               </article>
             </div>
           
           
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
       </main>
@@ -785,7 +815,9 @@ manner on clusters managed by SLURM. (<em>not expected to work off-the-shelf</em
     <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "content.code.copy", "navigation.footer", "navigation.tabs", "navigation.tabs.sticky", "toc.follow", "header.autohide", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.81fa17fe.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7c377c4.min.js"></script>
+      
+        <script src="../../assets/_markdown_exec_pyodide.js"></script>
       
     
   </body>
