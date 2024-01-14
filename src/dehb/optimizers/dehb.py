@@ -823,6 +823,12 @@ class DEHB(DEHBBase):
         2) Number of Successive Halving brackets run under Hyperband (brackets)
         3) Total computational cost (in seconds) aggregated by all function evaluations (total_cost)
         """
+        # check if run has already been called before
+        if self.start is not None:
+            logger.warning("DEHB has already been run. Calling 'run' twice could lead to unintended"
+                           + " behavior. Please restart DEHB with an increased compute budget"
+                           + " instead of calling 'run' twice.")
+
         # checks if a Dask client exists
         if len(kwargs) > 0 and self.n_workers > 1 and isinstance(self.client, Client):
             # broadcasts all additional data passed as **kwargs to all client workers
