@@ -245,14 +245,18 @@ class DEHB(DEHBBase):
         res = self.de[fidelity].f_objective(config, fidelity, **kwargs)
         info = res["info"] if "info" in res else {}
         run_info = {
-            "fitness": res["fitness"],
-            "cost": res["cost"],
-            "config": config,
-            "config_id": config_id,
-            "fidelity": fidelity,
-            "parent_id": parent_id,
-            "bracket_id": bracket_id,
-            "info": info,
+            "job_info": {
+                "config": config,
+                "config_id": config_id,
+                "fidelity": fidelity,
+                "parent_id": parent_id,
+                "bracket_id": bracket_id,
+            },
+            "result": {
+                "fitness": res["fitness"],
+                "cost": res["cost"],
+                "info": info,
+            },
         }
 
         if "gpu_devices" in job_info:
@@ -542,7 +546,10 @@ class DEHB(DEHBBase):
         return config, config_id, parent_id
 
     def _get_next_job(self):
-        """ Loads a configuration and fidelity to be evaluated next by a free worker
+        """Loads a configuration and fidelity to be evaluated next.
+
+        Returns:
+            dict: Dicitonary containing all necessary information of the next job.
         """
         bracket = None
         if len(self.active_brackets) == 0 or \
@@ -564,15 +571,49 @@ class DEHB(DEHBBase):
         # fidelity that the SH bracket allots
         fidelity = bracket.get_next_job_fidelity()
         config, config_id, parent_id = self._acquire_config(bracket, fidelity)
+
+        # transform config to proper representation
+        if self.configspace:
+            # converts [0, 1] vector to a ConfigSpace object
+            config = self.de[fidelity].vector_to_configspace(config)
+
         # notifies the Bracket Manager that a single config is to run for the fidelity chosen
         job_info = {
             "config": config,
             "config_id": config_id,
             "fidelity": fidelity,
             "parent_id": parent_id,
-            "bracket_id": bracket.bracket_id
+            "bracket_id": bracket.bracket_id,
         }
+
+        # pass information of job submission to Bracket Manager
+        for bracket in self.active_brackets:
+            if bracket.bracket_id == job_info['bracket_id']:
+                # registering is IMPORTANT for Bracket Manager to perform SH
+                bracket.register_job(job_info['fidelity'])
+                break
         return job_info
+
+    def ask(self, n_configs: int=1):
+        """Get the next configuration to run from the optimizer.
+
+        The retrieved configuration can then be evaluated by the user.
+        After evaluation use `tell` to report the results back to the optimizer.
+        For more information, please refer to the description of `tell`.
+
+        Args:
+            n_configs (int, optional): Number of configs to ask for. Defaults to 1.
+
+        Returns:
+            dict or list of dict: Job info(s) of next configuration to evaluate.
+        """
+        if n_configs == 1:
+            return self._get_next_job()
+
+        jobs = []
+        for _ in range(n_configs):
+            jobs.append(self._get_next_job())
+        return jobs
 
     def _get_gpu_id_with_low_load(self):
         candidates = []
@@ -594,7 +635,7 @@ class DEHB(DEHBBase):
         """ Asks a free worker to run the objective function on config and fidelity
         """
         job_info["kwargs"] = self.shared_data if self.shared_data is not None else kwargs
-        # submit to to Dask client
+        # submit to Dask client
         if self.n_workers > 1 or isinstance(self.client, Client):
             if self.single_node_with_gpus:
                 # managing GPU allocation for the job to be submitted
@@ -605,13 +646,6 @@ class DEHB(DEHBBase):
         else:
             # skipping scheduling to Dask worker to avoid added overheads in the synchronous case
             self.futures.append(self._f_objective(job_info))
-
-        # pass information of job submission to Bracket Manager
-        for bracket in self.active_brackets:
-            if bracket.bracket_id == job_info['bracket_id']:
-                # registering is IMPORTANT for Bracket Manager to perform SH
-                bracket.register_job(job_info['fidelity'])
-                break
 
     def _fetch_results_from_workers(self):
         """ Iterate over futures and collect results from finished workers
@@ -636,39 +670,19 @@ class DEHB(DEHBBase):
             else:
                 # Dask not invoked in the synchronous case
                 run_info = future
-            # update bracket information
-            fitness, cost = run_info["fitness"], run_info["cost"]
-            info = run_info["info"] if "info" in run_info else dict()
-            fidelity, parent_id = run_info["fidelity"], run_info["parent_id"]
-            config, config_id = run_info["config"], run_info["config_id"]
-            bracket_id = run_info["bracket_id"]
-            for bracket in self.active_brackets:
-                if bracket.bracket_id == bracket_id:
-                    # bracket job complete
-                    bracket.complete_job(fidelity)  # IMPORTANT to perform synchronous SH
-
-            self.config_repository.tell_result(config_id, fidelity, fitness, cost, info)
-
-            # carry out DE selection
-            if fitness <= self.de[fidelity].fitness[parent_id]:
-                self.de[fidelity].population[parent_id] = config
-                self.de[fidelity].population_ids[parent_id] = config_id
-                self.de[fidelity].fitness[parent_id] = fitness
-            # updating incumbents
-            if self.de[fidelity].fitness[parent_id] < self.inc_score:
-                self._update_incumbents(
-                    config=self.de[fidelity].population[parent_id],
-                    score=self.de[fidelity].fitness[parent_id],
-                    info=info
-                )
-            # book-keeping
-            self._update_trackers(
-                traj=self.inc_score, runtime=cost, history=(
-                    config.tolist(), float(fitness), float(cost), float(fidelity), info
-                )
-            )
+            # tell result
+            self.tell(run_info["job_info"], run_info["result"])
         # remove processed future
         self.futures = np.delete(self.futures, [i for i, _ in done_list]).tolist()
+
+    def _adjust_budgets(self, fevals=None, brackets=None):
+        # only update budgets if it is not the first run
+        if fevals is not None and len(self.traj) > 0:
+            fevals = len(self.traj) + fevals
+        elif brackets is not None and self.iteration_counter > -1:
+            brackets = self.iteration_counter + brackets
+
+        return fevals, brackets
 
     def _is_run_budget_exhausted(self, fevals=None, brackets=None, total_cost=None):
         """ Checks if the DEHB run should be terminated or continued
@@ -745,6 +759,54 @@ class DEHB(DEHBBase):
             "{}/{} {}".format(remaining[0], remaining[1], remaining[2])
         )
 
+    def tell(self, job_info: dict, result: dict):
+        """Feed a result back to the optimizer.
+
+        In order to correctly interpret the results, the `job_info` dict, retrieved by `ask`,
+        has to be given. Moreover, the `result` dict has to contain the keys `fitness` and `cost`.
+        It is also possible to add the field `info` to the `result` in order to store additional,
+        user-specific information.
+
+        Args:
+            job_info (dict): Job info returned by ask().
+            result (dict): Result dictionary with mandatory keys `fitness` and `cost`.
+        """
+        # update bracket information
+        fitness, cost = result["fitness"], result["cost"]
+        info = result["info"] if "info" in result else dict()
+        fidelity, parent_id = job_info["fidelity"], job_info["parent_id"]
+        config, config_id = job_info["config"], job_info["config_id"]
+        bracket_id = job_info["bracket_id"]
+        for bracket in self.active_brackets:
+            if bracket.bracket_id == bracket_id:
+                # bracket job complete
+                bracket.complete_job(fidelity)  # IMPORTANT to perform synchronous SH
+
+        self.config_repository.tell_result(config_id, fidelity, fitness, cost, info)
+
+        # get hypercube representation from config repo
+        if self.configspace:
+            config = self.config_repository.get(config_id)
+
+        # carry out DE selection
+        if fitness <= self.de[fidelity].fitness[parent_id]:
+            self.de[fidelity].population[parent_id] = config
+            self.de[fidelity].population_ids[parent_id] = config_id
+            self.de[fidelity].fitness[parent_id] = fitness
+        # updating incumbents
+        if self.de[fidelity].fitness[parent_id] < self.inc_score:
+            self._update_incumbents(
+                config=self.de[fidelity].population[parent_id],
+                score=self.de[fidelity].fitness[parent_id],
+                info=info
+            )
+        # book-keeping
+        self._update_trackers(
+            traj=self.inc_score, runtime=cost, history=(
+                config.tolist(), float(fitness), float(cost), float(fidelity), info
+            )
+        )
+
     @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None, single_node_with_gpus=False,
             verbose=False, debug=False, save_intermediate=True, save_history=True, name=None, **kwargs):
@@ -761,6 +823,12 @@ class DEHB(DEHBBase):
         2) Number of Successive Halving brackets run under Hyperband (brackets)
         3) Total computational cost (in seconds) aggregated by all function evaluations (total_cost)
         """
+        # check if run has already been called before
+        if self.start is not None:
+            logger.warning("DEHB has already been run. Calling 'run' twice could lead to unintended"
+                           + " behavior. Please restart DEHB with an increased compute budget"
+                           + " instead of calling 'run' twice.")
+
         # checks if a Dask client exists
         if len(kwargs) > 0 and self.n_workers > 1 and isinstance(self.client, Client):
             # broadcasts all additional data passed as **kwargs to all client workers
@@ -774,7 +842,8 @@ class DEHB(DEHBBase):
         if self.single_node_with_gpus:
             self.distribute_gpus()
 
-        self.start = time.time()
+        self.start = self.start = time.time()
+        fevals, brackets = self._adjust_budgets(fevals, brackets)
         if verbose:
             print("\nLogging at {} for optimization starting at {}\n".format(
                 os.path.join(os.getcwd(), self.log_filename),
@@ -786,11 +855,11 @@ class DEHB(DEHBBase):
             if self._is_run_budget_exhausted(fevals, brackets, total_cost):
                 break
             if self.is_worker_available():
-                job_info = self._get_next_job()
+                job_info = self.ask()
                 if brackets is not None and job_info["bracket_id"] >= brackets:
                     # ignore submission and only collect results
                     # when brackets are chosen as run budget, an extra bracket is created
-                    # since iteration_counter is incremented in _get_next_job() and then checked
+                    # since iteration_counter is incremented in ask() and then checked
                     # in _is_run_budget_exhausted(), therefore, need to skip suggestions
                     # coming from the extra allocated bracket
                     # _is_run_budget_exhausted() will not return True until all the lower brackets
@@ -850,4 +919,6 @@ class DEHB(DEHBBase):
                 self.logger.info("{}".format(self.inc_config))
         self._save_incumbent(name)
         self._save_history(name)
+        # reset waiting jobs of active bracket to allow for continuation
+        self.active_brackets[0].reset_waiting_jobs()
         return np.array(self.traj), np.array(self.runtime), np.array(self.history, dtype=object)
