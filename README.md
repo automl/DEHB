@@ -18,7 +18,8 @@ pip install -e DEHB  # -e stands for editable, lets you modify the code and reru
 ### Tutorials/Example notebooks
 
 * [00 - A generic template to use DEHB for multi-fidelity Hyperparameter Optimization](examples/00_interfacing_DEHB.ipynb)
-* [01 - Using DEHB to optimize 4 hyperparameters of a Scikit-learn's Random Forest on a classification dataset](examples/01_Optimizing_RandomForest_using_DEHB.ipynb)
+* [01.1 - Using DEHB to optimize 4 hyperparameters of a Scikit-learn's Random Forest on a classification dataset](examples/01.1_Optimizing_RandomForest_using_DEHB.ipynb)
+* [01.2 - Using DEHB to optimize 4 hyperparameters of a Scikit-learn's Random Forest on a classification dataset using Ask & Tell interface](examples/01.2_Optimizing_RandomForest_using_Ask_Tell.ipynb)
 * [02 - Optimizing Scikit-learn's Random Forest without using ConfigSpace to represent the hyperparameter space](examples/02_using%20DEHB_without_ConfigSpace.ipynb)
 * [03 - Hyperparameter Optimization for MNIST in PyTorch](examples/03_pytorch_mnist_hpo.py)
 
@@ -29,6 +30,27 @@ python examples/03_pytorch_mnist_hpo.py \
     --max_fidelity 3 \
     --runtime 60 \
     --verbose
+```
+
+#### Ask & Tell interface
+DEHB allows users to either utilize the Ask & Tell interface for manual task distribution or leverage the built-in functionality (`run`) to set up a Dask cluster autonomously.
+The Ask & Tell functionality can be utilized as follows:
+```python
+optimizer = DEHB(
+    f=your_target_function, # Here we do not need to necessarily specify the target function, but it can still be useful to call 'run' later.
+    cs=config_space, 
+    dimensions=dimensions, 
+    min_fidelity=min_fidelity, 
+    max_fidelity=max_fidelity)
+
+# Ask for next configuration to run
+job_info = optimizer.ask()
+
+# Run the configuration for the given fidelity. Here you can freely distribute the computation to any worker you'd like.
+result = your_target_function(config=job_info["config"], fidelity=job_info["fidelity"])
+
+# When you received the result, feed them back to the optimizer
+optimizer.tell(job_info, result)
 ```
 
 ### Running DEHB in a parallel setting
