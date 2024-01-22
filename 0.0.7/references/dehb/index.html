@@ -617,27 +617,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dehb.optimizers.dehb.DEHB.ask" class="md-nav__link">
-    <span class="md-ellipsis">
-      ask
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#dehb.optimizers.dehb.DEHB.submit_job" class="md-nav__link">
     <span class="md-ellipsis">
       submit_job
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dehb.optimizers.dehb.DEHB.tell" class="md-nav__link">
-    <span class="md-ellipsis">
-      tell
     </span>
   </a>
   
@@ -854,27 +836,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dehb.optimizers.dehb.DEHB.ask" class="md-nav__link">
-    <span class="md-ellipsis">
-      ask
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#dehb.optimizers.dehb.DEHB.submit_job" class="md-nav__link">
     <span class="md-ellipsis">
       submit_job
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dehb.optimizers.dehb.DEHB.tell" class="md-nav__link">
-    <span class="md-ellipsis">
-      tell
     </span>
   </a>
   
@@ -1448,7 +1412,11 @@ updated for the device ID that the finished job was mapped to.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-284">284</a></span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-280">280</a></span>
+<span class="normal"><a href="#__codelineno-0-281">281</a></span>
+<span class="normal"><a href="#__codelineno-0-282">282</a></span>
+<span class="normal"><a href="#__codelineno-0-283">283</a></span>
+<span class="normal"><a href="#__codelineno-0-284">284</a></span>
 <span class="normal"><a href="#__codelineno-0-285">285</a></span>
 <span class="normal"><a href="#__codelineno-0-286">286</a></span>
 <span class="normal"><a href="#__codelineno-0-287">287</a></span>
@@ -1462,29 +1430,25 @@ updated for the device ID that the finished job was mapped to.</p>
 <span class="normal"><a href="#__codelineno-0-295">295</a></span>
 <span class="normal"><a href="#__codelineno-0-296">296</a></span>
 <span class="normal"><a href="#__codelineno-0-297">297</a></span>
-<span class="normal"><a href="#__codelineno-0-298">298</a></span>
-<span class="normal"><a href="#__codelineno-0-299">299</a></span>
-<span class="normal"><a href="#__codelineno-0-300">300</a></span>
-<span class="normal"><a href="#__codelineno-0-301">301</a></span>
-<span class="normal"><a href="#__codelineno-0-302">302</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-284" name="__codelineno-0-284"></a><span class="k">def</span> <span class="nf">distribute_gpus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-285" name="__codelineno-0-285"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Function to create a GPU usage tracker dict.</span>
-<a id="__codelineno-0-286" name="__codelineno-0-286"></a>
-<a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="sd">    The idea is to extract the exact GPU device IDs available. During job submission, each</span>
-<a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="sd">    submitted job is given a preference of a GPU device ID based on the GPU device with the</span>
-<a id="__codelineno-0-289" name="__codelineno-0-289"></a><span class="sd">    least number of active running jobs. On retrieval of the result, this gpu usage dict is</span>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="sd">    updated for the device ID that the finished job was mapped to.</span>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-292" name="__codelineno-0-292"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-293" name="__codelineno-0-293"></a>        <span class="n">available_gpus</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;CUDA_VISIBLE_DEVICES&quot;</span><span class="p">]</span>
-<a id="__codelineno-0-294" name="__codelineno-0-294"></a>        <span class="n">available_gpus</span> <span class="o">=</span> <span class="n">available_gpus</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-295" name="__codelineno-0-295"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">available_gpus</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">_id</span> <span class="ow">in</span> <span class="n">available_gpus</span><span class="p">]</span>
-<a id="__codelineno-0-296" name="__codelineno-0-296"></a>    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-<a id="__codelineno-0-297" name="__codelineno-0-297"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unable to find valid GPU devices. &quot;</span>
-<a id="__codelineno-0-298" name="__codelineno-0-298"></a>              <span class="s2">&quot;Environment variable </span><span class="si">{}</span><span class="s2"> not visible!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
-<a id="__codelineno-0-299" name="__codelineno-0-299"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">available_gpus</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-300" name="__codelineno-0-300"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">gpu_usage</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-<a id="__codelineno-0-301" name="__codelineno-0-301"></a>    <span class="k">for</span> <span class="n">_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_gpus</span><span class="p">:</span>
-<a id="__codelineno-0-302" name="__codelineno-0-302"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">gpu_usage</span><span class="p">[</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="normal"><a href="#__codelineno-0-298">298</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="k">def</span> <span class="nf">distribute_gpus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Function to create a GPU usage tracker dict.</span>
+<a id="__codelineno-0-282" name="__codelineno-0-282"></a>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a><span class="sd">    The idea is to extract the exact GPU device IDs available. During job submission, each</span>
+<a id="__codelineno-0-284" name="__codelineno-0-284"></a><span class="sd">    submitted job is given a preference of a GPU device ID based on the GPU device with the</span>
+<a id="__codelineno-0-285" name="__codelineno-0-285"></a><span class="sd">    least number of active running jobs. On retrieval of the result, this gpu usage dict is</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="sd">    updated for the device ID that the finished job was mapped to.</span>
+<a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-288" name="__codelineno-0-288"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a>        <span class="n">available_gpus</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;CUDA_VISIBLE_DEVICES&quot;</span><span class="p">]</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a>        <span class="n">available_gpus</span> <span class="o">=</span> <span class="n">available_gpus</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">available_gpus</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">_id</span> <span class="ow">in</span> <span class="n">available_gpus</span><span class="p">]</span>
+<a id="__codelineno-0-292" name="__codelineno-0-292"></a>    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<a id="__codelineno-0-293" name="__codelineno-0-293"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unable to find valid GPU devices. &quot;</span>
+<a id="__codelineno-0-294" name="__codelineno-0-294"></a>              <span class="s2">&quot;Environment variable </span><span class="si">{}</span><span class="s2"> not visible!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+<a id="__codelineno-0-295" name="__codelineno-0-295"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">available_gpus</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-296" name="__codelineno-0-296"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">gpu_usage</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+<a id="__codelineno-0-297" name="__codelineno-0-297"></a>    <span class="k">for</span> <span class="n">_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_gpus</span><span class="p">:</span>
+<a id="__codelineno-0-298" name="__codelineno-0-298"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">gpu_usage</span><span class="p">[</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -1508,23 +1472,23 @@ updated for the device ID that the finished job was mapped to.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-343">343</a></span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-339">339</a></span>
+<span class="normal"><a href="#__codelineno-0-340">340</a></span>
+<span class="normal"><a href="#__codelineno-0-341">341</a></span>
+<span class="normal"><a href="#__codelineno-0-342">342</a></span>
+<span class="normal"><a href="#__codelineno-0-343">343</a></span>
 <span class="normal"><a href="#__codelineno-0-344">344</a></span>
 <span class="normal"><a href="#__codelineno-0-345">345</a></span>
 <span class="normal"><a href="#__codelineno-0-346">346</a></span>
-<span class="normal"><a href="#__codelineno-0-347">347</a></span>
-<span class="normal"><a href="#__codelineno-0-348">348</a></span>
-<span class="normal"><a href="#__codelineno-0-349">349</a></span>
-<span class="normal"><a href="#__codelineno-0-350">350</a></span>
-<span class="normal"><a href="#__codelineno-0-351">351</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-343" name="__codelineno-0-343"></a><span class="k">def</span> <span class="nf">clean_inactive_brackets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-344" name="__codelineno-0-344"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Removes brackets from the active list if it is done as communicated by Bracket Manager</span>
-<a id="__codelineno-0-345" name="__codelineno-0-345"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-346" name="__codelineno-0-346"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_brackets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-0-347" name="__codelineno-0-347"></a>        <span class="k">return</span>
-<a id="__codelineno-0-348" name="__codelineno-0-348"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">active_brackets</span> <span class="o">=</span> <span class="p">[</span>
-<a id="__codelineno-0-349" name="__codelineno-0-349"></a>        <span class="n">bracket</span> <span class="k">for</span> <span class="n">bracket</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_brackets</span> <span class="k">if</span> <span class="o">~</span><span class="n">bracket</span><span class="o">.</span><span class="n">is_bracket_done</span><span class="p">()</span>
-<a id="__codelineno-0-350" name="__codelineno-0-350"></a>    <span class="p">]</span>
-<a id="__codelineno-0-351" name="__codelineno-0-351"></a>    <span class="k">return</span>
+<span class="normal"><a href="#__codelineno-0-347">347</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-339" name="__codelineno-0-339"></a><span class="k">def</span> <span class="nf">clean_inactive_brackets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-0-340" name="__codelineno-0-340"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Removes brackets from the active list if it is done as communicated by Bracket Manager</span>
+<a id="__codelineno-0-341" name="__codelineno-0-341"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-342" name="__codelineno-0-342"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_brackets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-343" name="__codelineno-0-343"></a>        <span class="k">return</span>
+<a id="__codelineno-0-344" name="__codelineno-0-344"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">active_brackets</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-0-345" name="__codelineno-0-345"></a>        <span class="n">bracket</span> <span class="k">for</span> <span class="n">bracket</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_brackets</span> <span class="k">if</span> <span class="o">~</span><span class="n">bracket</span><span class="o">.</span><span class="n">is_bracket_done</span><span class="p">()</span>
+<a id="__codelineno-0-346" name="__codelineno-0-346"></a>    <span class="p">]</span>
+<a id="__codelineno-0-347" name="__codelineno-0-347"></a>    <span class="k">return</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -1548,7 +1512,11 @@ updated for the device ID that the finished job was mapped to.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-419">419</a></span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-415">415</a></span>
+<span class="normal"><a href="#__codelineno-0-416">416</a></span>
+<span class="normal"><a href="#__codelineno-0-417">417</a></span>
+<span class="normal"><a href="#__codelineno-0-418">418</a></span>
+<span class="normal"><a href="#__codelineno-0-419">419</a></span>
 <span class="normal"><a href="#__codelineno-0-420">420</a></span>
 <span class="normal"><a href="#__codelineno-0-421">421</a></span>
 <span class="normal"><a href="#__codelineno-0-422">422</a></span>
@@ -1557,142 +1525,20 @@ updated for the device ID that the finished job was mapped to.</p>
 <span class="normal"><a href="#__codelineno-0-425">425</a></span>
 <span class="normal"><a href="#__codelineno-0-426">426</a></span>
 <span class="normal"><a href="#__codelineno-0-427">427</a></span>
-<span class="normal"><a href="#__codelineno-0-428">428</a></span>
-<span class="normal"><a href="#__codelineno-0-429">429</a></span>
-<span class="normal"><a href="#__codelineno-0-430">430</a></span>
-<span class="normal"><a href="#__codelineno-0-431">431</a></span>
-<span class="normal"><a href="#__codelineno-0-432">432</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-419" name="__codelineno-0-419"></a><span class="k">def</span> <span class="nf">is_worker_available</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<a id="__codelineno-0-420" name="__codelineno-0-420"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Checks if at least one worker is available to run a job</span>
-<a id="__codelineno-0-421" name="__codelineno-0-421"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-422" name="__codelineno-0-422"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_workers</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="n">Client</span><span class="p">):</span>
-<a id="__codelineno-0-423" name="__codelineno-0-423"></a>        <span class="c1"># in the synchronous case, one worker is always available</span>
-<a id="__codelineno-0-424" name="__codelineno-0-424"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-425" name="__codelineno-0-425"></a>    <span class="c1"># checks the absolute number of workers mapped to the client scheduler</span>
-<a id="__codelineno-0-426" name="__codelineno-0-426"></a>    <span class="c1"># client.ncores() should return a dict with the keys as unique addresses to these workers</span>
-<a id="__codelineno-0-427" name="__codelineno-0-427"></a>    <span class="c1"># treating the number of available workers in this manner</span>
-<a id="__codelineno-0-428" name="__codelineno-0-428"></a>    <span class="n">workers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_worker_count</span><span class="p">()</span>  <span class="c1"># len(self.client.ncores())</span>
-<a id="__codelineno-0-429" name="__codelineno-0-429"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">workers</span><span class="p">:</span>
-<a id="__codelineno-0-430" name="__codelineno-0-430"></a>        <span class="c1"># pause/wait if active worker count greater allocated workers</span>
-<a id="__codelineno-0-431" name="__codelineno-0-431"></a>        <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-432" name="__codelineno-0-432"></a>    <span class="k">return</span> <span class="kc">True</span>
-</code></pre></div></td></tr></table></div>
-          </details>
-  </div>
-
-</div>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-<h3 id="dehb.optimizers.dehb.DEHB.ask" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">ask</span><span class="p">(</span><span class="n">n_configs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code>
-
-<a href="#dehb.optimizers.dehb.DEHB.ask" class="headerlink" title="Permanent link">#</a></h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Get the next configuration to run from the optimizer.</p>
-<p>The retrieved configuration can then be evaluated by the user.
-After evaluation use <code>tell</code> to report the results back to the optimizer.
-For more information, please refer to the description of <code>tell</code>.</p>
-
-
-
-  <table>
-    <thead>
-      <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b> DESCRIPTION</b></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>n_configs</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>Number of configs to ask for. Defaults to 1.</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>1</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-
-  <table>
-    <thead>
-      <tr>
-        <th><b>RETURNS</b></th>
-        <th><b>DESCRIPTION</b></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-          </td>
-          <td class="doc-returns-details">
-            <div class="doc-md-description">
-              <p>dict or list of dict: Job info(s) of next configuration to evaluate.</p>
-            </div>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-597">597</a></span>
-<span class="normal"><a href="#__codelineno-0-598">598</a></span>
-<span class="normal"><a href="#__codelineno-0-599">599</a></span>
-<span class="normal"><a href="#__codelineno-0-600">600</a></span>
-<span class="normal"><a href="#__codelineno-0-601">601</a></span>
-<span class="normal"><a href="#__codelineno-0-602">602</a></span>
-<span class="normal"><a href="#__codelineno-0-603">603</a></span>
-<span class="normal"><a href="#__codelineno-0-604">604</a></span>
-<span class="normal"><a href="#__codelineno-0-605">605</a></span>
-<span class="normal"><a href="#__codelineno-0-606">606</a></span>
-<span class="normal"><a href="#__codelineno-0-607">607</a></span>
-<span class="normal"><a href="#__codelineno-0-608">608</a></span>
-<span class="normal"><a href="#__codelineno-0-609">609</a></span>
-<span class="normal"><a href="#__codelineno-0-610">610</a></span>
-<span class="normal"><a href="#__codelineno-0-611">611</a></span>
-<span class="normal"><a href="#__codelineno-0-612">612</a></span>
-<span class="normal"><a href="#__codelineno-0-613">613</a></span>
-<span class="normal"><a href="#__codelineno-0-614">614</a></span>
-<span class="normal"><a href="#__codelineno-0-615">615</a></span>
-<span class="normal"><a href="#__codelineno-0-616">616</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="k">def</span> <span class="nf">ask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_configs</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-<a id="__codelineno-0-598" name="__codelineno-0-598"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the next configuration to run from the optimizer.</span>
-<a id="__codelineno-0-599" name="__codelineno-0-599"></a>
-<a id="__codelineno-0-600" name="__codelineno-0-600"></a><span class="sd">    The retrieved configuration can then be evaluated by the user.</span>
-<a id="__codelineno-0-601" name="__codelineno-0-601"></a><span class="sd">    After evaluation use `tell` to report the results back to the optimizer.</span>
-<a id="__codelineno-0-602" name="__codelineno-0-602"></a><span class="sd">    For more information, please refer to the description of `tell`.</span>
-<a id="__codelineno-0-603" name="__codelineno-0-603"></a>
-<a id="__codelineno-0-604" name="__codelineno-0-604"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-605" name="__codelineno-0-605"></a><span class="sd">        n_configs (int, optional): Number of configs to ask for. Defaults to 1.</span>
-<a id="__codelineno-0-606" name="__codelineno-0-606"></a>
-<a id="__codelineno-0-607" name="__codelineno-0-607"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-608" name="__codelineno-0-608"></a><span class="sd">        dict or list of dict: Job info(s) of next configuration to evaluate.</span>
-<a id="__codelineno-0-609" name="__codelineno-0-609"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-610" name="__codelineno-0-610"></a>    <span class="k">if</span> <span class="n">n_configs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-<a id="__codelineno-0-611" name="__codelineno-0-611"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_next_job</span><span class="p">()</span>
-<a id="__codelineno-0-612" name="__codelineno-0-612"></a>
-<a id="__codelineno-0-613" name="__codelineno-0-613"></a>    <span class="n">jobs</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-614" name="__codelineno-0-614"></a>    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_configs</span><span class="p">):</span>
-<a id="__codelineno-0-615" name="__codelineno-0-615"></a>        <span class="n">jobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_next_job</span><span class="p">())</span>
-<a id="__codelineno-0-616" name="__codelineno-0-616"></a>    <span class="k">return</span> <span class="n">jobs</span>
+<span class="normal"><a href="#__codelineno-0-428">428</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-415" name="__codelineno-0-415"></a><span class="k">def</span> <span class="nf">is_worker_available</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<a id="__codelineno-0-416" name="__codelineno-0-416"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Checks if at least one worker is available to run a job</span>
+<a id="__codelineno-0-417" name="__codelineno-0-417"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-418" name="__codelineno-0-418"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_workers</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="n">Client</span><span class="p">):</span>
+<a id="__codelineno-0-419" name="__codelineno-0-419"></a>        <span class="c1"># in the synchronous case, one worker is always available</span>
+<a id="__codelineno-0-420" name="__codelineno-0-420"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-421" name="__codelineno-0-421"></a>    <span class="c1"># checks the absolute number of workers mapped to the client scheduler</span>
+<a id="__codelineno-0-422" name="__codelineno-0-422"></a>    <span class="c1"># client.ncores() should return a dict with the keys as unique addresses to these workers</span>
+<a id="__codelineno-0-423" name="__codelineno-0-423"></a>    <span class="c1"># treating the number of available workers in this manner</span>
+<a id="__codelineno-0-424" name="__codelineno-0-424"></a>    <span class="n">workers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_worker_count</span><span class="p">()</span>  <span class="c1"># len(self.client.ncores())</span>
+<a id="__codelineno-0-425" name="__codelineno-0-425"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">workers</span><span class="p">:</span>
+<a id="__codelineno-0-426" name="__codelineno-0-426"></a>        <span class="c1"># pause/wait if active worker count greater allocated workers</span>
+<a id="__codelineno-0-427" name="__codelineno-0-427"></a>        <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-428" name="__codelineno-0-428"></a>    <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -1716,35 +1562,49 @@ For more information, please refer to the description of <code>tell</code>.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-634">634</a></span>
-<span class="normal"><a href="#__codelineno-0-635">635</a></span>
-<span class="normal"><a href="#__codelineno-0-636">636</a></span>
-<span class="normal"><a href="#__codelineno-0-637">637</a></span>
-<span class="normal"><a href="#__codelineno-0-638">638</a></span>
-<span class="normal"><a href="#__codelineno-0-639">639</a></span>
-<span class="normal"><a href="#__codelineno-0-640">640</a></span>
-<span class="normal"><a href="#__codelineno-0-641">641</a></span>
-<span class="normal"><a href="#__codelineno-0-642">642</a></span>
-<span class="normal"><a href="#__codelineno-0-643">643</a></span>
-<span class="normal"><a href="#__codelineno-0-644">644</a></span>
-<span class="normal"><a href="#__codelineno-0-645">645</a></span>
-<span class="normal"><a href="#__codelineno-0-646">646</a></span>
-<span class="normal"><a href="#__codelineno-0-647">647</a></span>
-<span class="normal"><a href="#__codelineno-0-648">648</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-634" name="__codelineno-0-634"></a><span class="k">def</span> <span class="nf">submit_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_info</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<a id="__codelineno-0-635" name="__codelineno-0-635"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Asks a free worker to run the objective function on config and fidelity</span>
-<a id="__codelineno-0-636" name="__codelineno-0-636"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-637" name="__codelineno-0-637"></a>    <span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_data</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">kwargs</span>
-<a id="__codelineno-0-638" name="__codelineno-0-638"></a>    <span class="c1"># submit to Dask client</span>
-<a id="__codelineno-0-639" name="__codelineno-0-639"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_workers</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="n">Client</span><span class="p">):</span>
-<a id="__codelineno-0-640" name="__codelineno-0-640"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_node_with_gpus</span><span class="p">:</span>
-<a id="__codelineno-0-641" name="__codelineno-0-641"></a>            <span class="c1"># managing GPU allocation for the job to be submitted</span>
-<a id="__codelineno-0-642" name="__codelineno-0-642"></a>            <span class="n">job_info</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;gpu_devices&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_gpu_id_with_low_load</span><span class="p">()})</span>
-<a id="__codelineno-0-643" name="__codelineno-0-643"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-<a id="__codelineno-0-644" name="__codelineno-0-644"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_f_objective</span><span class="p">,</span> <span class="n">job_info</span><span class="p">)</span>
-<a id="__codelineno-0-645" name="__codelineno-0-645"></a>        <span class="p">)</span>
-<a id="__codelineno-0-646" name="__codelineno-0-646"></a>    <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-647" name="__codelineno-0-647"></a>        <span class="c1"># skipping scheduling to Dask worker to avoid added overheads in the synchronous case</span>
-<a id="__codelineno-0-648" name="__codelineno-0-648"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_f_objective</span><span class="p">(</span><span class="n">job_info</span><span class="p">))</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-593">593</a></span>
+<span class="normal"><a href="#__codelineno-0-594">594</a></span>
+<span class="normal"><a href="#__codelineno-0-595">595</a></span>
+<span class="normal"><a href="#__codelineno-0-596">596</a></span>
+<span class="normal"><a href="#__codelineno-0-597">597</a></span>
+<span class="normal"><a href="#__codelineno-0-598">598</a></span>
+<span class="normal"><a href="#__codelineno-0-599">599</a></span>
+<span class="normal"><a href="#__codelineno-0-600">600</a></span>
+<span class="normal"><a href="#__codelineno-0-601">601</a></span>
+<span class="normal"><a href="#__codelineno-0-602">602</a></span>
+<span class="normal"><a href="#__codelineno-0-603">603</a></span>
+<span class="normal"><a href="#__codelineno-0-604">604</a></span>
+<span class="normal"><a href="#__codelineno-0-605">605</a></span>
+<span class="normal"><a href="#__codelineno-0-606">606</a></span>
+<span class="normal"><a href="#__codelineno-0-607">607</a></span>
+<span class="normal"><a href="#__codelineno-0-608">608</a></span>
+<span class="normal"><a href="#__codelineno-0-609">609</a></span>
+<span class="normal"><a href="#__codelineno-0-610">610</a></span>
+<span class="normal"><a href="#__codelineno-0-611">611</a></span>
+<span class="normal"><a href="#__codelineno-0-612">612</a></span>
+<span class="normal"><a href="#__codelineno-0-613">613</a></span>
+<span class="normal"><a href="#__codelineno-0-614">614</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-593" name="__codelineno-0-593"></a><span class="k">def</span> <span class="nf">submit_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_info</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-0-594" name="__codelineno-0-594"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Asks a free worker to run the objective function on config and fidelity</span>
+<a id="__codelineno-0-595" name="__codelineno-0-595"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-596" name="__codelineno-0-596"></a>    <span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_data</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">kwargs</span>
+<a id="__codelineno-0-597" name="__codelineno-0-597"></a>    <span class="c1"># submit to to Dask client</span>
+<a id="__codelineno-0-598" name="__codelineno-0-598"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_workers</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="n">Client</span><span class="p">):</span>
+<a id="__codelineno-0-599" name="__codelineno-0-599"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_node_with_gpus</span><span class="p">:</span>
+<a id="__codelineno-0-600" name="__codelineno-0-600"></a>            <span class="c1"># managing GPU allocation for the job to be submitted</span>
+<a id="__codelineno-0-601" name="__codelineno-0-601"></a>            <span class="n">job_info</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;gpu_devices&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_gpu_id_with_low_load</span><span class="p">()})</span>
+<a id="__codelineno-0-602" name="__codelineno-0-602"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<a id="__codelineno-0-603" name="__codelineno-0-603"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_f_objective</span><span class="p">,</span> <span class="n">job_info</span><span class="p">)</span>
+<a id="__codelineno-0-604" name="__codelineno-0-604"></a>        <span class="p">)</span>
+<a id="__codelineno-0-605" name="__codelineno-0-605"></a>    <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-606" name="__codelineno-0-606"></a>        <span class="c1"># skipping scheduling to Dask worker to avoid added overheads in the synchronous case</span>
+<a id="__codelineno-0-607" name="__codelineno-0-607"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_f_objective</span><span class="p">(</span><span class="n">job_info</span><span class="p">))</span>
+<a id="__codelineno-0-608" name="__codelineno-0-608"></a>
+<a id="__codelineno-0-609" name="__codelineno-0-609"></a>    <span class="c1"># pass information of job submission to Bracket Manager</span>
+<a id="__codelineno-0-610" name="__codelineno-0-610"></a>    <span class="k">for</span> <span class="n">bracket</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_brackets</span><span class="p">:</span>
+<a id="__codelineno-0-611" name="__codelineno-0-611"></a>        <span class="k">if</span> <span class="n">bracket</span><span class="o">.</span><span class="n">bracket_id</span> <span class="o">==</span> <span class="n">job_info</span><span class="p">[</span><span class="s1">&#39;bracket_id&#39;</span><span class="p">]:</span>
+<a id="__codelineno-0-612" name="__codelineno-0-612"></a>            <span class="c1"># registering is IMPORTANT for Bracket Manager to perform SH</span>
+<a id="__codelineno-0-613" name="__codelineno-0-613"></a>            <span class="n">bracket</span><span class="o">.</span><span class="n">register_job</span><span class="p">(</span><span class="n">job_info</span><span class="p">[</span><span class="s1">&#39;fidelity&#39;</span><span class="p">])</span>
+<a id="__codelineno-0-614" name="__codelineno-0-614"></a>            <span class="k">break</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -1756,64 +1616,42 @@ For more information, please refer to the description of <code>tell</code>.</p>
 
 
 
-<h3 id="dehb.optimizers.dehb.DEHB.tell" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">tell</span><span class="p">(</span><span class="n">job_info</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span></code>
+<h3 id="dehb.optimizers.dehb.DEHB.run" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">run</span><span class="p">(</span><span class="n">fevals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">brackets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">total_cost</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">single_node_with_gpus</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save_intermediate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_history</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
-<a href="#dehb.optimizers.dehb.DEHB.tell" class="headerlink" title="Permanent link">#</a></h3>
+<a href="#dehb.optimizers.dehb.DEHB.run" class="headerlink" title="Permanent link">#</a></h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Feed a result back to the optimizer.</p>
-<p>In order to correctly interpret the results, the <code>job_info</code> dict, retrieved by <code>ask</code>,
-has to be given. Moreover, the <code>result</code> dict has to contain the keys <code>fitness</code> and <code>cost</code>.
-It is also possible to add the field <code>info</code> to the <code>result</code> in order to store additional,
-user-specific information.</p>
-
-
-
-  <table>
-    <thead>
-      <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b> DESCRIPTION</b></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>job_info</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>Job info returned by ask().</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>dict</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>result</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>Result dictionary with mandatory keys <code>fitness</code> and <code>cost</code>.</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>dict</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
+      <p>Main interface to run optimization by DEHB</p>
+<p>This function waits on workers and if a worker is free, asks for a configuration and a
+fidelity to evaluate on and submits it to the worker. In each loop, it checks if a job
+is complete, fetches the results, carries the necessary processing of it asynchronously
+to the worker computations.</p>
+<p>The duration of the DEHB run can be controlled by specifying one of 3 parameters. If more
+than one are specified, DEHB selects only one in the priority order (high to low):
+1) Number of function evaluations (fevals)
+2) Number of Successive Halving brackets run under Hyperband (brackets)
+3) Total computational cost (in seconds) aggregated by all function evaluations (total_cost)</p>
 
           <details class="quote">
             <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-762">762</a></span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-748">748</a></span>
+<span class="normal"><a href="#__codelineno-0-749">749</a></span>
+<span class="normal"><a href="#__codelineno-0-750">750</a></span>
+<span class="normal"><a href="#__codelineno-0-751">751</a></span>
+<span class="normal"><a href="#__codelineno-0-752">752</a></span>
+<span class="normal"><a href="#__codelineno-0-753">753</a></span>
+<span class="normal"><a href="#__codelineno-0-754">754</a></span>
+<span class="normal"><a href="#__codelineno-0-755">755</a></span>
+<span class="normal"><a href="#__codelineno-0-756">756</a></span>
+<span class="normal"><a href="#__codelineno-0-757">757</a></span>
+<span class="normal"><a href="#__codelineno-0-758">758</a></span>
+<span class="normal"><a href="#__codelineno-0-759">759</a></span>
+<span class="normal"><a href="#__codelineno-0-760">760</a></span>
+<span class="normal"><a href="#__codelineno-0-761">761</a></span>
+<span class="normal"><a href="#__codelineno-0-762">762</a></span>
 <span class="normal"><a href="#__codelineno-0-763">763</a></span>
 <span class="normal"><a href="#__codelineno-0-764">764</a></span>
 <span class="normal"><a href="#__codelineno-0-765">765</a></span>
@@ -1859,86 +1697,9 @@ user-specific information.</p>
 <span class="normal"><a href="#__codelineno-0-805">805</a></span>
 <span class="normal"><a href="#__codelineno-0-806">806</a></span>
 <span class="normal"><a href="#__codelineno-0-807">807</a></span>
-<span class="normal"><a href="#__codelineno-0-808">808</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-762" name="__codelineno-0-762"></a><span class="k">def</span> <span class="nf">tell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-<a id="__codelineno-0-763" name="__codelineno-0-763"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Feed a result back to the optimizer.</span>
-<a id="__codelineno-0-764" name="__codelineno-0-764"></a>
-<a id="__codelineno-0-765" name="__codelineno-0-765"></a><span class="sd">    In order to correctly interpret the results, the `job_info` dict, retrieved by `ask`,</span>
-<a id="__codelineno-0-766" name="__codelineno-0-766"></a><span class="sd">    has to be given. Moreover, the `result` dict has to contain the keys `fitness` and `cost`.</span>
-<a id="__codelineno-0-767" name="__codelineno-0-767"></a><span class="sd">    It is also possible to add the field `info` to the `result` in order to store additional,</span>
-<a id="__codelineno-0-768" name="__codelineno-0-768"></a><span class="sd">    user-specific information.</span>
-<a id="__codelineno-0-769" name="__codelineno-0-769"></a>
-<a id="__codelineno-0-770" name="__codelineno-0-770"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-771" name="__codelineno-0-771"></a><span class="sd">        job_info (dict): Job info returned by ask().</span>
-<a id="__codelineno-0-772" name="__codelineno-0-772"></a><span class="sd">        result (dict): Result dictionary with mandatory keys `fitness` and `cost`.</span>
-<a id="__codelineno-0-773" name="__codelineno-0-773"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-774" name="__codelineno-0-774"></a>    <span class="c1"># update bracket information</span>
-<a id="__codelineno-0-775" name="__codelineno-0-775"></a>    <span class="n">fitness</span><span class="p">,</span> <span class="n">cost</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;fitness&quot;</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;cost&quot;</span><span class="p">]</span>
-<a id="__codelineno-0-776" name="__codelineno-0-776"></a>    <span class="n">info</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;info&quot;</span> <span class="ow">in</span> <span class="n">result</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">()</span>
-<a id="__codelineno-0-777" name="__codelineno-0-777"></a>    <span class="n">fidelity</span><span class="p">,</span> <span class="n">parent_id</span> <span class="o">=</span> <span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;fidelity&quot;</span><span class="p">],</span> <span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;parent_id&quot;</span><span class="p">]</span>
-<a id="__codelineno-0-778" name="__codelineno-0-778"></a>    <span class="n">config</span><span class="p">,</span> <span class="n">config_id</span> <span class="o">=</span> <span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">],</span> <span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;config_id&quot;</span><span class="p">]</span>
-<a id="__codelineno-0-779" name="__codelineno-0-779"></a>    <span class="n">bracket_id</span> <span class="o">=</span> <span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;bracket_id&quot;</span><span class="p">]</span>
-<a id="__codelineno-0-780" name="__codelineno-0-780"></a>    <span class="k">for</span> <span class="n">bracket</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_brackets</span><span class="p">:</span>
-<a id="__codelineno-0-781" name="__codelineno-0-781"></a>        <span class="k">if</span> <span class="n">bracket</span><span class="o">.</span><span class="n">bracket_id</span> <span class="o">==</span> <span class="n">bracket_id</span><span class="p">:</span>
-<a id="__codelineno-0-782" name="__codelineno-0-782"></a>            <span class="c1"># bracket job complete</span>
-<a id="__codelineno-0-783" name="__codelineno-0-783"></a>            <span class="n">bracket</span><span class="o">.</span><span class="n">complete_job</span><span class="p">(</span><span class="n">fidelity</span><span class="p">)</span>  <span class="c1"># IMPORTANT to perform synchronous SH</span>
-<a id="__codelineno-0-784" name="__codelineno-0-784"></a>
-<a id="__codelineno-0-785" name="__codelineno-0-785"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">config_repository</span><span class="o">.</span><span class="n">tell_result</span><span class="p">(</span><span class="n">config_id</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">,</span> <span class="n">fitness</span><span class="p">,</span> <span class="n">cost</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
-<a id="__codelineno-0-786" name="__codelineno-0-786"></a>
-<a id="__codelineno-0-787" name="__codelineno-0-787"></a>    <span class="c1"># get hypercube representation from config repo</span>
-<a id="__codelineno-0-788" name="__codelineno-0-788"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configspace</span><span class="p">:</span>
-<a id="__codelineno-0-789" name="__codelineno-0-789"></a>        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_repository</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config_id</span><span class="p">)</span>
-<a id="__codelineno-0-790" name="__codelineno-0-790"></a>
-<a id="__codelineno-0-791" name="__codelineno-0-791"></a>    <span class="c1"># carry out DE selection</span>
-<a id="__codelineno-0-792" name="__codelineno-0-792"></a>    <span class="k">if</span> <span class="n">fitness</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">de</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span><span class="o">.</span><span class="n">fitness</span><span class="p">[</span><span class="n">parent_id</span><span class="p">]:</span>
-<a id="__codelineno-0-793" name="__codelineno-0-793"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">de</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span><span class="o">.</span><span class="n">population</span><span class="p">[</span><span class="n">parent_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span>
-<a id="__codelineno-0-794" name="__codelineno-0-794"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">de</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span><span class="o">.</span><span class="n">population_ids</span><span class="p">[</span><span class="n">parent_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">config_id</span>
-<a id="__codelineno-0-795" name="__codelineno-0-795"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">de</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span><span class="o">.</span><span class="n">fitness</span><span class="p">[</span><span class="n">parent_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">fitness</span>
-<a id="__codelineno-0-796" name="__codelineno-0-796"></a>    <span class="c1"># updating incumbents</span>
-<a id="__codelineno-0-797" name="__codelineno-0-797"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">de</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span><span class="o">.</span><span class="n">fitness</span><span class="p">[</span><span class="n">parent_id</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">inc_score</span><span class="p">:</span>
-<a id="__codelineno-0-798" name="__codelineno-0-798"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_update_incumbents</span><span class="p">(</span>
-<a id="__codelineno-0-799" name="__codelineno-0-799"></a>            <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">de</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span><span class="o">.</span><span class="n">population</span><span class="p">[</span><span class="n">parent_id</span><span class="p">],</span>
-<a id="__codelineno-0-800" name="__codelineno-0-800"></a>            <span class="n">score</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">de</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span><span class="o">.</span><span class="n">fitness</span><span class="p">[</span><span class="n">parent_id</span><span class="p">],</span>
-<a id="__codelineno-0-801" name="__codelineno-0-801"></a>            <span class="n">info</span><span class="o">=</span><span class="n">info</span>
-<a id="__codelineno-0-802" name="__codelineno-0-802"></a>        <span class="p">)</span>
-<a id="__codelineno-0-803" name="__codelineno-0-803"></a>    <span class="c1"># book-keeping</span>
-<a id="__codelineno-0-804" name="__codelineno-0-804"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_update_trackers</span><span class="p">(</span>
-<a id="__codelineno-0-805" name="__codelineno-0-805"></a>        <span class="n">traj</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inc_score</span><span class="p">,</span> <span class="n">runtime</span><span class="o">=</span><span class="n">cost</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="p">(</span>
-<a id="__codelineno-0-806" name="__codelineno-0-806"></a>            <span class="n">config</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="nb">float</span><span class="p">(</span><span class="n">fitness</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">cost</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">fidelity</span><span class="p">),</span> <span class="n">info</span>
-<a id="__codelineno-0-807" name="__codelineno-0-807"></a>        <span class="p">)</span>
-<a id="__codelineno-0-808" name="__codelineno-0-808"></a>    <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-          </details>
-  </div>
-
-</div>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-<h3 id="dehb.optimizers.dehb.DEHB.run" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">run</span><span class="p">(</span><span class="n">fevals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">brackets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">total_cost</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">single_node_with_gpus</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save_intermediate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_history</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
-
-<a href="#dehb.optimizers.dehb.DEHB.run" class="headerlink" title="Permanent link">#</a></h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Main interface to run optimization by DEHB</p>
-<p>This function waits on workers and if a worker is free, asks for a configuration and a
-fidelity to evaluate on and submits it to the worker. In each loop, it checks if a job
-is complete, fetches the results, carries the necessary processing of it asynchronously
-to the worker computations.</p>
-<p>The duration of the DEHB run can be controlled by specifying one of 3 parameters. If more
-than one are specified, DEHB selects only one in the priority order (high to low):
-1) Number of function evaluations (fevals)
-2) Number of Successive Halving brackets run under Hyperband (brackets)
-3) Total computational cost (in seconds) aggregated by all function evaluations (total_cost)</p>
-
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-810">810</a></span>
+<span class="normal"><a href="#__codelineno-0-808">808</a></span>
+<span class="normal"><a href="#__codelineno-0-809">809</a></span>
+<span class="normal"><a href="#__codelineno-0-810">810</a></span>
 <span class="normal"><a href="#__codelineno-0-811">811</a></span>
 <span class="normal"><a href="#__codelineno-0-812">812</a></span>
 <span class="normal"><a href="#__codelineno-0-813">813</a></span>
@@ -1981,192 +1742,112 @@ than one are specified, DEHB selects only one in the priority order (high to low
 <span class="normal"><a href="#__codelineno-0-850">850</a></span>
 <span class="normal"><a href="#__codelineno-0-851">851</a></span>
 <span class="normal"><a href="#__codelineno-0-852">852</a></span>
-<span class="normal"><a href="#__codelineno-0-853">853</a></span>
-<span class="normal"><a href="#__codelineno-0-854">854</a></span>
-<span class="normal"><a href="#__codelineno-0-855">855</a></span>
-<span class="normal"><a href="#__codelineno-0-856">856</a></span>
-<span class="normal"><a href="#__codelineno-0-857">857</a></span>
-<span class="normal"><a href="#__codelineno-0-858">858</a></span>
-<span class="normal"><a href="#__codelineno-0-859">859</a></span>
-<span class="normal"><a href="#__codelineno-0-860">860</a></span>
-<span class="normal"><a href="#__codelineno-0-861">861</a></span>
-<span class="normal"><a href="#__codelineno-0-862">862</a></span>
-<span class="normal"><a href="#__codelineno-0-863">863</a></span>
-<span class="normal"><a href="#__codelineno-0-864">864</a></span>
-<span class="normal"><a href="#__codelineno-0-865">865</a></span>
-<span class="normal"><a href="#__codelineno-0-866">866</a></span>
-<span class="normal"><a href="#__codelineno-0-867">867</a></span>
-<span class="normal"><a href="#__codelineno-0-868">868</a></span>
-<span class="normal"><a href="#__codelineno-0-869">869</a></span>
-<span class="normal"><a href="#__codelineno-0-870">870</a></span>
-<span class="normal"><a href="#__codelineno-0-871">871</a></span>
-<span class="normal"><a href="#__codelineno-0-872">872</a></span>
-<span class="normal"><a href="#__codelineno-0-873">873</a></span>
-<span class="normal"><a href="#__codelineno-0-874">874</a></span>
-<span class="normal"><a href="#__codelineno-0-875">875</a></span>
-<span class="normal"><a href="#__codelineno-0-876">876</a></span>
-<span class="normal"><a href="#__codelineno-0-877">877</a></span>
-<span class="normal"><a href="#__codelineno-0-878">878</a></span>
-<span class="normal"><a href="#__codelineno-0-879">879</a></span>
-<span class="normal"><a href="#__codelineno-0-880">880</a></span>
-<span class="normal"><a href="#__codelineno-0-881">881</a></span>
-<span class="normal"><a href="#__codelineno-0-882">882</a></span>
-<span class="normal"><a href="#__codelineno-0-883">883</a></span>
-<span class="normal"><a href="#__codelineno-0-884">884</a></span>
-<span class="normal"><a href="#__codelineno-0-885">885</a></span>
-<span class="normal"><a href="#__codelineno-0-886">886</a></span>
-<span class="normal"><a href="#__codelineno-0-887">887</a></span>
-<span class="normal"><a href="#__codelineno-0-888">888</a></span>
-<span class="normal"><a href="#__codelineno-0-889">889</a></span>
-<span class="normal"><a href="#__codelineno-0-890">890</a></span>
-<span class="normal"><a href="#__codelineno-0-891">891</a></span>
-<span class="normal"><a href="#__codelineno-0-892">892</a></span>
-<span class="normal"><a href="#__codelineno-0-893">893</a></span>
-<span class="normal"><a href="#__codelineno-0-894">894</a></span>
-<span class="normal"><a href="#__codelineno-0-895">895</a></span>
-<span class="normal"><a href="#__codelineno-0-896">896</a></span>
-<span class="normal"><a href="#__codelineno-0-897">897</a></span>
-<span class="normal"><a href="#__codelineno-0-898">898</a></span>
-<span class="normal"><a href="#__codelineno-0-899">899</a></span>
-<span class="normal"><a href="#__codelineno-0-900">900</a></span>
-<span class="normal"><a href="#__codelineno-0-901">901</a></span>
-<span class="normal"><a href="#__codelineno-0-902">902</a></span>
-<span class="normal"><a href="#__codelineno-0-903">903</a></span>
-<span class="normal"><a href="#__codelineno-0-904">904</a></span>
-<span class="normal"><a href="#__codelineno-0-905">905</a></span>
-<span class="normal"><a href="#__codelineno-0-906">906</a></span>
-<span class="normal"><a href="#__codelineno-0-907">907</a></span>
-<span class="normal"><a href="#__codelineno-0-908">908</a></span>
-<span class="normal"><a href="#__codelineno-0-909">909</a></span>
-<span class="normal"><a href="#__codelineno-0-910">910</a></span>
-<span class="normal"><a href="#__codelineno-0-911">911</a></span>
-<span class="normal"><a href="#__codelineno-0-912">912</a></span>
-<span class="normal"><a href="#__codelineno-0-913">913</a></span>
-<span class="normal"><a href="#__codelineno-0-914">914</a></span>
-<span class="normal"><a href="#__codelineno-0-915">915</a></span>
-<span class="normal"><a href="#__codelineno-0-916">916</a></span>
-<span class="normal"><a href="#__codelineno-0-917">917</a></span>
-<span class="normal"><a href="#__codelineno-0-918">918</a></span>
-<span class="normal"><a href="#__codelineno-0-919">919</a></span>
-<span class="normal"><a href="#__codelineno-0-920">920</a></span>
-<span class="normal"><a href="#__codelineno-0-921">921</a></span>
-<span class="normal"><a href="#__codelineno-0-922">922</a></span>
-<span class="normal"><a href="#__codelineno-0-923">923</a></span>
-<span class="normal"><a href="#__codelineno-0-924">924</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-810" name="__codelineno-0-810"></a><span class="nd">@logger</span><span class="o">.</span><span class="n">catch</span>
-<a id="__codelineno-0-811" name="__codelineno-0-811"></a><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fevals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">brackets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">total_cost</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">single_node_with_gpus</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-0-812" name="__codelineno-0-812"></a>        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save_intermediate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_history</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<a id="__codelineno-0-813" name="__codelineno-0-813"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Main interface to run optimization by DEHB</span>
-<a id="__codelineno-0-814" name="__codelineno-0-814"></a>
-<a id="__codelineno-0-815" name="__codelineno-0-815"></a><span class="sd">    This function waits on workers and if a worker is free, asks for a configuration and a</span>
-<a id="__codelineno-0-816" name="__codelineno-0-816"></a><span class="sd">    fidelity to evaluate on and submits it to the worker. In each loop, it checks if a job</span>
-<a id="__codelineno-0-817" name="__codelineno-0-817"></a><span class="sd">    is complete, fetches the results, carries the necessary processing of it asynchronously</span>
-<a id="__codelineno-0-818" name="__codelineno-0-818"></a><span class="sd">    to the worker computations.</span>
-<a id="__codelineno-0-819" name="__codelineno-0-819"></a>
-<a id="__codelineno-0-820" name="__codelineno-0-820"></a><span class="sd">    The duration of the DEHB run can be controlled by specifying one of 3 parameters. If more</span>
-<a id="__codelineno-0-821" name="__codelineno-0-821"></a><span class="sd">    than one are specified, DEHB selects only one in the priority order (high to low):</span>
-<a id="__codelineno-0-822" name="__codelineno-0-822"></a><span class="sd">    1) Number of function evaluations (fevals)</span>
-<a id="__codelineno-0-823" name="__codelineno-0-823"></a><span class="sd">    2) Number of Successive Halving brackets run under Hyperband (brackets)</span>
-<a id="__codelineno-0-824" name="__codelineno-0-824"></a><span class="sd">    3) Total computational cost (in seconds) aggregated by all function evaluations (total_cost)</span>
-<a id="__codelineno-0-825" name="__codelineno-0-825"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-826" name="__codelineno-0-826"></a>    <span class="c1"># check if run has already been called before</span>
-<a id="__codelineno-0-827" name="__codelineno-0-827"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-828" name="__codelineno-0-828"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;DEHB has already been run. Calling &#39;run&#39; twice could lead to unintended&quot;</span>
-<a id="__codelineno-0-829" name="__codelineno-0-829"></a>                       <span class="o">+</span> <span class="s2">&quot; behavior. Please restart DEHB with an increased compute budget&quot;</span>
-<a id="__codelineno-0-830" name="__codelineno-0-830"></a>                       <span class="o">+</span> <span class="s2">&quot; instead of calling &#39;run&#39; twice.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-831" name="__codelineno-0-831"></a>
-<a id="__codelineno-0-832" name="__codelineno-0-832"></a>    <span class="c1"># checks if a Dask client exists</span>
-<a id="__codelineno-0-833" name="__codelineno-0-833"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_workers</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="n">Client</span><span class="p">):</span>
-<a id="__codelineno-0-834" name="__codelineno-0-834"></a>        <span class="c1"># broadcasts all additional data passed as **kwargs to all client workers</span>
-<a id="__codelineno-0-835" name="__codelineno-0-835"></a>        <span class="c1"># this reduces overload in the client-worker communication by not having to</span>
-<a id="__codelineno-0-836" name="__codelineno-0-836"></a>        <span class="c1"># serialize the redundant data used by all workers for every job</span>
-<a id="__codelineno-0-837" name="__codelineno-0-837"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">shared_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">broadcast</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-0-838" name="__codelineno-0-838"></a>
-<a id="__codelineno-0-839" name="__codelineno-0-839"></a>    <span class="c1"># allows each worker to be mapped to a different GPU when running on a single node</span>
-<a id="__codelineno-0-840" name="__codelineno-0-840"></a>    <span class="c1"># where all available GPUs are accessible</span>
-<a id="__codelineno-0-841" name="__codelineno-0-841"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">single_node_with_gpus</span> <span class="o">=</span> <span class="n">single_node_with_gpus</span>
-<a id="__codelineno-0-842" name="__codelineno-0-842"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_node_with_gpus</span><span class="p">:</span>
-<a id="__codelineno-0-843" name="__codelineno-0-843"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">distribute_gpus</span><span class="p">()</span>
-<a id="__codelineno-0-844" name="__codelineno-0-844"></a>
-<a id="__codelineno-0-845" name="__codelineno-0-845"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<a id="__codelineno-0-846" name="__codelineno-0-846"></a>    <span class="n">fevals</span><span class="p">,</span> <span class="n">brackets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adjust_budgets</span><span class="p">(</span><span class="n">fevals</span><span class="p">,</span> <span class="n">brackets</span><span class="p">)</span>
-<a id="__codelineno-0-847" name="__codelineno-0-847"></a>    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-<a id="__codelineno-0-848" name="__codelineno-0-848"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Logging at </span><span class="si">{}</span><span class="s2"> for optimization starting at </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-<a id="__codelineno-0-849" name="__codelineno-0-849"></a>            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_filename</span><span class="p">),</span>
-<a id="__codelineno-0-850" name="__codelineno-0-850"></a>            <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%x</span><span class="s2"> </span><span class="si">%X</span><span class="s2"> %Z&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">))</span>
-<a id="__codelineno-0-851" name="__codelineno-0-851"></a>        <span class="p">))</span>
-<a id="__codelineno-0-852" name="__codelineno-0-852"></a>    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
-<a id="__codelineno-0-853" name="__codelineno-0-853"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">handlers</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;sink&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">}])</span>
-<a id="__codelineno-0-854" name="__codelineno-0-854"></a>    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-<a id="__codelineno-0-855" name="__codelineno-0-855"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_run_budget_exhausted</span><span class="p">(</span><span class="n">fevals</span><span class="p">,</span> <span class="n">brackets</span><span class="p">,</span> <span class="n">total_cost</span><span class="p">):</span>
-<a id="__codelineno-0-856" name="__codelineno-0-856"></a>            <span class="k">break</span>
-<a id="__codelineno-0-857" name="__codelineno-0-857"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_worker_available</span><span class="p">():</span>
-<a id="__codelineno-0-858" name="__codelineno-0-858"></a>            <span class="n">job_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ask</span><span class="p">()</span>
-<a id="__codelineno-0-859" name="__codelineno-0-859"></a>            <span class="k">if</span> <span class="n">brackets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;bracket_id&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">brackets</span><span class="p">:</span>
-<a id="__codelineno-0-860" name="__codelineno-0-860"></a>                <span class="c1"># ignore submission and only collect results</span>
-<a id="__codelineno-0-861" name="__codelineno-0-861"></a>                <span class="c1"># when brackets are chosen as run budget, an extra bracket is created</span>
-<a id="__codelineno-0-862" name="__codelineno-0-862"></a>                <span class="c1"># since iteration_counter is incremented in ask() and then checked</span>
-<a id="__codelineno-0-863" name="__codelineno-0-863"></a>                <span class="c1"># in _is_run_budget_exhausted(), therefore, need to skip suggestions</span>
-<a id="__codelineno-0-864" name="__codelineno-0-864"></a>                <span class="c1"># coming from the extra allocated bracket</span>
-<a id="__codelineno-0-865" name="__codelineno-0-865"></a>                <span class="c1"># _is_run_budget_exhausted() will not return True until all the lower brackets</span>
-<a id="__codelineno-0-866" name="__codelineno-0-866"></a>                <span class="c1"># have finished computation and returned its results</span>
-<a id="__codelineno-0-867" name="__codelineno-0-867"></a>                <span class="k">pass</span>
-<a id="__codelineno-0-868" name="__codelineno-0-868"></a>            <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-869" name="__codelineno-0-869"></a>                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_workers</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="n">Client</span><span class="p">):</span>
-<a id="__codelineno-0-870" name="__codelineno-0-870"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2"> worker(s) available.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-<a id="__codelineno-0-871" name="__codelineno-0-871"></a>                        <span class="bp">self</span><span class="o">.</span><span class="n">_get_worker_count</span><span class="p">()</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_worker_count</span><span class="p">()</span>
-<a id="__codelineno-0-872" name="__codelineno-0-872"></a>                    <span class="p">))</span>
-<a id="__codelineno-0-873" name="__codelineno-0-873"></a>                <span class="c1"># submits job_info to a worker for execution</span>
-<a id="__codelineno-0-874" name="__codelineno-0-874"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">submit_job</span><span class="p">(</span><span class="n">job_info</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-0-875" name="__codelineno-0-875"></a>                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-<a id="__codelineno-0-876" name="__codelineno-0-876"></a>                    <span class="n">fidelity</span> <span class="o">=</span> <span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;fidelity&quot;</span><span class="p">]</span>
-<a id="__codelineno-0-877" name="__codelineno-0-877"></a>                    <span class="n">config_id</span> <span class="o">=</span> <span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;config_id&quot;</span><span class="p">]</span>
-<a id="__codelineno-0-878" name="__codelineno-0-878"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_verbosity_runtime</span><span class="p">(</span><span class="n">fevals</span><span class="p">,</span> <span class="n">brackets</span><span class="p">,</span> <span class="n">total_cost</span><span class="p">)</span>
-<a id="__codelineno-0-879" name="__codelineno-0-879"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-<a id="__codelineno-0-880" name="__codelineno-0-880"></a>                        <span class="s2">&quot;Evaluating configuration </span><span class="si">{}</span><span class="s2"> with fidelity </span><span class="si">{}</span><span class="s2"> under &quot;</span>
-<a id="__codelineno-0-881" name="__codelineno-0-881"></a>                        <span class="s2">&quot;bracket ID </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">config_id</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">,</span> <span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;bracket_id&quot;</span><span class="p">])</span>
-<a id="__codelineno-0-882" name="__codelineno-0-882"></a>                    <span class="p">)</span>
-<a id="__codelineno-0-883" name="__codelineno-0-883"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-<a id="__codelineno-0-884" name="__codelineno-0-884"></a>                        <span class="s2">&quot;Best score seen/Incumbent score: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inc_score</span><span class="p">)</span>
-<a id="__codelineno-0-885" name="__codelineno-0-885"></a>                    <span class="p">)</span>
-<a id="__codelineno-0-886" name="__codelineno-0-886"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">_verbosity_debug</span><span class="p">()</span>
-<a id="__codelineno-0-887" name="__codelineno-0-887"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_results_from_workers</span><span class="p">()</span>
-<a id="__codelineno-0-888" name="__codelineno-0-888"></a>        <span class="k">if</span> <span class="n">save_intermediate</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">inc_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-889" name="__codelineno-0-889"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_save_incumbent</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-890" name="__codelineno-0-890"></a>        <span class="k">if</span> <span class="n">save_history</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-891" name="__codelineno-0-891"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_save_history</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-892" name="__codelineno-0-892"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">clean_inactive_brackets</span><span class="p">()</span>
-<a id="__codelineno-0-893" name="__codelineno-0-893"></a>    <span class="c1"># end of while</span>
-<a id="__codelineno-0-894" name="__codelineno-0-894"></a>
-<a id="__codelineno-0-895" name="__codelineno-0-895"></a>    <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-0-896" name="__codelineno-0-896"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-<a id="__codelineno-0-897" name="__codelineno-0-897"></a>            <span class="s2">&quot;DEHB optimisation over! Waiting to collect results from workers running...&quot;</span>
-<a id="__codelineno-0-898" name="__codelineno-0-898"></a>        <span class="p">)</span>
-<a id="__codelineno-0-899" name="__codelineno-0-899"></a>    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-0-900" name="__codelineno-0-900"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_results_from_workers</span><span class="p">()</span>
-<a id="__codelineno-0-901" name="__codelineno-0-901"></a>        <span class="k">if</span> <span class="n">save_intermediate</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">inc_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-902" name="__codelineno-0-902"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_save_incumbent</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-903" name="__codelineno-0-903"></a>        <span class="k">if</span> <span class="n">save_history</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-904" name="__codelineno-0-904"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_save_history</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-905" name="__codelineno-0-905"></a>        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>  <span class="c1"># waiting 50ms</span>
-<a id="__codelineno-0-906" name="__codelineno-0-906"></a>
-<a id="__codelineno-0-907" name="__codelineno-0-907"></a>    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-<a id="__codelineno-0-908" name="__codelineno-0-908"></a>        <span class="n">time_taken</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span>
-<a id="__codelineno-0-909" name="__codelineno-0-909"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;End of optimisation! Total duration: </span><span class="si">{}</span><span class="s2">; Total fevals: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-<a id="__codelineno-0-910" name="__codelineno-0-910"></a>            <span class="n">time_taken</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traj</span><span class="p">)</span>
-<a id="__codelineno-0-911" name="__codelineno-0-911"></a>        <span class="p">))</span>
-<a id="__codelineno-0-912" name="__codelineno-0-912"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Incumbent score: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inc_score</span><span class="p">))</span>
-<a id="__codelineno-0-913" name="__codelineno-0-913"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Incumbent config: &quot;</span><span class="p">)</span>
-<a id="__codelineno-0-914" name="__codelineno-0-914"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configspace</span><span class="p">:</span>
-<a id="__codelineno-0-915" name="__codelineno-0-915"></a>            <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_to_configspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inc_config</span><span class="p">)</span>
-<a id="__codelineno-0-916" name="__codelineno-0-916"></a>            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">get_dictionary</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<a id="__codelineno-0-917" name="__codelineno-0-917"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
-<a id="__codelineno-0-918" name="__codelineno-0-918"></a>        <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-919" name="__codelineno-0-919"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inc_config</span><span class="p">))</span>
-<a id="__codelineno-0-920" name="__codelineno-0-920"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_save_incumbent</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-921" name="__codelineno-0-921"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_save_history</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-922" name="__codelineno-0-922"></a>    <span class="c1"># reset waiting jobs of active bracket to allow for continuation</span>
-<a id="__codelineno-0-923" name="__codelineno-0-923"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">active_brackets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reset_waiting_jobs</span><span class="p">()</span>
-<a id="__codelineno-0-924" name="__codelineno-0-924"></a>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traj</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runtime</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-853">853</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-748" name="__codelineno-0-748"></a><span class="nd">@logger</span><span class="o">.</span><span class="n">catch</span>
+<a id="__codelineno-0-749" name="__codelineno-0-749"></a><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fevals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">brackets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">total_cost</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">single_node_with_gpus</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-0-750" name="__codelineno-0-750"></a>        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save_intermediate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_history</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-0-751" name="__codelineno-0-751"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Main interface to run optimization by DEHB</span>
+<a id="__codelineno-0-752" name="__codelineno-0-752"></a>
+<a id="__codelineno-0-753" name="__codelineno-0-753"></a><span class="sd">    This function waits on workers and if a worker is free, asks for a configuration and a</span>
+<a id="__codelineno-0-754" name="__codelineno-0-754"></a><span class="sd">    fidelity to evaluate on and submits it to the worker. In each loop, it checks if a job</span>
+<a id="__codelineno-0-755" name="__codelineno-0-755"></a><span class="sd">    is complete, fetches the results, carries the necessary processing of it asynchronously</span>
+<a id="__codelineno-0-756" name="__codelineno-0-756"></a><span class="sd">    to the worker computations.</span>
+<a id="__codelineno-0-757" name="__codelineno-0-757"></a>
+<a id="__codelineno-0-758" name="__codelineno-0-758"></a><span class="sd">    The duration of the DEHB run can be controlled by specifying one of 3 parameters. If more</span>
+<a id="__codelineno-0-759" name="__codelineno-0-759"></a><span class="sd">    than one are specified, DEHB selects only one in the priority order (high to low):</span>
+<a id="__codelineno-0-760" name="__codelineno-0-760"></a><span class="sd">    1) Number of function evaluations (fevals)</span>
+<a id="__codelineno-0-761" name="__codelineno-0-761"></a><span class="sd">    2) Number of Successive Halving brackets run under Hyperband (brackets)</span>
+<a id="__codelineno-0-762" name="__codelineno-0-762"></a><span class="sd">    3) Total computational cost (in seconds) aggregated by all function evaluations (total_cost)</span>
+<a id="__codelineno-0-763" name="__codelineno-0-763"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-764" name="__codelineno-0-764"></a>    <span class="c1"># checks if a Dask client exists</span>
+<a id="__codelineno-0-765" name="__codelineno-0-765"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_workers</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="n">Client</span><span class="p">):</span>
+<a id="__codelineno-0-766" name="__codelineno-0-766"></a>        <span class="c1"># broadcasts all additional data passed as **kwargs to all client workers</span>
+<a id="__codelineno-0-767" name="__codelineno-0-767"></a>        <span class="c1"># this reduces overload in the client-worker communication by not having to</span>
+<a id="__codelineno-0-768" name="__codelineno-0-768"></a>        <span class="c1"># serialize the redundant data used by all workers for every job</span>
+<a id="__codelineno-0-769" name="__codelineno-0-769"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">shared_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">broadcast</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-770" name="__codelineno-0-770"></a>
+<a id="__codelineno-0-771" name="__codelineno-0-771"></a>    <span class="c1"># allows each worker to be mapped to a different GPU when running on a single node</span>
+<a id="__codelineno-0-772" name="__codelineno-0-772"></a>    <span class="c1"># where all available GPUs are accessible</span>
+<a id="__codelineno-0-773" name="__codelineno-0-773"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">single_node_with_gpus</span> <span class="o">=</span> <span class="n">single_node_with_gpus</span>
+<a id="__codelineno-0-774" name="__codelineno-0-774"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_node_with_gpus</span><span class="p">:</span>
+<a id="__codelineno-0-775" name="__codelineno-0-775"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">distribute_gpus</span><span class="p">()</span>
+<a id="__codelineno-0-776" name="__codelineno-0-776"></a>
+<a id="__codelineno-0-777" name="__codelineno-0-777"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<a id="__codelineno-0-778" name="__codelineno-0-778"></a>    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+<a id="__codelineno-0-779" name="__codelineno-0-779"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Logging at </span><span class="si">{}</span><span class="s2"> for optimization starting at </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<a id="__codelineno-0-780" name="__codelineno-0-780"></a>            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_filename</span><span class="p">),</span>
+<a id="__codelineno-0-781" name="__codelineno-0-781"></a>            <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%x</span><span class="s2"> </span><span class="si">%X</span><span class="s2"> %Z&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">))</span>
+<a id="__codelineno-0-782" name="__codelineno-0-782"></a>        <span class="p">))</span>
+<a id="__codelineno-0-783" name="__codelineno-0-783"></a>    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+<a id="__codelineno-0-784" name="__codelineno-0-784"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">handlers</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;sink&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">}])</span>
+<a id="__codelineno-0-785" name="__codelineno-0-785"></a>    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+<a id="__codelineno-0-786" name="__codelineno-0-786"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_run_budget_exhausted</span><span class="p">(</span><span class="n">fevals</span><span class="p">,</span> <span class="n">brackets</span><span class="p">,</span> <span class="n">total_cost</span><span class="p">):</span>
+<a id="__codelineno-0-787" name="__codelineno-0-787"></a>            <span class="k">break</span>
+<a id="__codelineno-0-788" name="__codelineno-0-788"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_worker_available</span><span class="p">():</span>
+<a id="__codelineno-0-789" name="__codelineno-0-789"></a>            <span class="n">job_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_next_job</span><span class="p">()</span>
+<a id="__codelineno-0-790" name="__codelineno-0-790"></a>            <span class="k">if</span> <span class="n">brackets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;bracket_id&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">brackets</span><span class="p">:</span>
+<a id="__codelineno-0-791" name="__codelineno-0-791"></a>                <span class="c1"># ignore submission and only collect results</span>
+<a id="__codelineno-0-792" name="__codelineno-0-792"></a>                <span class="c1"># when brackets are chosen as run budget, an extra bracket is created</span>
+<a id="__codelineno-0-793" name="__codelineno-0-793"></a>                <span class="c1"># since iteration_counter is incremented in _get_next_job() and then checked</span>
+<a id="__codelineno-0-794" name="__codelineno-0-794"></a>                <span class="c1"># in _is_run_budget_exhausted(), therefore, need to skip suggestions</span>
+<a id="__codelineno-0-795" name="__codelineno-0-795"></a>                <span class="c1"># coming from the extra allocated bracket</span>
+<a id="__codelineno-0-796" name="__codelineno-0-796"></a>                <span class="c1"># _is_run_budget_exhausted() will not return True until all the lower brackets</span>
+<a id="__codelineno-0-797" name="__codelineno-0-797"></a>                <span class="c1"># have finished computation and returned its results</span>
+<a id="__codelineno-0-798" name="__codelineno-0-798"></a>                <span class="k">pass</span>
+<a id="__codelineno-0-799" name="__codelineno-0-799"></a>            <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-800" name="__codelineno-0-800"></a>                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_workers</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="n">Client</span><span class="p">):</span>
+<a id="__codelineno-0-801" name="__codelineno-0-801"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2"> worker(s) available.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<a id="__codelineno-0-802" name="__codelineno-0-802"></a>                        <span class="bp">self</span><span class="o">.</span><span class="n">_get_worker_count</span><span class="p">()</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_worker_count</span><span class="p">()</span>
+<a id="__codelineno-0-803" name="__codelineno-0-803"></a>                    <span class="p">))</span>
+<a id="__codelineno-0-804" name="__codelineno-0-804"></a>                <span class="c1"># submits job_info to a worker for execution</span>
+<a id="__codelineno-0-805" name="__codelineno-0-805"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">submit_job</span><span class="p">(</span><span class="n">job_info</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-0-806" name="__codelineno-0-806"></a>                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+<a id="__codelineno-0-807" name="__codelineno-0-807"></a>                    <span class="n">fidelity</span> <span class="o">=</span> <span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;fidelity&quot;</span><span class="p">]</span>
+<a id="__codelineno-0-808" name="__codelineno-0-808"></a>                    <span class="n">config_id</span> <span class="o">=</span> <span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;config_id&quot;</span><span class="p">]</span>
+<a id="__codelineno-0-809" name="__codelineno-0-809"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_verbosity_runtime</span><span class="p">(</span><span class="n">fevals</span><span class="p">,</span> <span class="n">brackets</span><span class="p">,</span> <span class="n">total_cost</span><span class="p">)</span>
+<a id="__codelineno-0-810" name="__codelineno-0-810"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-0-811" name="__codelineno-0-811"></a>                        <span class="s2">&quot;Evaluating configuration </span><span class="si">{}</span><span class="s2"> with fidelity </span><span class="si">{}</span><span class="s2"> under &quot;</span>
+<a id="__codelineno-0-812" name="__codelineno-0-812"></a>                        <span class="s2">&quot;bracket ID </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">config_id</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">,</span> <span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;bracket_id&quot;</span><span class="p">])</span>
+<a id="__codelineno-0-813" name="__codelineno-0-813"></a>                    <span class="p">)</span>
+<a id="__codelineno-0-814" name="__codelineno-0-814"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-0-815" name="__codelineno-0-815"></a>                        <span class="s2">&quot;Best score seen/Incumbent score: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inc_score</span><span class="p">)</span>
+<a id="__codelineno-0-816" name="__codelineno-0-816"></a>                    <span class="p">)</span>
+<a id="__codelineno-0-817" name="__codelineno-0-817"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">_verbosity_debug</span><span class="p">()</span>
+<a id="__codelineno-0-818" name="__codelineno-0-818"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_results_from_workers</span><span class="p">()</span>
+<a id="__codelineno-0-819" name="__codelineno-0-819"></a>        <span class="k">if</span> <span class="n">save_intermediate</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">inc_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-820" name="__codelineno-0-820"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_save_incumbent</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-821" name="__codelineno-0-821"></a>        <span class="k">if</span> <span class="n">save_history</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-822" name="__codelineno-0-822"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_save_history</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-823" name="__codelineno-0-823"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">clean_inactive_brackets</span><span class="p">()</span>
+<a id="__codelineno-0-824" name="__codelineno-0-824"></a>    <span class="c1"># end of while</span>
+<a id="__codelineno-0-825" name="__codelineno-0-825"></a>
+<a id="__codelineno-0-826" name="__codelineno-0-826"></a>    <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-827" name="__codelineno-0-827"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-0-828" name="__codelineno-0-828"></a>            <span class="s2">&quot;DEHB optimisation over! Waiting to collect results from workers running...&quot;</span>
+<a id="__codelineno-0-829" name="__codelineno-0-829"></a>        <span class="p">)</span>
+<a id="__codelineno-0-830" name="__codelineno-0-830"></a>    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-831" name="__codelineno-0-831"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_results_from_workers</span><span class="p">()</span>
+<a id="__codelineno-0-832" name="__codelineno-0-832"></a>        <span class="k">if</span> <span class="n">save_intermediate</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">inc_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-833" name="__codelineno-0-833"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_save_incumbent</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-834" name="__codelineno-0-834"></a>        <span class="k">if</span> <span class="n">save_history</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-835" name="__codelineno-0-835"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_save_history</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-836" name="__codelineno-0-836"></a>        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>  <span class="c1"># waiting 50ms</span>
+<a id="__codelineno-0-837" name="__codelineno-0-837"></a>
+<a id="__codelineno-0-838" name="__codelineno-0-838"></a>    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+<a id="__codelineno-0-839" name="__codelineno-0-839"></a>        <span class="n">time_taken</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span>
+<a id="__codelineno-0-840" name="__codelineno-0-840"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;End of optimisation! Total duration: </span><span class="si">{}</span><span class="s2">; Total fevals: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<a id="__codelineno-0-841" name="__codelineno-0-841"></a>            <span class="n">time_taken</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traj</span><span class="p">)</span>
+<a id="__codelineno-0-842" name="__codelineno-0-842"></a>        <span class="p">))</span>
+<a id="__codelineno-0-843" name="__codelineno-0-843"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Incumbent score: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inc_score</span><span class="p">))</span>
+<a id="__codelineno-0-844" name="__codelineno-0-844"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Incumbent config: &quot;</span><span class="p">)</span>
+<a id="__codelineno-0-845" name="__codelineno-0-845"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configspace</span><span class="p">:</span>
+<a id="__codelineno-0-846" name="__codelineno-0-846"></a>            <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_to_configspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inc_config</span><span class="p">)</span>
+<a id="__codelineno-0-847" name="__codelineno-0-847"></a>            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">get_dictionary</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-0-848" name="__codelineno-0-848"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+<a id="__codelineno-0-849" name="__codelineno-0-849"></a>        <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-850" name="__codelineno-0-850"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inc_config</span><span class="p">))</span>
+<a id="__codelineno-0-851" name="__codelineno-0-851"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_save_incumbent</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-852" name="__codelineno-0-852"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_save_history</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-853" name="__codelineno-0-853"></a>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traj</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runtime</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>

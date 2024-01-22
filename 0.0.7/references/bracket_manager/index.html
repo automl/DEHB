@@ -635,15 +635,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#dehb.utils.bracket_manager.SHBracketManager.reset_waiting_jobs" class="md-nav__link">
-    <span class="md-ellipsis">
-      reset_waiting_jobs
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -777,15 +768,6 @@
   <a href="#dehb.utils.bracket_manager.SHBracketManager.is_waiting" class="md-nav__link">
     <span class="md-ellipsis">
       is_waiting
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dehb.utils.bracket_manager.SHBracketManager.reset_waiting_jobs" class="md-nav__link">
-    <span class="md-ellipsis">
-      reset_waiting_jobs
     </span>
   </a>
   
@@ -1256,52 +1238,6 @@ synchronous Successive Halving case.</p>
 <a id="__codelineno-0-124" name="__codelineno-0-124"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns True if any of the rungs/fidelities have a configuration pending/running</span>
 <a id="__codelineno-0-125" name="__codelineno-0-125"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-126" name="__codelineno-0-126"></a>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_rung_waiting</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span><span class="p">)])</span>
-</code></pre></div></td></tr></table></div>
-          </details>
-  </div>
-
-</div>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-<h3 id="dehb.utils.bracket_manager.SHBracketManager.reset_waiting_jobs" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">reset_waiting_jobs</span><span class="p">()</span></code>
-
-<a href="#dehb.utils.bracket_manager.SHBracketManager.reset_waiting_jobs" class="headerlink" title="Permanent link">#</a></h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Resets all waiting jobs and updates the current_rung pointer accordingly.</p>
-
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-128">128</a></span>
-<span class="normal"><a href="#__codelineno-0-129">129</a></span>
-<span class="normal"><a href="#__codelineno-0-130">130</a></span>
-<span class="normal"><a href="#__codelineno-0-131">131</a></span>
-<span class="normal"><a href="#__codelineno-0-132">132</a></span>
-<span class="normal"><a href="#__codelineno-0-133">133</a></span>
-<span class="normal"><a href="#__codelineno-0-134">134</a></span>
-<span class="normal"><a href="#__codelineno-0-135">135</a></span>
-<span class="normal"><a href="#__codelineno-0-136">136</a></span>
-<span class="normal"><a href="#__codelineno-0-137">137</a></span>
-<span class="normal"><a href="#__codelineno-0-138">138</a></span>
-<span class="normal"><a href="#__codelineno-0-139">139</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-128" name="__codelineno-0-128"></a><span class="k">def</span> <span class="nf">reset_waiting_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-129" name="__codelineno-0-129"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Resets all waiting jobs and updates the current_rung pointer accordingly.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-130" name="__codelineno-0-130"></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">fidelity</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span><span class="p">):</span>
-<a id="__codelineno-0-131" name="__codelineno-0-131"></a>        <span class="n">pending</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_bracket</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span>
-<a id="__codelineno-0-132" name="__codelineno-0-132"></a>        <span class="n">done</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sh_bracket</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span>
-<a id="__codelineno-0-133" name="__codelineno-0-133"></a>        <span class="n">waiting</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_configs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">pending</span> <span class="o">-</span> <span class="n">done</span><span class="p">)</span>
-<a id="__codelineno-0-134" name="__codelineno-0-134"></a>
-<a id="__codelineno-0-135" name="__codelineno-0-135"></a>        <span class="c1"># update current_rung pointer to the lowest rung with waiting jobs</span>
-<a id="__codelineno-0-136" name="__codelineno-0-136"></a>        <span class="k">if</span> <span class="n">waiting</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_rung</span> <span class="o">&gt;</span> <span class="n">i</span><span class="p">:</span>
-<a id="__codelineno-0-137" name="__codelineno-0-137"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">current_rung</span> <span class="o">=</span> <span class="n">i</span>
-<a id="__codelineno-0-138" name="__codelineno-0-138"></a>        <span class="c1"># reset waiting jobs</span>
-<a id="__codelineno-0-139" name="__codelineno-0-139"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">sh_bracket</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span> <span class="o">+=</span> <span class="n">waiting</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
