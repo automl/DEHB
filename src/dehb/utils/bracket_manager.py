@@ -125,19 +125,6 @@ class SHBracketManager(object):
         """
         return np.any([self._is_rung_waiting(i) > 0 for i, _ in enumerate(self.fidelities)])
 
-    def reset_waiting_jobs(self):
-        """Resets all waiting jobs and updates the current_rung pointer accordingly."""
-        for i, fidelity in enumerate(self.fidelities):
-            pending = self.sh_bracket[fidelity]
-            done = self._sh_bracket[fidelity]
-            waiting = np.abs(self.n_configs[i] - pending - done)
-
-            # update current_rung pointer to the lowest rung with waiting jobs
-            if waiting > 0 and self.current_rung > i:
-                self.current_rung = i
-            # reset waiting jobs
-            self.sh_bracket[fidelity] += waiting
-
     def __repr__(self):
         cell_width = 10
         cell = "{{:^{}}}".format(cell_width)

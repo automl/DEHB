@@ -82,26 +82,28 @@ class ConfigRepository:
             population_ids.append(conf_id)
         return np.array(population_ids)
 
-    def announce_fidelity(self, config_id: int, fidelity: float):
+    def announce_fidelity(self, config_id: int, fidelity: float) -> bool:
         """Announce the evaluation of a new fidelity for a given config.
 
         This function may only be used if the config already exists in the repository.
-        Note: This function is currently unused, but might be used later in order to
-        allow for continuation.
 
         Args:
             config_id (int): ID of Configuration
             fidelity (float): Fidelity on which the config will be evaluated
-        """
-        try:
-            config_item = self.configs[config_id]
-        except IndexError as e:
-            raise IndexError("Config with the given ID can not be found.") from e
 
+        Returns:
+            bool: Success/Failure of operation
+        """
+        if config_id >= len(self.configs) or config_id < 0:
+            # TODO: Error message
+            return False
+
+        config_item = self.configs[config_id]
         result_item = {
                 fidelity: ResultItem(np.inf, -1, {}),
             }
         config_item.results[fidelity] = result_item
+        return True
 
     def tell_result(self, config_id: int, fidelity: float, score: float, cost: float, info: dict):
         """Logs the achieved performance, cost etc. of a specific configuration-fidelity pair.
@@ -113,10 +115,7 @@ class ConfigRepository:
             cost (float): Cost, given by objective function
             info (dict): Run info, given by objective function
         """
-        try:
-            config_item = self.configs[config_id]
-        except IndexError as e:
-            raise IndexError("Config with the given ID can not be found.") from e
+        config_item = self.configs[config_id]
 
         # If configuration has been promoted, there is no fidelity information yet
         if fidelity not in config_item.results:
@@ -126,18 +125,3 @@ class ConfigRepository:
             config_item.results[fidelity].score = score
             config_item.results[fidelity].cost = cost
             config_item.results[fidelity].info = info
-
-    def get(self, config_id: int) -> np.ndarray:
-        """Get the configuration with the given ID.
-
-        Args:
-            config_id (int): ID of config
-
-        Returns:
-            np.ndarray: Config in hypercube representation
-        """
-        try:
-            config_item = self.configs[config_id]
-        except IndexError as e:
-            raise IndexError("Config with the given ID can not be found.") from e
-        return config_item.config

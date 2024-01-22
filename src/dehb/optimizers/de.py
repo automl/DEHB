@@ -163,7 +163,7 @@ class DEBase():
         '''
         # creates a ConfigSpace object dict with all hyperparameters present, the inactive too
         new_config = ConfigSpace.util.impute_inactive_values(
-            self.cs.get_default_configuration()
+            self.cs.sample_configuration()
         ).get_dictionary()
         # iterates over all hyperparameters and normalizes each based on its type
         for i, hyper in enumerate(self.cs.get_hyperparameters()):
@@ -304,17 +304,12 @@ class DE(DEBase):
             raise NotImplementedError("An objective function needs to be passed.")
         if self.encoding:
             x = self.map_to_original(x)
-
-        # Only convert config if configspace is used + configuration has not been converted yet
         if self.configspace:
-            if not isinstance(x, ConfigSpace.Configuration):
-                # converts [0, 1] vector to a ConfigSpace object
-                config = self.vector_to_configspace(x)
-            else:
-                config = x
+            # converts [0, 1] vector to a ConfigSpace object
+            config = self.vector_to_configspace(x)
         else:
+            # can insert custom scaling/transform function here
             config = x.copy()
-
         if fidelity is not None:  # to be used when called by multi-fidelity based optimizers
             res = self.f(config, fidelity=fidelity, **kwargs)
         else:
