@@ -26,8 +26,8 @@ pip install -e DEHB  # -e stands for editable, lets you modify the code and reru
 To run PyTorch example: (*note additional requirements*) 
 ```bash
 python examples/03_pytorch_mnist_hpo.py \
-    --min_budget 1 \
-    --max_budget 3 \
+    --min_fidelity 1 \
+    --max_fidelity 3 \
     --runtime 60 \
     --verbose
 ```
@@ -63,8 +63,8 @@ to it by that DEHB run.
 To run the PyTorch MNIST example on a single node using 2 workers:  
 ```bash
 python examples/03_pytorch_mnist_hpo.py \
-    --min_budget 1 \
-    --max_budget 3 \
+    --min_fidelity 1 \
+    --max_fidelity 3 \
     --runtime 60 \
     --n_workers 2 \
     --single_node_with_gpus \
@@ -97,8 +97,8 @@ bash utils/run_dask_setup.sh \
 # Make sure to sleep to allow the workers to setup properly
 sleep 5
 python examples/03_pytorch_mnist_hpo.py \
-    --min_budget 1 \
-    --max_budget 3 \
+    --min_fidelity 1 \
+    --max_fidelity 3 \
     --runtime 60 \
     --scheduler_file dask_dump/scheduler.json \
     --verbose
@@ -112,9 +112,9 @@ and were found to be *generally* useful across all cases tested.
 However, the parameters are still available for tuning to a specific problem.
 
 The Hyperband components:
-* *min\_budget*: Needs to be specified for every DEHB instantiation and is used in determining 
-the budget spacing for the problem at hand.
-* *max\_budget*: Needs to be specified for every DEHB instantiation. Represents the full-budget 
+* *min\_fidelity*: Needs to be specified for every DEHB instantiation and is used in determining 
+the fidelity spacing for the problem at hand.
+* *max\_fidelity*: Needs to be specified for every DEHB instantiation. Represents the full-fidelity 
 evaluation or the actual black-box setting.
 * *eta*: (default=3) Sets the aggressiveness of Hyperband's aggressive early stopping by retaining
 1/eta configurations every round
