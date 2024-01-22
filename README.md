@@ -5,6 +5,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/automl/DEHB/badge.svg)](https://coveralls.io/github/automl/DEHB)
 [![PyPI](https://img.shields.io/pypi/v/dehb)](https://pypi.org/project/dehb/)
 [![Static Badge](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20-blue)](https://pypi.org/project/dehb/)
+[![arXiv](https://img.shields.io/badge/arXiv-2105.09821-b31b1b.svg)](https://arxiv.org/abs/2105.09821)
 ### Installation
 ```bash
 # from pypi
@@ -141,11 +142,4 @@ represents the *mutation* strategy while `bin` represents the *binomial crossove
   publisher = {ijcai.org},
   editor    = {Z. Zhou},
   year      = {2021}
-}
-
-@online{Awad-arXiv-2023,
-title       = {MO-DEHB: Evolutionary-based Hyperband for Multi-Objective Optimization},
-author      = {Noor Awad and Ayushi Sharma and Frank Hutter},
-year        = {2023},
-keywords    = {}
 }
