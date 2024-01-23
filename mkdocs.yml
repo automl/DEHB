@@ -5,6 +5,11 @@ nav:
   - Getting Started:
     - Single Worker: getting_started/single_worker.md
     - Parallel: getting_started/parallel.md
+  - Examples:
+    - Interfacing DEHB: examples/00_interfacing_DEHB.ipynb
+    - Optimizing RandomForest using DEHB: examples/01.1_Optimizing_RandomForest_using_DEHB.ipynb
+    - Using the Ask & Tell interface: examples/01.2_Optimizing_RandomForest_using_Ask_Tell.ipynb
+    - Using DEHB without ConfigSpace: examples/02_using_DEHB_without_ConfigSpace.ipynb
   - Code Reference:
     - DEHB: references/dehb.md
     - DE: references/de.md
@@ -100,6 +105,8 @@ plugins:
             show_signature: true
             separate_signature: false
             show_signature_annotations: false
+  - mkdocs-jupyter:
+      execute: true
 
 extra:
   version:

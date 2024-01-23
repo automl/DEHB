@@ -46,6 +46,7 @@ dev = [
   "mkdocs-material",
   "mkdocstrings[python]",
   "markdown-exec[ansi]",
+  "mkdocs-jupyter",
   "mike",
   # Others
   "ruff",
