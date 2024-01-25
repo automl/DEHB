@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import List
 
 import ConfigSpace
@@ -38,8 +39,8 @@ class DEBase():
             for i, hp in enumerate(cs.get_hyperparameters()):
                 # maps hyperparameter name to positional index in vector form
                 self.hps[hp.name] = i
-        self.output_path = kwargs['output_path'] if 'output_path' in kwargs else './'
-        os.makedirs(self.output_path, exist_ok=True)
+        self.output_path = Path(kwargs["output_path"]) if "output_path" in kwargs else Path("./")
+        self.output_path.mkdir(parents=True, exist_ok=True)
 
         if config_repository:
             self.config_repository = config_repository
