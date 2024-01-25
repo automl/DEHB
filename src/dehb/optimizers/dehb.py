@@ -671,6 +671,33 @@ class DEHB(DEHBBase):
 
         return fevals, brackets
 
+    def save_state(self):
+        # Save ConfigRepository
+        config_repo_path = self.output_path / "config_repository.json"
+        self.config_repository.save_state(config_repo_path)
+        state = {}
+        # Save DE subpopulations
+        de_dict = {}
+        for fidelity, de_object in self.de.items():
+            de_instance = {}
+            de_instance["population_ids"] = de_object.population_ids
+            de_instance["fitness"] = de_object.fitness
+            de_instance["age"] = de_object.age
+            de_instance["parent_counter"] = de_object.parent_counter
+            de_instance["promotion_pop_ids"] = de_object.promotion_pop_ids
+            de_instance["promotion_fitness"] = de_object.promotion_fitness
+            de_dict[fidelity] = de_instance
+        state["DE"] = de_dict
+        # DE parameters
+        state["DE_params"] = self.de_params
+        # Save dehb interals
+        dehb_internals = {}
+        dehb_internals["iteration_counter"] = self.iteration_counter
+        dehb_internals["inc_score"] = self.inc_score
+        dehb_internals["inc_config"] = self.inc_config
+        dehb_internals["inc_info"] = self.inc_info
+
+
     def _is_run_budget_exhausted(self, fevals=None, brackets=None, total_cost=None):
         """Checks if the DEHB run should be terminated or continued."""
         delimiters = [fevals, brackets, total_cost]
@@ -788,7 +815,7 @@ class DEHB(DEHBBase):
         # book-keeping
         self._update_trackers(
             traj=self.inc_score, runtime=cost, history=(
-                config.tolist(), float(fitness), float(cost), float(fidelity), info,
+                config_id, config.tolist(), float(fitness), float(cost), float(fidelity), info,
             ),
         )
 
