@@ -1,6 +1,7 @@
 import json
 import os
 import pickle
+import sched
 import sys
 import time
 from copy import deepcopy
@@ -671,7 +672,9 @@ class DEHB(DEHBBase):
 
         return fevals, brackets
 
-    def save_state(self):
+    def save_state(self, scheduler=None):
+        if scheduler:
+            scheduler.enter(60, 1, self.save_state, (scheduler,))
         # Save ConfigRepository
         config_repo_path = self.output_path / "config_repository.json"
         self.config_repository.save_state(config_repo_path)
@@ -840,6 +843,11 @@ class DEHB(DEHBBase):
             logger.warning("DEHB has already been run. Calling 'run' twice could lead to unintended"
                            + " behavior. Please restart DEHB with an increased compute budget"
                            + " instead of calling 'run' twice.")
+
+        # Setup continous log and state saving
+        saving_scheduler = sched.scheduler(time.time, time.sleep)
+        saving_scheduler.enter(60, 1, self.save_state, (saving_scheduler,))
+        saving_scheduler.run()
 
         # checks if a Dask client exists
         if len(kwargs) > 0 and self.n_workers > 1 and isinstance(self.client, Client):
