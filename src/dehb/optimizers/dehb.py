@@ -1,8 +1,8 @@
 import json
 import os
 import pickle
-import sched
 import sys
+import threading
 import time
 from copy import deepcopy
 from pathlib import Path
@@ -35,8 +35,8 @@ class DEHBBase:
 
         # Benchmark related variables
         self.cs = cs
-        self.configspace = True if isinstance(self.cs, ConfigSpace.ConfigurationSpace) else False
-        if self.configspace:
+        self.use_configspace = True if isinstance(self.cs, ConfigSpace.ConfigurationSpace) else False
+        if self.use_configspace:
             self.dimensions = len(self.cs.get_hyperparameters())
         elif dimensions is None or not isinstance(dimensions, (int, np.integer)):
             assert "Need to specify `dimensions` as an int when `cs` is not available/specified!"
@@ -54,7 +54,7 @@ class DEHBBase:
             "mutation_factor": self.mutation_factor,
             "crossover_prob": self.crossover_prob,
             "strategy": self.strategy,
-            "configspace": self.configspace,
+            "configspace": self.use_configspace,
             "boundary_fix_type": self.fix_type,
             "max_age": self.max_age,
             "cs": self.cs,
@@ -158,7 +158,7 @@ class DEHBBase:
 
     def get_incumbents(self):
         """Returns a tuple of the (incumbent configuration, incumbent score/fitness)."""
-        if self.configspace:
+        if self.use_configspace:
             return self.vector_to_configspace(self.inc_config), self.inc_score
         return self.inc_config, self.inc_score
 
@@ -332,7 +332,7 @@ class DEHB(DEHBBase):
         self.saving_scheduler = None
 
     def init_population(self, pop_size):
-        if self.configspace:
+        if self.use_configspace:
             population = self.cs.sample_configuration(size=pop_size)
             population = [self.configspace_to_vector(individual) for individual in population]
         else:
@@ -564,7 +564,7 @@ class DEHB(DEHBBase):
         config, config_id, parent_id = self._acquire_config(bracket, fidelity)
 
         # transform config to proper representation
-        if self.configspace:
+        if self.use_configspace:
             # converts [0, 1] vector to a ConfigSpace object
             config = self.de[fidelity].vector_to_configspace(config)
 
@@ -673,9 +673,7 @@ class DEHB(DEHBBase):
 
         return fevals, brackets
 
-    def save_state(self, scheduler=None):
-        if scheduler:
-            scheduler.enter(60, 1, self.save_state, (scheduler,))
+    def save_state(self, continuous=False):
         # Save ConfigRepository
         config_repo_path = self.run_dir / "config_repository.json"
         self.config_repository.save_state(config_repo_path)
@@ -689,28 +687,40 @@ class DEHB(DEHBBase):
         de_dict = {}
         for fidelity, de_object in self.de.items():
             de_instance = {}
-            de_instance["population_ids"] = de_object.population_ids
-            de_instance["fitness"] = de_object.fitness
+            de_instance["population_ids"] = de_object.population_ids.tolist()
+            de_instance["fitness"] = de_object.fitness.tolist()
             de_instance["age"] = de_object.age
             de_instance["parent_counter"] = de_object.parent_counter
-            de_instance["promotion_pop_ids"] = de_object.promotion_pop_ids
-            de_instance["promotion_fitness"] = de_object.promotion_fitness
+            if de_object.promotion_pop_ids:
+                de_instance["promotion_pop_ids"] = de_object.promotion_pop_ids.tolist()
+                de_instance["promotion_fitness"] = de_object.promotion_fitness.tolist()
+            else:
+                de_instance["promotion_pop_ids"] = []
+                de_instance["promotion_fitness"] = []
             de_dict[fidelity] = de_instance
         state["DE"] = de_dict
         # DE parameters
-        state["DE_params"] = self.de_params
+        serializable_de_params = self.de_params.copy()
+        serializable_de_params.pop("cs")
+        serializable_de_params.pop("f")
+        serializable_de_params["output_path"] = str(serializable_de_params["output_path"])
+        state["DE_params"] = serializable_de_params
         # Save dehb interals
         dehb_internals = {}
         dehb_internals["iteration_counter"] = self.iteration_counter
         dehb_internals["inc_score"] = self.inc_score
-        dehb_internals["inc_config"] = self.inc_config
+        dehb_internals["inc_config"] = self.inc_config.tolist()
         dehb_internals["inc_info"] = self.inc_info
         state["internals"] = dehb_internals
         # Save state
         state_path = self.run_dir / "dehb_state.json"
         with state_path.open("w") as f:
-            json.dump(state_path, f, indent=2)
+            json.dump(state, f, indent=2)
 
+        # Restart timer
+        if continuous:
+            self.saving_timer = threading.Timer(60, self.save_state, args=(True,))
+            self.saving_timer.start()
 
 
 
@@ -743,7 +753,7 @@ class DEHB(DEHBBase):
     def _save_incumbent(self):
         try:
             res = {}
-            if self.configspace:
+            if self.use_configspace:
                 config = self.vector_to_configspace(self.inc_config)
                 res["config"] = config.get_dictionary()
             else:
@@ -782,19 +792,25 @@ class DEHB(DEHBBase):
         )
 
     def _setup_state_logging(self, name):
+        # Create run directory
         if name is None:
             name = time.strftime("%x %X %Z", time.localtime(self.start))
             name = name.replace("/", "-").replace(":", "-").replace(" ", "_")
 
         self.run_dir = self.output_path / name
-        self.saving_scheduler = sched.scheduler(time.time, time.sleep)
-        self.sched_event = self.saving_scheduler.enter(
-            60, 1, self.save_state, (self.saving_scheduler,))
-        self.saving_scheduler.run()
+        try:
+            self.run_dir.mkdir(parents=True)
+        except FileExistsError:
+            self.logger.warning("Run directory already exists, " /
+                                "results could potentially be overwritten.")
 
-    def _clean_up_scheduler(self):
-        self.saving_scheduler.cancel(self.sched_event)
-        self.saving_scheduler = None
+        # Create timer to continuously save the state
+        self.saving_timer = threading.Timer(60, self.save_state, args=(True,))
+        self.saving_timer.start()
+
+    def _clean_up_saving_timer(self):
+        self.saving_timer.cancel()
+        self.saving_timer = None
 
 
     def tell(self, job_info: dict, result: dict):
@@ -823,7 +839,7 @@ class DEHB(DEHBBase):
         self.config_repository.tell_result(config_id, fidelity, fitness, cost, info)
 
         # get hypercube representation from config repo
-        if self.configspace:
+        if self.use_configspace:
             config = self.config_repository.get(config_id)
 
         # carry out DE selection
@@ -948,13 +964,13 @@ class DEHB(DEHBBase):
             ))
             self.logger.info(f"Incumbent score: {self.inc_score}")
             self.logger.info("Incumbent config: ")
-            if self.configspace:
+            if self.use_configspace:
                 config = self.vector_to_configspace(self.inc_config)
                 for k, v in config.get_dictionary().items():
                     self.logger.info(f"{k}: {v}")
             else:
                 self.logger.info(f"{self.inc_config}")
-        self._clean_up_scheduler()
+        self._clean_up_saving_timer()
         self.save_state()
         # reset waiting jobs of active bracket to allow for continuation
         if len(self.active_brackets) > 0:
