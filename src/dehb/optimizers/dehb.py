@@ -329,6 +329,7 @@ class DEHB(DEHBBase):
         self._init_subpop()
         self.available_gpus = None
         self.gpu_usage = None
+        self.saving_scheduler = None
 
     def init_population(self, pop_size):
         if self.configspace:
@@ -676,10 +677,15 @@ class DEHB(DEHBBase):
         if scheduler:
             scheduler.enter(60, 1, self.save_state, (scheduler,))
         # Save ConfigRepository
-        config_repo_path = self.output_path / "config_repository.json"
+        config_repo_path = self.run_dir / "config_repository.json"
         self.config_repository.save_state(config_repo_path)
+
+        # Save history, incumbents etc.
+        self._save_history()
+        self._save_incumbent()
+
         state = {}
-        # Save DE subpopulations
+        # DE subpopulations
         de_dict = {}
         for fidelity, de_object in self.de.items():
             de_instance = {}
@@ -699,6 +705,13 @@ class DEHB(DEHBBase):
         dehb_internals["inc_score"] = self.inc_score
         dehb_internals["inc_config"] = self.inc_config
         dehb_internals["inc_info"] = self.inc_info
+        state["internals"] = dehb_internals
+        # Save state
+        state_path = self.run_dir / "dehb_state.json"
+        with state_path.open("w") as f:
+            json.dump(state_path, f, indent=2)
+
+
 
 
     def _is_run_budget_exhausted(self, fevals=None, brackets=None, total_cost=None):
@@ -727,10 +740,7 @@ class DEHB(DEHBBase):
                 return True
         return False
 
-    def _save_incumbent(self, name=None):
-        if name is None:
-            name = time.strftime("%x %X %Z", time.localtime(self.start))
-            name = name.replace("/", "-").replace(":", "-").replace(" ", "_")
+    def _save_incumbent(self):
         try:
             res = {}
             if self.configspace:
@@ -740,18 +750,15 @@ class DEHB(DEHBBase):
                 res["config"] = self.inc_config.tolist()
             res["score"] = self.inc_score
             res["info"] = self.inc_info
-            incumbent_path = self.output_path / f"incumbent_{name}.json"
+            incumbent_path = self.run_dir / "incumbent.json"
             with incumbent_path.open("w") as f:
                 json.dump(res, f)
         except Exception as e:
             self.logger.warning(f"Incumbent not saved: {e!r}")
 
-    def _save_history(self, name=None):
-        if name is None:
-            name = time.strftime("%x %X %Z", time.localtime(self.start))
-            name = name.replace("/", "-").replace(":", "-").replace(" ", "_")
+    def _save_history(self):
         try:
-            history_path = self.output_path / f"history_{name}.pkl"
+            history_path = self.run_dir / "history.pkl"
             with history_path.open("wb") as f:
                 pickle.dump(self.history, f)
         except Exception as e:
@@ -773,6 +780,22 @@ class DEHB(DEHBBase):
         self.logger.info(
             f"{remaining[0]}/{remaining[1]} {remaining[2]}",
         )
+
+    def _setup_state_logging(self, name):
+        if name is None:
+            name = time.strftime("%x %X %Z", time.localtime(self.start))
+            name = name.replace("/", "-").replace(":", "-").replace(" ", "_")
+
+        self.run_dir = self.output_path / name
+        self.saving_scheduler = sched.scheduler(time.time, time.sleep)
+        self.sched_event = self.saving_scheduler.enter(
+            60, 1, self.save_state, (self.saving_scheduler,))
+        self.saving_scheduler.run()
+
+    def _clean_up_scheduler(self):
+        self.saving_scheduler.cancel(self.sched_event)
+        self.saving_scheduler = None
+
 
     def tell(self, job_info: dict, result: dict):
         """Feed a result back to the optimizer.
@@ -845,9 +868,7 @@ class DEHB(DEHBBase):
                            + " instead of calling 'run' twice.")
 
         # Setup continous log and state saving
-        saving_scheduler = sched.scheduler(time.time, time.sleep)
-        saving_scheduler.enter(60, 1, self.save_state, (saving_scheduler,))
-        saving_scheduler.run()
+        self._setup_state_logging(name)
 
         # checks if a Dask client exists
         if len(kwargs) > 0 and self.n_workers > 1 and isinstance(self.client, Client):
@@ -888,7 +909,7 @@ class DEHB(DEHBBase):
                 else:
                     if self.n_workers > 1 or isinstance(self.client, Client):
                         self.logger.debug("{}/{} worker(s) available.".format(
-                            self._get_worker_count() - len(self.futures), self._get_worker_count()
+                            self._get_worker_count() - len(self.futures), self._get_worker_count(),
                         ))
                     # submits job_info to a worker for execution
                     self.submit_job(job_info, **kwargs)
@@ -905,10 +926,6 @@ class DEHB(DEHBBase):
                         )
                     self._verbosity_debug()
             self._fetch_results_from_workers()
-            if save_intermediate and self.inc_config is not None:
-                self._save_incumbent(name)
-            if save_history and self.history is not None:
-                self._save_history(name)
             self.clean_inactive_brackets()
         # end of while
 
@@ -927,7 +944,7 @@ class DEHB(DEHBBase):
         if verbose:
             time_taken = time.time() - self.start
             self.logger.info("End of optimisation! Total duration: {}; Total fevals: {}\n".format(
-                time_taken, len(self.traj)
+                time_taken, len(self.traj),
             ))
             self.logger.info(f"Incumbent score: {self.inc_score}")
             self.logger.info("Incumbent config: ")
@@ -937,8 +954,8 @@ class DEHB(DEHBBase):
                     self.logger.info(f"{k}: {v}")
             else:
                 self.logger.info(f"{self.inc_config}")
-        self._save_incumbent(name)
-        self._save_history(name)
+        self._clean_up_scheduler()
+        self.save_state()
         # reset waiting jobs of active bracket to allow for continuation
         if len(self.active_brackets) > 0:
             for active_bracket in self.active_brackets:
