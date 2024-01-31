@@ -78,15 +78,7 @@ class DEHBBase:
         self.max_clip = max_clip
 
         # Precomputing fidelity spacing and number of configurations for HB iterations
-        self.max_SH_iter = None
-        self.fidelities = None
-        if self.min_fidelity is not None and \
-           self.max_fidelity is not None and \
-           self.eta is not None:
-            self.max_SH_iter = -int(np.log(self.min_fidelity / self.max_fidelity) / np.log(self.eta)) + 1
-            self.fidelities = self.max_fidelity * np.power(self.eta,
-                                                     -np.linspace(start=self.max_SH_iter - 1,
-                                                                  stop=0, num=self.max_SH_iter))
+        self._pre_compute_fidelity_spacing()
 
         # Updating DE parameter list
         self.de_params.update({"output_path": self.output_path})
@@ -110,6 +102,17 @@ class DEHBBase:
             **_logger_props,
         )
         self.log_filename = f"{self.output_path}/dehb_{log_suffix}.log"
+
+    def _pre_compute_fidelity_spacing(self):
+        self.max_SH_iter = None
+        self.fidelities = None
+        if self.min_fidelity is not None and \
+           self.max_fidelity is not None and \
+           self.eta is not None:
+            self.max_SH_iter = -int(np.log(self.min_fidelity / self.max_fidelity) / np.log(self.eta)) + 1
+            self.fidelities = self.max_fidelity * np.power(self.eta,
+                                                     -np.linspace(start=self.max_SH_iter - 1,
+                                                                  stop=0, num=self.max_SH_iter))
 
     def reset(self):
         self.inc_score = np.inf
@@ -705,12 +708,21 @@ class DEHB(DEHBBase):
         serializable_de_params.pop("f")
         serializable_de_params["output_path"] = str(serializable_de_params["output_path"])
         state["DE_params"] = serializable_de_params
-        # Save dehb interals
+        # Hyperband variables
+        hb_dict = {}
+        hb_dict["min_fidelity"] = self.min_fidelity
+        hb_dict["max_fidelity"] = self.max_fidelity
+        hb_dict["min_clip"] = self.min_clip
+        hb_dict["max_clip"] = self.max_clip
+        hb_dict["eta"] = self.eta
+        state["HB_params"] = hb_dict
+        # Save DEHB interals
         dehb_internals = {}
         dehb_internals["iteration_counter"] = self.iteration_counter
-        dehb_internals["inc_score"] = self.inc_score
-        dehb_internals["inc_config"] = self.inc_config.tolist()
-        dehb_internals["inc_info"] = self.inc_info
+        if self.inc_config:
+            dehb_internals["inc_score"] = self.inc_score
+            dehb_internals["inc_config"] = self.inc_config.tolist()
+            dehb_internals["inc_info"] = self.inc_info
         state["internals"] = dehb_internals
         # Save state
         state_path = self.run_dir / "dehb_state.json"
@@ -796,6 +808,7 @@ class DEHB(DEHBBase):
         if name is None:
             name = time.strftime("%x %X %Z", time.localtime(self.start))
             name = name.replace("/", "-").replace(":", "-").replace(" ", "_")
+            name = "run_" + name
 
         self.run_dir = self.output_path / name
         try:
@@ -812,8 +825,50 @@ class DEHB(DEHBBase):
         self.saving_timer.cancel()
         self.saving_timer = None
 
+    def load(self, run_dir: str):
+        # Check if path exists, otherwise give warning
+        run_dir = Path(run_dir)
+        if not Path.exists(run_dir):
+            self.logger.warning("Path to run directory does not exist.")
+            return
+        # Load dehb state
+        dehb_state_path = run_dir / "dehb_state.json"
+        with dehb_state_path.open() as f:
+            dehb_state = json.load(f)
+        self.de_params.update(dehb_state["DE_params"])
 
-    def tell(self, job_info: dict, result: dict):
+        hb_vars = dehb_state["HB_params"]
+        self.min_fidelity = hb_vars["min_fidelity"]
+        self.max_fidelity = hb_vars["max_fidelity"]
+        self.min_clip = hb_vars["min_clip"]
+        self.max_clip = hb_vars["max_clip"]
+        self.eta = hb_vars["eta"]
+
+        self._pre_compute_fidelity_spacing()
+        self._get_pop_sizes()
+        self._init_subpop()
+        # Reset ConfigRepo after initializing DE
+        self.config_repository.reset()
+        # Load initial configurations from config repository
+        config_repo_path = run_dir / "config_repository.json"
+        with config_repo_path.open() as f:
+            config_repo_list = json.load(f)
+        # Get initial configs
+        num_initial_configs = sum(self._max_pop_size.values())
+        initial_config_entries = config_repo_list[:num_initial_configs]
+        # Filter initial configs by fidelity
+        initial_configs_by_fidelity = {fidelity: [item["config"] for item in initial_config_entries
+                                                  if str(fidelity) in item["results"]]
+                                                  for fidelity in self.fidelities}
+        # Add initial configs to DE and announce them to ConfigRepo
+        for fidelity, sub_pop in initial_configs_by_fidelity.items():
+            self.de[fidelity].population = sub_pop
+            self.de[fidelity].population_ids = self.config_repository.announce_population(sub_pop,
+                                                                                          fidelity)
+
+        # Iterate over history and tell with replay=True
+
+    def tell(self, job_info: dict, result: dict, replay: bool=False):
         """Feed a result back to the optimizer.
 
         In order to correctly interpret the results, the `job_info` dict, retrieved by `ask`,
@@ -825,6 +880,18 @@ class DEHB(DEHBBase):
             job_info (dict): Job info returned by ask().
             result (dict): Result dictionary with mandatory keys `fitness` and `cost`.
         """
+        if replay:
+            # Get job_info container from ask and update fields
+            job_info_container = self.ask()
+            # Update according to given history
+            job_info_container["fidelity"] = job_info["fidelity"]
+            job_info_container["config"] = job_info["config"]
+            job_info_container["config_id"] = job_info["config_id"]
+
+            # Update entry in ConfigRepository
+            self.config_repository.configs[job_info["config_id"]].config = job_info["config"]
+
+
         # update bracket information
         fitness, cost = result["fitness"], result["cost"]
         info = result["info"] if "info" in result else dict()
