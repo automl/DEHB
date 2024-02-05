@@ -14,7 +14,7 @@
       
       
       <link rel="icon" href="../../assets/automl_org.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.4">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.7">
     
     
       
@@ -22,7 +22,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.f2e4d321.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -555,27 +555,27 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#dehb.utils.bracket_manager.SHBracketManager.get_fidelity" class="md-nav__link">
+  <a href="#dehb.utils.bracket_manager.SHBracketManager.get_budget" class="md-nav__link">
     <span class="md-ellipsis">
-      get_fidelity
+      get_budget
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#dehb.utils.bracket_manager.SHBracketManager.get_lower_fidelity_promotions" class="md-nav__link">
+  <a href="#dehb.utils.bracket_manager.SHBracketManager.get_lower_budget_promotions" class="md-nav__link">
     <span class="md-ellipsis">
-      get_lower_fidelity_promotions
+      get_lower_budget_promotions
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#dehb.utils.bracket_manager.SHBracketManager.get_next_job_fidelity" class="md-nav__link">
+  <a href="#dehb.utils.bracket_manager.SHBracketManager.get_next_job_budget" class="md-nav__link">
     <span class="md-ellipsis">
-      get_next_job_fidelity
+      get_next_job_budget
     </span>
   </a>
   
@@ -693,27 +693,27 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#dehb.utils.bracket_manager.SHBracketManager.get_fidelity" class="md-nav__link">
+  <a href="#dehb.utils.bracket_manager.SHBracketManager.get_budget" class="md-nav__link">
     <span class="md-ellipsis">
-      get_fidelity
+      get_budget
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#dehb.utils.bracket_manager.SHBracketManager.get_lower_fidelity_promotions" class="md-nav__link">
+  <a href="#dehb.utils.bracket_manager.SHBracketManager.get_lower_budget_promotions" class="md-nav__link">
     <span class="md-ellipsis">
-      get_lower_fidelity_promotions
+      get_lower_budget_promotions
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#dehb.utils.bracket_manager.SHBracketManager.get_next_job_fidelity" class="md-nav__link">
+  <a href="#dehb.utils.bracket_manager.SHBracketManager.get_next_job_budget" class="md-nav__link">
     <span class="md-ellipsis">
-      get_next_job_fidelity
+      get_next_job_budget
     </span>
   </a>
   
@@ -819,7 +819,7 @@
 
 
 <h2 id="dehb.utils.bracket_manager.SHBracketManager" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">SHBracketManager</span><span class="p">(</span><span class="n">n_configs</span><span class="p">,</span> <span class="n">fidelities</span><span class="p">,</span> <span class="n">bracket_id</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">SHBracketManager</span><span class="p">(</span><span class="n">n_configs</span><span class="p">,</span> <span class="n">budgets</span><span class="p">,</span> <span class="n">bracket_id</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 <a href="#dehb.utils.bracket_manager.SHBracketManager" class="headerlink" title="Permanent link">#</a></h2>
 
@@ -851,24 +851,24 @@
 <span class="normal"><a href="#__codelineno-0-22">22</a></span>
 <span class="normal"><a href="#__codelineno-0-23">23</a></span>
 <span class="normal"><a href="#__codelineno-0-24">24</a></span>
-<span class="normal"><a href="#__codelineno-0-25">25</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_configs</span><span class="p">,</span> <span class="n">fidelities</span><span class="p">,</span> <span class="n">bracket_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8"></a>    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">n_configs</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">fidelities</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-25">25</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_configs</span><span class="p">,</span> <span class="n">budgets</span><span class="p">,</span> <span class="n">bracket_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8"></a>    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">n_configs</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">budgets</span><span class="p">)</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">n_configs</span> <span class="o">=</span> <span class="n">n_configs</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span> <span class="o">=</span> <span class="n">fidelities</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">budgets</span> <span class="o">=</span> <span class="n">budgets</span>
 <a id="__codelineno-0-11" name="__codelineno-0-11"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">bracket_id</span> <span class="o">=</span> <span class="n">bracket_id</span>
 <a id="__codelineno-0-12" name="__codelineno-0-12"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">sh_bracket</span> <span class="o">=</span> <span class="p">{}</span>
 <a id="__codelineno-0-13" name="__codelineno-0-13"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_sh_bracket</span> <span class="o">=</span> <span class="p">{}</span>
 <a id="__codelineno-0-14" name="__codelineno-0-14"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_config_map</span> <span class="o">=</span> <span class="p">{}</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15"></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">fidelity</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fidelities</span><span class="p">):</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15"></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">budget</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">budgets</span><span class="p">):</span>
 <a id="__codelineno-0-16" name="__codelineno-0-16"></a>        <span class="c1"># sh_bracket keeps track of jobs/configs that are still to be scheduled/allocatted</span>
 <a id="__codelineno-0-17" name="__codelineno-0-17"></a>        <span class="c1"># _sh_bracket keeps track of jobs/configs that have been run and results retrieved for</span>
 <a id="__codelineno-0-18" name="__codelineno-0-18"></a>        <span class="c1"># (sh_bracket[i] + _sh_bracket[i]) == n_configs[i] is when no jobs have been scheduled</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19"></a>        <span class="c1">#   or all jobs for that fidelity/rung are over</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19"></a>        <span class="c1">#   or all jobs for that budget/rung are over</span>
 <a id="__codelineno-0-20" name="__codelineno-0-20"></a>        <span class="c1"># (sh_bracket[i] + _sh_bracket[i]) &lt; n_configs[i] indicates a job has been scheduled</span>
 <a id="__codelineno-0-21" name="__codelineno-0-21"></a>        <span class="c1">#   and is queued/running and the bracket needs to be paused till results are retrieved</span>
-<a id="__codelineno-0-22" name="__codelineno-0-22"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">sh_bracket</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_configs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># each scheduled job does -= 1</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_sh_bracket</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># each retrieved job does +=1</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">n_rungs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fidelities</span><span class="p">)</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">sh_bracket</span><span class="p">[</span><span class="n">budget</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_configs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># each scheduled job does -= 1</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_sh_bracket</span><span class="p">[</span><span class="n">budget</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># each retrieved job does +=1</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">n_rungs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">budgets</span><span class="p">)</span>
 <a id="__codelineno-0-25" name="__codelineno-0-25"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">current_rung</span> <span class="o">=</span> <span class="mi">0</span>
 </code></pre></div></td></tr></table></div>
                 </details>
@@ -890,16 +890,16 @@
 
 
 
-<h3 id="dehb.utils.bracket_manager.SHBracketManager.get_fidelity" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">get_fidelity</span><span class="p">(</span><span class="n">rung</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<h3 id="dehb.utils.bracket_manager.SHBracketManager.get_budget" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">get_budget</span><span class="p">(</span><span class="n">rung</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
-<a href="#dehb.utils.bracket_manager.SHBracketManager.get_fidelity" class="headerlink" title="Permanent link">#</a></h3>
+<a href="#dehb.utils.bracket_manager.SHBracketManager.get_budget" class="headerlink" title="Permanent link">#</a></h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Returns the exact fidelity that rung is pointing to.</p>
-<p>Returns current rung's fidelity if no rung is passed.</p>
+      <p>Returns the exact budget that rung is pointing to.</p>
+<p>Returns current rung's budget if no rung is passed.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
@@ -910,14 +910,14 @@
 <span class="normal"><a href="#__codelineno-0-31">31</a></span>
 <span class="normal"><a href="#__codelineno-0-32">32</a></span>
 <span class="normal"><a href="#__codelineno-0-33">33</a></span>
-<span class="normal"><a href="#__codelineno-0-34">34</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="k">def</span> <span class="nf">get_fidelity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rung</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns the exact fidelity that rung is pointing to.</span>
+<span class="normal"><a href="#__codelineno-0-34">34</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="k">def</span> <span class="nf">get_budget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rung</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns the exact budget that rung is pointing to.</span>
 <a id="__codelineno-0-29" name="__codelineno-0-29"></a>
-<a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">    Returns current rung&#39;s fidelity if no rung is passed.</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">    Returns current rung&#39;s budget if no rung is passed.</span>
 <a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-32" name="__codelineno-0-32"></a>    <span class="k">if</span> <span class="n">rung</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-33" name="__codelineno-0-33"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span><span class="p">[</span><span class="n">rung</span><span class="p">]</span>
-<a id="__codelineno-0-34" name="__codelineno-0-34"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_rung</span><span class="p">]</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">budgets</span><span class="p">[</span><span class="n">rung</span><span class="p">]</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">budgets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_rung</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -929,15 +929,15 @@
 
 
 
-<h3 id="dehb.utils.bracket_manager.SHBracketManager.get_lower_fidelity_promotions" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">get_lower_fidelity_promotions</span><span class="p">(</span><span class="n">fidelity</span><span class="p">)</span></code>
+<h3 id="dehb.utils.bracket_manager.SHBracketManager.get_lower_budget_promotions" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">get_lower_budget_promotions</span><span class="p">(</span><span class="n">budget</span><span class="p">)</span></code>
 
-<a href="#dehb.utils.bracket_manager.SHBracketManager.get_lower_fidelity_promotions" class="headerlink" title="Permanent link">#</a></h3>
+<a href="#dehb.utils.bracket_manager.SHBracketManager.get_lower_budget_promotions" class="headerlink" title="Permanent link">#</a></h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Returns the immediate lower fidelity and the number of configs to be promoted from there</p>
+      <p>Returns the immediate lower budget and the number of configs to be promoted from there</p>
 
           <details class="quote">
             <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
@@ -949,15 +949,15 @@
 <span class="normal"><a href="#__codelineno-0-41">41</a></span>
 <span class="normal"><a href="#__codelineno-0-42">42</a></span>
 <span class="normal"><a href="#__codelineno-0-43">43</a></span>
-<span class="normal"><a href="#__codelineno-0-44">44</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="k">def</span> <span class="nf">get_lower_fidelity_promotions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">):</span>
-<a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns the immediate lower fidelity and the number of configs to be promoted from there</span>
+<span class="normal"><a href="#__codelineno-0-44">44</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="k">def</span> <span class="nf">get_lower_budget_promotions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">budget</span><span class="p">):</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns the immediate lower budget and the number of configs to be promoted from there</span>
 <a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-39" name="__codelineno-0-39"></a>    <span class="k">assert</span> <span class="n">fidelity</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span>
-<a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="n">rung</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">fidelity</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a>    <span class="k">assert</span> <span class="n">budget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">budgets</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="n">rung</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">budget</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">budgets</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 <a id="__codelineno-0-41" name="__codelineno-0-41"></a>    <span class="n">prev_rung</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">rung</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_rungs</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-42" name="__codelineno-0-42"></a>    <span class="n">lower_fidelity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span><span class="p">[</span><span class="n">prev_rung</span><span class="p">]</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a>    <span class="n">lower_budget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">budgets</span><span class="p">[</span><span class="n">prev_rung</span><span class="p">]</span>
 <a id="__codelineno-0-43" name="__codelineno-0-43"></a>    <span class="n">num_promote_configs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_configs</span><span class="p">[</span><span class="n">rung</span><span class="p">]</span>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a>    <span class="k">return</span> <span class="n">lower_fidelity</span><span class="p">,</span> <span class="n">num_promote_configs</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a>    <span class="k">return</span> <span class="n">lower_budget</span><span class="p">,</span> <span class="n">num_promote_configs</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -969,15 +969,15 @@
 
 
 
-<h3 id="dehb.utils.bracket_manager.SHBracketManager.get_next_job_fidelity" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">get_next_job_fidelity</span><span class="p">()</span></code>
+<h3 id="dehb.utils.bracket_manager.SHBracketManager.get_next_job_budget" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">get_next_job_budget</span><span class="p">()</span></code>
 
-<a href="#dehb.utils.bracket_manager.SHBracketManager.get_next_job_fidelity" class="headerlink" title="Permanent link">#</a></h3>
+<a href="#dehb.utils.bracket_manager.SHBracketManager.get_next_job_budget" class="headerlink" title="Permanent link">#</a></h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Returns the fidelity that will be selected if current_rung is incremented by 1</p>
+      <p>Returns the budget that will be selected if current_rung is incremented by 1</p>
 
           <details class="quote">
             <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
@@ -997,21 +997,21 @@
 <span class="normal"><a href="#__codelineno-0-59">59</a></span>
 <span class="normal"><a href="#__codelineno-0-60">60</a></span>
 <span class="normal"><a href="#__codelineno-0-61">61</a></span>
-<span class="normal"><a href="#__codelineno-0-62">62</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="k">def</span> <span class="nf">get_next_job_fidelity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns the fidelity that will be selected if current_rung is incremented by 1</span>
+<span class="normal"><a href="#__codelineno-0-62">62</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="k">def</span> <span class="nf">get_next_job_budget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns the budget that will be selected if current_rung is incremented by 1</span>
 <a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_bracket</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_fidelity</span><span class="p">()]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_bracket</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_budget</span><span class="p">()]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
 <a id="__codelineno-0-50" name="__codelineno-0-50"></a>        <span class="c1"># the current rung still has unallocated jobs (&gt;0)</span>
-<a id="__codelineno-0-51" name="__codelineno-0-51"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_fidelity</span><span class="p">()</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_budget</span><span class="p">()</span>
 <a id="__codelineno-0-52" name="__codelineno-0-52"></a>    <span class="k">else</span><span class="p">:</span>
 <a id="__codelineno-0-53" name="__codelineno-0-53"></a>        <span class="c1"># the current rung has no more jobs to allocate, increment it</span>
 <a id="__codelineno-0-54" name="__codelineno-0-54"></a>        <span class="n">rung</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_rung</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_rungs</span>
-<a id="__codelineno-0-55" name="__codelineno-0-55"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_bracket</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_fidelity</span><span class="p">(</span><span class="n">rung</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_bracket</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_budget</span><span class="p">(</span><span class="n">rung</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
 <a id="__codelineno-0-56" name="__codelineno-0-56"></a>            <span class="c1"># the incremented rung has unallocated jobs (&gt;0)</span>
-<a id="__codelineno-0-57" name="__codelineno-0-57"></a>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_fidelity</span><span class="p">(</span><span class="n">rung</span><span class="p">)</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57"></a>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_budget</span><span class="p">(</span><span class="n">rung</span><span class="p">)</span>
 <a id="__codelineno-0-58" name="__codelineno-0-58"></a>        <span class="k">else</span><span class="p">:</span>
 <a id="__codelineno-0-59" name="__codelineno-0-59"></a>            <span class="c1"># all jobs for this bracket has been allocated/bracket is complete</span>
-<a id="__codelineno-0-60" name="__codelineno-0-60"></a>            <span class="c1"># no more fidelities to evaluate and can return None</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a>            <span class="c1"># no more budgets to evaluate and can return None</span>
 <a id="__codelineno-0-61" name="__codelineno-0-61"></a>            <span class="k">pass</span>
 <a id="__codelineno-0-62" name="__codelineno-0-62"></a>        <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
@@ -1026,16 +1026,16 @@
 
 
 <h3 id="dehb.utils.bracket_manager.SHBracketManager.register_job" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">register_job</span><span class="p">(</span><span class="n">fidelity</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">register_job</span><span class="p">(</span><span class="n">budget</span><span class="p">)</span></code>
 
 <a href="#dehb.utils.bracket_manager.SHBracketManager.register_job" class="headerlink" title="Permanent link">#</a></h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Registers the allocation of a configuration for the fidelity and updates current rung</p>
+      <p>Registers the allocation of a configuration for the budget and updates current rung</p>
 <p>This function must be called when scheduling a job in order to allow the bracket manager
-to continue job and fidelity allocation without waiting for jobs to finish and return
+to continue job and budget allocation without waiting for jobs to finish and return
 results necessarily. This feature can be leveraged to run brackets asynchronously.</p>
 
           <details class="quote">
@@ -1052,16 +1052,16 @@ results necessarily. This feature can be leveraged to run brackets asynchronousl
 <span class="normal"><a href="#__codelineno-0-73">73</a></span>
 <span class="normal"><a href="#__codelineno-0-74">74</a></span>
 <span class="normal"><a href="#__codelineno-0-75">75</a></span>
-<span class="normal"><a href="#__codelineno-0-76">76</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="k">def</span> <span class="nf">register_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">):</span>
-<a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Registers the allocation of a configuration for the fidelity and updates current rung</span>
+<span class="normal"><a href="#__codelineno-0-76">76</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="k">def</span> <span class="nf">register_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">budget</span><span class="p">):</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Registers the allocation of a configuration for the budget and updates current rung</span>
 <a id="__codelineno-0-66" name="__codelineno-0-66"></a>
 <a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">    This function must be called when scheduling a job in order to allow the bracket manager</span>
-<a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">    to continue job and fidelity allocation without waiting for jobs to finish and return</span>
+<a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">    to continue job and budget allocation without waiting for jobs to finish and return</span>
 <a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">    results necessarily. This feature can be leveraged to run brackets asynchronously.</span>
 <a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-71" name="__codelineno-0-71"></a>    <span class="k">assert</span> <span class="n">fidelity</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span>
-<a id="__codelineno-0-72" name="__codelineno-0-72"></a>    <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_bracket</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
-<a id="__codelineno-0-73" name="__codelineno-0-73"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">sh_bracket</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71"></a>    <span class="k">assert</span> <span class="n">budget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">budgets</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a>    <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sh_bracket</span><span class="p">[</span><span class="n">budget</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">sh_bracket</span><span class="p">[</span><span class="n">budget</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
 <a id="__codelineno-0-74" name="__codelineno-0-74"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_rung_pending</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_rung</span><span class="p">):</span>
 <a id="__codelineno-0-75" name="__codelineno-0-75"></a>        <span class="c1"># increment current rung if no jobs left in the rung</span>
 <a id="__codelineno-0-76" name="__codelineno-0-76"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">current_rung</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_rung</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_rungs</span>
@@ -1077,15 +1077,15 @@ results necessarily. This feature can be leveraged to run brackets asynchronousl
 
 
 <h3 id="dehb.utils.bracket_manager.SHBracketManager.complete_job" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">complete_job</span><span class="p">(</span><span class="n">fidelity</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">complete_job</span><span class="p">(</span><span class="n">budget</span><span class="p">)</span></code>
 
 <a href="#dehb.utils.bracket_manager.SHBracketManager.complete_job" class="headerlink" title="Permanent link">#</a></h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Notifies the bracket that a job for a fidelity has been completed</p>
-<p>This function must be called when a config for a fidelity has finished evaluation to inform
+      <p>Notifies the bracket that a job for a budget has been completed</p>
+<p>This function must be called when a config for a budget has finished evaluation to inform
 the Bracket Manager that no job needs to be waited for and the next rung can begin for the
 synchronous Successive Halving case.</p>
 
@@ -1101,17 +1101,17 @@ synchronous Successive Halving case.</p>
 <span class="normal"><a href="#__codelineno-0-85">85</a></span>
 <span class="normal"><a href="#__codelineno-0-86">86</a></span>
 <span class="normal"><a href="#__codelineno-0-87">87</a></span>
-<span class="normal"><a href="#__codelineno-0-88">88</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-78" name="__codelineno-0-78"></a><span class="k">def</span> <span class="nf">complete_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">):</span>
-<a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Notifies the bracket that a job for a fidelity has been completed</span>
+<span class="normal"><a href="#__codelineno-0-88">88</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-78" name="__codelineno-0-78"></a><span class="k">def</span> <span class="nf">complete_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">budget</span><span class="p">):</span>
+<a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Notifies the bracket that a job for a budget has been completed</span>
 <a id="__codelineno-0-80" name="__codelineno-0-80"></a>
-<a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="sd">    This function must be called when a config for a fidelity has finished evaluation to inform</span>
+<a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="sd">    This function must be called when a config for a budget has finished evaluation to inform</span>
 <a id="__codelineno-0-82" name="__codelineno-0-82"></a><span class="sd">    the Bracket Manager that no job needs to be waited for and the next rung can begin for the</span>
 <a id="__codelineno-0-83" name="__codelineno-0-83"></a><span class="sd">    synchronous Successive Halving case.</span>
 <a id="__codelineno-0-84" name="__codelineno-0-84"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-85" name="__codelineno-0-85"></a>    <span class="k">assert</span> <span class="n">fidelity</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span>
-<a id="__codelineno-0-86" name="__codelineno-0-86"></a>    <span class="n">_max_configs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_configs</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">fidelity</span><span class="p">)]</span>
-<a id="__codelineno-0-87" name="__codelineno-0-87"></a>    <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sh_bracket</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">_max_configs</span>
-<a id="__codelineno-0-88" name="__codelineno-0-88"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_sh_bracket</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+<a id="__codelineno-0-85" name="__codelineno-0-85"></a>    <span class="k">assert</span> <span class="n">budget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">budgets</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86"></a>    <span class="n">_max_configs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_configs</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">budgets</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">budget</span><span class="p">)]</span>
+<a id="__codelineno-0-87" name="__codelineno-0-87"></a>    <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sh_bracket</span><span class="p">[</span><span class="n">budget</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">_max_configs</span>
+<a id="__codelineno-0-88" name="__codelineno-0-88"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_sh_bracket</span><span class="p">[</span><span class="n">budget</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -1197,7 +1197,7 @@ synchronous Successive Halving case.</p>
 
   <div class="doc doc-contents ">
   
-      <p>Returns True if any of the rungs/fidelities have still a configuration to submit</p>
+      <p>Returns True if any of the rungs/budgets have still a configuration to submit</p>
 
           <details class="quote">
             <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
@@ -1205,9 +1205,9 @@ synchronous Successive Halving case.</p>
 <span class="normal"><a href="#__codelineno-0-119">119</a></span>
 <span class="normal"><a href="#__codelineno-0-120">120</a></span>
 <span class="normal"><a href="#__codelineno-0-121">121</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-118" name="__codelineno-0-118"></a><span class="k">def</span> <span class="nf">is_pending</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-119" name="__codelineno-0-119"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns True if any of the rungs/fidelities have still a configuration to submit</span>
+<a id="__codelineno-0-119" name="__codelineno-0-119"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns True if any of the rungs/budgets have still a configuration to submit</span>
 <a id="__codelineno-0-120" name="__codelineno-0-120"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-121" name="__codelineno-0-121"></a>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_rung_pending</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span><span class="p">)])</span>
+<a id="__codelineno-0-121" name="__codelineno-0-121"></a>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_rung_pending</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">budgets</span><span class="p">)])</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -1227,7 +1227,7 @@ synchronous Successive Halving case.</p>
 
   <div class="doc doc-contents ">
   
-      <p>Returns True if any of the rungs/fidelities have a configuration pending/running</p>
+      <p>Returns True if any of the rungs/budgets have a configuration pending/running</p>
 
           <details class="quote">
             <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
@@ -1235,9 +1235,9 @@ synchronous Successive Halving case.</p>
 <span class="normal"><a href="#__codelineno-0-124">124</a></span>
 <span class="normal"><a href="#__codelineno-0-125">125</a></span>
 <span class="normal"><a href="#__codelineno-0-126">126</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-123" name="__codelineno-0-123"></a><span class="k">def</span> <span class="nf">is_waiting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-124" name="__codelineno-0-124"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns True if any of the rungs/fidelities have a configuration pending/running</span>
+<a id="__codelineno-0-124" name="__codelineno-0-124"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns True if any of the rungs/budgets have a configuration pending/running</span>
 <a id="__codelineno-0-125" name="__codelineno-0-125"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-126" name="__codelineno-0-126"></a>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_rung_waiting</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span><span class="p">)])</span>
+<a id="__codelineno-0-126" name="__codelineno-0-126"></a>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_rung_waiting</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">budgets</span><span class="p">)])</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -1331,10 +1331,10 @@ synchronous Successive Halving case.</p>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "content.code.copy", "navigation.footer", "navigation.tabs", "navigation.tabs.sticky", "toc.follow", "header.autohide", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.c011b7c0.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "content.code.copy", "navigation.footer", "navigation.tabs", "navigation.tabs.sticky", "toc.follow", "header.autohide", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.7389ff0e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.caa56a14.min.js"></script>
       
         <script src="../../assets/_markdown_exec_pyodide.js"></script>
       
