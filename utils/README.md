@@ -36,8 +36,8 @@ For example, running a DEHB optimization by specifiying `scheduler_file` makes t
 connect to the Dask cluster runnning.
 ```bash
 python examples/03_pytorch_mnist_hpo.py \
-    --min_fidelity 1 \
-    --max_fidelity 9 \
+    --min_budget 1 \
+    --max_budget 9 \
     --runtime 200 \
     --seed 123 \
     --scheduler_file scheduler/scheduler_gpu.json \

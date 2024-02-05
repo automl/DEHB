@@ -6,7 +6,7 @@ The parameter space is defined in the get_configspace() function. Any configurat
 this space can be passed to an object of class Model() which can instantiate a CNN architecture
 from it. The objective_function() is the target function that DEHB minimizes for this problem. This
 function instantiates an architecture, an optimizer, as defined by a configuration and performs the
-training and evaluation (on the validation set) as per the fidelity passed.
+training and evaluation (on the validation set) as per the budget passed.
 The argument `runtime` can be passed to DEHB as a wallclock budget for running the optimisation.
 
 This tutorial also briefly refers to the different methods of interfacing DEHB with the Dask
@@ -167,7 +167,7 @@ def evaluate(model, device, data_loader, acc=False):
     return loss
 
 
-def train_and_evaluate(config, max_fidelity, verbose=False, **kwargs):
+def train_and_evaluate(config, max_budget, verbose=False, **kwargs):
     device = kwargs["device"]
     batch_size = config["batch_size"]
     train_set = kwargs["train_set"]
@@ -176,7 +176,7 @@ def train_and_evaluate(config, max_fidelity, verbose=False, **kwargs):
     test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=False)
     model = Model(config).to(device)
     optimizer = optim.Adadelta(model.parameters(), lr=config["lr"])
-    for epoch in range(1, int(max_fidelity)+1):
+    for epoch in range(1, int(max_budget)+1):
         train(model, device, train_loader, optimizer)
     accuracy = evaluate(model, device, test_loader, acc=True)
     if verbose:
@@ -184,7 +184,7 @@ def train_and_evaluate(config, max_fidelity, verbose=False, **kwargs):
     return accuracy
 
 
-def objective_function(config, fidelity, **kwargs):
+def objective_function(config, budget, **kwargs):
     """ The target function to minimize for HPO"""
     device = kwargs["device"]
 
@@ -204,7 +204,7 @@ def objective_function(config, fidelity, **kwargs):
     optimizer = optim.Adadelta(model.parameters(), lr=config["lr"])
 
     start = time.time()  # measuring wallclock time
-    for epoch in range(1, int(fidelity)+1):
+    for epoch in range(1, int(budget)+1):
         train(model, device, train_loader, optimizer)
     loss = evaluate(model, device, valid_loader)
     cost = time.time() - start
@@ -216,7 +216,7 @@ def objective_function(config, fidelity, **kwargs):
     res = {
         "fitness": loss,
         "cost": cost,
-        "info": {"test_loss": test_loss, "fidelity": fidelity}
+        "info": {"test_loss": test_loss, "budget": budget}
     }
     return res
 
@@ -228,11 +228,11 @@ def input_arguments():
     parser.add_argument('--seed', type=int, default=123, metavar='S',
                         help='random seed (default: 123)')
     parser.add_argument('--refit_training', action='store_true', default=False,
-                        help='Refit with incumbent configuration on full training data and fidelity')
-    parser.add_argument('--min_fidelity', type=float, default=None,
-                        help='Minimum fidelity (epoch length)')
-    parser.add_argument('--max_fidelity', type=float, default=None,
-                        help='Maximum fidelity (epoch length)')
+                        help='Refit with incumbent configuration on full training data and budget')
+    parser.add_argument('--min_budget', type=float, default=None,
+                        help='Minimum budget (epoch length)')
+    parser.add_argument('--max_budget', type=float, default=None,
+                        help='Maximum budget (epoch length)')
     parser.add_argument('--eta', type=int, default=3,
                         help='Parameter for Hyperband controlling early stopping aggressiveness')
     parser.add_argument('--output_path', type=str, default="./pytorch_mnist_dehb",
@@ -250,7 +250,7 @@ def input_arguments():
     parser.add_argument('--verbose', action="store_true", default=False,
                         help='Decides verbosity of DEHB optimization')
     parser.add_argument('--runtime', type=float, default=300,
-                        help='Total time in seconds as fidelity to run DEHB')
+                        help='Total time in seconds as budget to run DEHB')
     args = parser.parse_args()
     return args
 
@@ -300,8 +300,8 @@ def main():
     # DEHB optimisation block #
     ###########################
     np.random.seed(args.seed)
-    dehb = DEHB(f=objective_function, cs=cs, dimensions=dimensions, min_fidelity=args.min_fidelity,
-                max_fidelity=args.max_fidelity, eta=args.eta, output_path=args.output_path,
+    dehb = DEHB(f=objective_function, cs=cs, dimensions=dimensions, min_budget=args.min_budget,
+                max_budget=args.max_budget, eta=args.eta, output_path=args.output_path,
                 # if client is not None and of type Client, n_workers is ignored
                 # if client is None, a Dask client with n_workers is set up
                 client=client, n_workers=args.n_workers)
@@ -325,7 +325,7 @@ def main():
             root='./data', train=True, download=True, transform=transform
         )
         incumbent = dehb.vector_to_configspace(dehb.inc_config)
-        acc = train_and_evaluate(incumbent, args.max_fidelity, verbose=True,
+        acc = train_and_evaluate(incumbent, args.max_budget, verbose=True,
                                  train_set=train_set, test_set=test_set, device=device)
         dehb.logger.info("Test accuracy of {:.3f} for the best found configuration: ".format(acc))
         dehb.logger.info(incumbent)
