@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2024-02-15
+
+### Added
+- Configuration IDs to improve logging and reproducability (#62)
+- Ask and Tell interface (#36)
+- Examples for Ask and Tell interface
+
+### Changes
+- Interface changes (renamed budget to fidelity) for clearer interface
 
 ## [0.0.7] - 2023-08-23
 
@@ -58,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial project release and push to PyPI
 
-[unreleased]: https://github.com/automl/DEHB/compare/v0.0.7...master
+[unreleased]: https://github.com/automl/DEHB/compare/v0.1.0...master
+[0.1.0]: https://github.com/automl/DEHB/compare/v0.0.7...v0.1.0
 [0.0.7]: https://github.com/automl/DEHB/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/automl/DEHB/releases/tag/v0.0.6
