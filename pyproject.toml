@@ -54,7 +54,7 @@ dev = [
   "pre-commit",
 ]
 examples = [
-  "sklearn"
+  "scikit-learn"
 ]
 
 [tool.pytest.ini_options]
