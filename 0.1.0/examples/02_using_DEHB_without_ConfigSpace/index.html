@@ -1705,16 +1705,12 @@ print("Train size: {}\nValid size: {}\nTest size: {}".format(
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">ModuleNotFoundError</span>                       Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[3], line 1</span>
-<span class="ansi-green-fg">----&gt; 1</span> <span class="ansi-bold" style="color: rgb(0,135,0)">from</span> <span class="ansi-bold" style="color: rgb(0,0,255)">sklearn</span><span class="ansi-bold" style="color: rgb(0,0,255)">.</span><span class="ansi-bold" style="color: rgb(0,0,255)">datasets</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span> load_digits, load_wine
-<span class="ansi-green-intense-fg ansi-bold">      2</span> <span class="ansi-bold" style="color: rgb(0,135,0)">from</span> <span class="ansi-bold" style="color: rgb(0,0,255)">sklearn</span><span class="ansi-bold" style="color: rgb(0,0,255)">.</span><span class="ansi-bold" style="color: rgb(0,0,255)">model_selection</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span> train_test_split
-<span class="ansi-green-intense-fg ansi-bold">      3</span> <span class="ansi-bold" style="color: rgb(0,135,0)">from</span> <span class="ansi-bold" style="color: rgb(0,0,255)">sklearn</span><span class="ansi-bold" style="color: rgb(0,0,255)">.</span><span class="ansi-bold" style="color: rgb(0,0,255)">ensemble</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span> RandomForestClassifier
-
-<span class="ansi-red-fg">ModuleNotFoundError</span>: No module named 'sklearn'</pre>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>digits
+Train size: (1257, 64)
+Valid size: (540, 64)
+Test size: (180, 64)
+</pre>
 </div>
 </div>
 </div>
@@ -1731,8 +1727,8 @@ Cell <span class="ansi-green-fg">In[3], line 1</span>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1777,35 +1773,9 @@ dehb = DEHB(
 </div>
 </div>
 </div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[4], line 5</span>
-<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-bold" style="color: rgb(0,135,0)">from</span> <span class="ansi-bold" style="color: rgb(0,0,255)">dehb</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span> DEHB
-<span class="ansi-green-intense-fg ansi-bold">      4</span> dehb <span style="color: rgb(98,98,98)">=</span> DEHB(
-<span class="ansi-green-fg">----&gt; 5</span>     f<span style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">target_function</span>, 
-<span class="ansi-green-intense-fg ansi-bold">      6</span>     dimensions<span style="color: rgb(98,98,98)">=</span>dimensions, 
-<span class="ansi-green-intense-fg ansi-bold">      7</span>     min_fidelity<span style="color: rgb(98,98,98)">=</span>min_fidelity, 
-<span class="ansi-green-intense-fg ansi-bold">      8</span>     max_fidelity<span style="color: rgb(98,98,98)">=</span>max_fidelity,
-<span class="ansi-green-intense-fg ansi-bold">      9</span>     n_workers<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">1</span>,
-<span class="ansi-green-intense-fg ansi-bold">     10</span>     output_path<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">./temp</span><span style="color: rgb(175,0,0)">"</span>
-<span class="ansi-green-intense-fg ansi-bold">     11</span> )
-
-<span class="ansi-red-fg">NameError</span>: name 'target_function' is not defined</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1852,35 +1822,6 @@ Cell <span class="ansi-green-fg">In[4], line 5</span>
 </div>
 </div>
 </div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[5], line 1</span>
-<span class="ansi-green-fg">----&gt; 1</span> trajectory, runtime, history <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">dehb</span><span style="color: rgb(98,98,98)">.</span>run(
-<span class="ansi-green-intense-fg ansi-bold">      2</span>     total_cost<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">10</span>, 
-<span class="ansi-green-intense-fg ansi-bold">      3</span>     verbose<span style="color: rgb(98,98,98)">=</span><span class="ansi-bold" style="color: rgb(0,135,0)">False</span>,
-<span class="ansi-green-intense-fg ansi-bold">      4</span>     save_intermediate<span style="color: rgb(98,98,98)">=</span><span class="ansi-bold" style="color: rgb(0,135,0)">False</span>,
-<span class="ansi-green-intense-fg ansi-bold">      5</span>     seed<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">123</span>,
-<span class="ansi-green-intense-fg ansi-bold">      6</span>     train_X<span style="color: rgb(98,98,98)">=</span>train_X,
-<span class="ansi-green-intense-fg ansi-bold">      7</span>     train_y<span style="color: rgb(98,98,98)">=</span>train_y,
-<span class="ansi-green-intense-fg ansi-bold">      8</span>     valid_X<span style="color: rgb(98,98,98)">=</span>valid_X,
-<span class="ansi-green-intense-fg ansi-bold">      9</span>     valid_y<span style="color: rgb(98,98,98)">=</span>valid_y,
-<span class="ansi-green-intense-fg ansi-bold">     10</span>     max_fidelity<span style="color: rgb(98,98,98)">=</span>dehb<span style="color: rgb(98,98,98)">.</span>max_fidelity,
-<span class="ansi-green-intense-fg ansi-bold">     11</span>     param_space<span style="color: rgb(98,98,98)">=</span>param_space
-<span class="ansi-green-intense-fg ansi-bold">     12</span> )
-
-<span class="ansi-red-fg">NameError</span>: name 'dehb' is not defined</pre>
-</div>
-</div>
-</div>
-</div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
 <div class="jp-Cell jp-CodeCell jp-Notebook-cell">
@@ -1916,15 +1857,11 @@ print("Incumbent configuration:\n{}".format(transform_space(param_space, dehb.in
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[6], line 1</span>
-<span class="ansi-green-fg">----&gt; 1</span> <span style="color: rgb(0,135,0)">print</span>(<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">Incumbent score: </span><span class="ansi-bold" style="color: rgb(175,95,135)">{}</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(98,98,98)">.</span>format(<span class="ansi-yellow-bg">dehb</span><span style="color: rgb(98,98,98)">.</span>inc_score))
-<span class="ansi-green-intense-fg ansi-bold">      2</span> <span style="color: rgb(0,135,0)">print</span>(<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">Incumbent configuration:</span><span class="ansi-bold" style="color: rgb(175,95,0)">\n</span><span class="ansi-bold" style="color: rgb(175,95,135)">{}</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(98,98,98)">.</span>format(transform_space(param_space, dehb<span style="color: rgb(98,98,98)">.</span>inc_config)))
-
-<span class="ansi-red-fg">NameError</span>: name 'dehb' is not defined</pre>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Incumbent score: -0.9611111111111111
+Incumbent configuration:
+{'max_depth': 9, 'min_samples_split': 3, 'max_features': 0.3990411414400532, 'min_samples_leaf': 1}
+</pre>
 </div>
 </div>
 </div>
@@ -1995,24 +1932,9 @@ print("Test accuracy: {}".format(test_accuracy))</div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[7], line 1</span>
-<span class="ansi-green-fg">----&gt; 1</span> model <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">RandomForestClassifier</span>(
-<span class="ansi-green-intense-fg ansi-bold">      2</span>     <span style="color: rgb(98,98,98)">*</span><span style="color: rgb(98,98,98)">*</span>transform_space(param_space, dehb<span style="color: rgb(98,98,98)">.</span>inc_config),
-<span class="ansi-green-intense-fg ansi-bold">      3</span>     n_estimators<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(0,135,0)">int</span>(max_fidelity),
-<span class="ansi-green-intense-fg ansi-bold">      4</span>     bootstrap<span style="color: rgb(98,98,98)">=</span><span class="ansi-bold" style="color: rgb(0,135,0)">True</span>,
-<span class="ansi-green-intense-fg ansi-bold">      5</span>     random_state<span style="color: rgb(98,98,98)">=</span>seed,
-<span class="ansi-green-intense-fg ansi-bold">      6</span> )
-<span class="ansi-green-intense-fg ansi-bold">      7</span> model<span style="color: rgb(98,98,98)">.</span>fit(
-<span class="ansi-green-intense-fg ansi-bold">      8</span>     np<span style="color: rgb(98,98,98)">.</span>concatenate((train_X, valid_X)),
-<span class="ansi-green-intense-fg ansi-bold">      9</span>     np<span style="color: rgb(98,98,98)">.</span>concatenate((train_y, valid_y))
-<span class="ansi-green-intense-fg ansi-bold">     10</span> )
-<span class="ansi-green-intense-fg ansi-bold">     11</span> test_accuracy <span style="color: rgb(98,98,98)">=</span> accuracy_scorer(model, test_X, test_y)
-
-<span class="ansi-red-fg">NameError</span>: name 'RandomForestClassifier' is not defined</pre>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Test accuracy: 0.9944444444444445
+</pre>
 </div>
 </div>
 </div>
