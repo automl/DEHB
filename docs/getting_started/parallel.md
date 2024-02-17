@@ -64,8 +64,8 @@ bash utils/run_dask_setup.sh \
 sleep 5
 
 python examples/03_pytorch_mnist_hpo.py \
-    --min_budget 1 \
-    --max_budget 3 \
+    --min_fidelity 1 \
+    --max_fidelity 3 \
     --runtime 60 \
     --scheduler_file dask_dump/scheduler.json \
     --verbose

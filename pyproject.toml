@@ -4,7 +4,7 @@
 urls = { Documentation = "https://automl.github.io/DEHB/", Github = "https://github.com/automl/DEHB" }
 
 name = "DEHB"
-version = "0.0.7"
+version = "0.1.0"
 dependencies = [
   "numpy>=1.18.2",
   "loguru>=0.5.3",
@@ -46,6 +46,7 @@ dev = [
   "mkdocs-material",
   "mkdocstrings[python]",
   "markdown-exec[ansi]",
+  "mkdocs-jupyter",
   "mike",
   # Others
   "ruff",
