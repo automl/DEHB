@@ -32,7 +32,7 @@ jobs:
         with:
           file: 'pyproject.toml'
           field: 'project.version'
-      - run: pip install ".[dev]"
+      - run: pip install ".[dev, examples]"
       - name: Configure Git user
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
