@@ -672,7 +672,7 @@ class DEHB(DEHBBase):
         if fevals is not None and len(self.traj) > 0:
             fevals = len(self.traj) + fevals
         elif brackets is not None and self.iteration_counter > -1:
-            brackets = self.iteration_counter + brackets
+            brackets = self.iteration_counter + brackets + 1
 
         return fevals, brackets
 
@@ -719,7 +719,7 @@ class DEHB(DEHBBase):
         # Save DEHB interals
         dehb_internals = {}
         dehb_internals["iteration_counter"] = self.iteration_counter
-        if self.inc_config:
+        if self.inc_config is not None:
             dehb_internals["inc_score"] = self.inc_score
             dehb_internals["inc_config"] = self.inc_config.tolist()
             dehb_internals["inc_info"] = self.inc_info
@@ -825,23 +825,45 @@ class DEHB(DEHBBase):
         self.saving_timer.cancel()
         self.saving_timer = None
 
-    def load(self, run_dir: str):
+    def _load_checkpoint(self, run_dir: str):
         # Check if path exists, otherwise give warning
         run_dir = Path(run_dir)
         if not Path.exists(run_dir):
             self.logger.warning("Path to run directory does not exist.")
-            return
+            return False
         # Load dehb state
         dehb_state_path = run_dir / "dehb_state.json"
         with dehb_state_path.open() as f:
             dehb_state = json.load(f)
+        if not all(dehb_state["DE_paams"][key] == self.de_params[key] for key in dehb_state["DE_params"]):
+            self.logger.warning("Initialized DE parameters do not match saved parameters.")
+            return False
         self.de_params.update(dehb_state["DE_params"])
 
         hb_vars = dehb_state["HB_params"]
+        if self.min_fidelity != hb_vars["min_fidelity"]:
+            self.logger.warning("Initialized min_fidelity does not match saved parameters.")
+            return False
         self.min_fidelity = hb_vars["min_fidelity"]
+
+        if self.max_fidelity != hb_vars["max_fidelity"]:
+            self.logger.warning("Initialized max_fidelity does not match saved parameters.")
+            return False
         self.max_fidelity = hb_vars["max_fidelity"]
+
+        if self.min_clip != hb_vars["min_clip"]:
+            self.logger.warning("Initialized min_clip does not match saved parameters.")
+            return False
         self.min_clip = hb_vars["min_clip"]
+
+        if self.max_clip != hb_vars["max_clip"]:
+            self.logger.warning("Initialized max_clip does not match saved parameters.")
+            return False
         self.max_clip = hb_vars["max_clip"]
+
+        if self.eta != hb_vars["eta"]:
+            self.logger.warning("Initialized eta does not match saved parameters.")
+            return False
         self.eta = hb_vars["eta"]
 
         self._pre_compute_fidelity_spacing()
@@ -857,16 +879,36 @@ class DEHB(DEHBBase):
         num_initial_configs = sum(self._max_pop_size.values())
         initial_config_entries = config_repo_list[:num_initial_configs]
         # Filter initial configs by fidelity
-        initial_configs_by_fidelity = {fidelity: [item["config"] for item in initial_config_entries
+        initial_configs_by_fidelity = {fidelity: [np.array(item["config"]) for item in initial_config_entries
                                                   if str(fidelity) in item["results"]]
                                                   for fidelity in self.fidelities}
         # Add initial configs to DE and announce them to ConfigRepo
         for fidelity, sub_pop in initial_configs_by_fidelity.items():
-            self.de[fidelity].population = sub_pop
+            self.de[fidelity].population = np.array(sub_pop)
             self.de[fidelity].population_ids = self.config_repository.announce_population(sub_pop,
                                                                                           fidelity)
 
-        # Iterate over history and tell with replay=True
+        # Load history
+        history_path = run_dir / "history.pkl"
+        with history_path.open("rb") as f:
+            history = pickle.load(f)
+
+        # Replay history
+        for config_id, config, fitness, cost, fidelity, info in history:
+            job_info = {
+                "fidelity": fidelity,
+                "config_id": config_id,
+                "config": np.array(config),
+            }
+            result = {
+                "fitness": fitness,
+                "cost": cost,
+                "info": info,
+            }
+
+            self.tell(job_info, result, replay=True)
+
+        return True
 
     def tell(self, job_info: dict, result: dict, replay: bool=False):
         """Feed a result back to the optimizer.
@@ -890,9 +932,10 @@ class DEHB(DEHBBase):
 
             # Update entry in ConfigRepository
             self.config_repository.configs[job_info["config_id"]].config = job_info["config"]
+            # Replace job_info with container to make sure all fields are given
+            job_info = job_info_container
 
-
-        # update bracket information
+        # Update bracket information
         fitness, cost = result["fitness"], result["cost"]
         info = result["info"] if "info" in result else dict()
         fidelity, parent_id = job_info["fidelity"], job_info["parent_id"]
@@ -930,7 +973,8 @@ class DEHB(DEHBBase):
 
     @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None, single_node_with_gpus=False,
-            verbose=False, debug=False, save_intermediate=True, save_history=True, name=None, **kwargs):
+            verbose=False, debug=False, save_intermediate=True, save_history=True, name=None,
+            resume=None, **kwargs):
         """Main interface to run optimization by DEHB.
 
         This function waits on workers and if a worker is free, asks for a configuration and a
@@ -949,6 +993,14 @@ class DEHB(DEHBBase):
             logger.warning("DEHB has already been run. Calling 'run' twice could lead to unintended"
                            + " behavior. Please restart DEHB with an increased compute budget"
                            + " instead of calling 'run' twice.")
+
+        if resume is not None:
+            success = self._load_checkpoint(resume)
+            if not success:
+                self.logger.error("Checkpoint could not be loaded. \
+                                  Please refer to the prior warning in order to \
+                                  identifiy the problem.")
+                raise AttributeError("Checkpoint could not be loaded.")
 
         # Setup continous log and state saving
         self._setup_state_logging(name)
@@ -1040,6 +1092,7 @@ class DEHB(DEHBBase):
         self._clean_up_saving_timer()
         self.save_state()
         # reset waiting jobs of active bracket to allow for continuation
+        self.active_brackets = []
         if len(self.active_brackets) > 0:
             for active_bracket in self.active_brackets:
                 active_bracket.reset_waiting_jobs()
