@@ -177,7 +177,7 @@ class DEHB(DEHBBase):
                  crossover_prob=0.5, strategy="rand1_bin", min_fidelity=None,
                  max_fidelity=None, eta=3, min_clip=None, max_clip=None, configspace=True,
                  boundary_fix_type="random", max_age=np.inf, n_workers=None, client=None,
-                 async_strategy="immediate", **kwargs):
+                 async_strategy="immediate", save_freq="incumbent", **kwargs):
         super().__init__(cs=cs, f=f, dimensions=dimensions, mutation_factor=mutation_factor,
                          crossover_prob=crossover_prob, strategy=strategy, min_fidelity=min_fidelity,
                          max_fidelity=max_fidelity, eta=eta, min_clip=min_clip, max_clip=max_clip,
@@ -192,6 +192,7 @@ class DEHB(DEHBBase):
         self.runtime = []
         self.history = []
         self.start = None
+        self.save_freq = "end" if save_freq is None else save_freq
 
         # Dask variables
         if n_workers is None and client is None:
@@ -676,7 +677,8 @@ class DEHB(DEHBBase):
 
         return fevals, brackets
 
-    def save_state(self, continuous=False):
+    def save_state(self):
+        self.logger.info("Saving state...")
         # Save ConfigRepository
         config_repo_path = self.run_dir / "config_repository.json"
         self.config_repository.save_state(config_repo_path)
@@ -694,7 +696,7 @@ class DEHB(DEHBBase):
             de_instance["fitness"] = de_object.fitness.tolist()
             de_instance["age"] = de_object.age
             de_instance["parent_counter"] = de_object.parent_counter
-            if de_object.promotion_pop_ids:
+            if de_object.promotion_pop_ids is not None:
                 de_instance["promotion_pop_ids"] = de_object.promotion_pop_ids.tolist()
                 de_instance["promotion_fitness"] = de_object.promotion_fitness.tolist()
             else:
@@ -728,11 +730,6 @@ class DEHB(DEHBBase):
         state_path = self.run_dir / "dehb_state.json"
         with state_path.open("w") as f:
             json.dump(state, f, indent=2)
-
-        # Restart timer
-        if continuous:
-            self.saving_timer = threading.Timer(60, self.save_state, args=(True,))
-            self.saving_timer.start()
 
 
 
@@ -835,7 +832,10 @@ class DEHB(DEHBBase):
         dehb_state_path = run_dir / "dehb_state.json"
         with dehb_state_path.open() as f:
             dehb_state = json.load(f)
-        if not all(dehb_state["DE_paams"][key] == self.de_params[key] for key in dehb_state["DE_params"]):
+        # Convert output_path of checkpoint to Path
+        dehb_state["DE_params"]["output_path"] = Path(dehb_state["DE_params"]["output_path"])
+        if not all(dehb_state["DE_params"][key] == self.de_params[key]
+                   for key in dehb_state["DE_params"]):
             self.logger.warning("Initialized DE parameters do not match saved parameters.")
             return False
         self.de_params.update(dehb_state["DE_params"])
@@ -964,12 +964,17 @@ class DEHB(DEHBBase):
                 score=self.de[fidelity].fitness[parent_id],
                 info=info,
             )
+            if self.save_freq == "incumbent" and not replay:
+                self.save_state()
         # book-keeping
         self._update_trackers(
             traj=self.inc_score, runtime=cost, history=(
                 config_id, config.tolist(), float(fitness), float(cost), float(fidelity), info,
             ),
         )
+
+        if self.save_freq == "iteration" and not replay:
+            self.save_state()
 
     @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None, single_node_with_gpus=False,
