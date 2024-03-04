@@ -177,7 +177,8 @@ class DEHB(DEHBBase):
                  crossover_prob=0.5, strategy="rand1_bin", min_fidelity=None,
                  max_fidelity=None, eta=3, min_clip=None, max_clip=None, configspace=True,
                  boundary_fix_type="random", max_age=np.inf, n_workers=None, client=None,
-                 async_strategy="immediate", save_freq="incumbent", **kwargs):
+                 async_strategy="immediate", save_freq="incumbent", run_dir=None, resume=False,
+                 **kwargs):
         super().__init__(cs=cs, f=f, dimensions=dimensions, mutation_factor=mutation_factor,
                          crossover_prob=crossover_prob, strategy=strategy, min_fidelity=min_fidelity,
                          max_fidelity=max_fidelity, eta=eta, min_clip=min_clip, max_clip=max_clip,
@@ -219,6 +220,22 @@ class DEHB(DEHBBase):
         self.available_gpus = None
         self.gpu_usage = None
         self.single_node_with_gpus = None
+
+        # Setup logging and potentially reload state
+        if resume:
+            run_path = self.output_path / run_dir
+            success = self._load_checkpoint(run_path)
+            if not success:
+                self.logger.error("Checkpoint could not be loaded. " \
+                                  "Please refer to the prior warning in order to " \
+                                  "identifiy the problem.")
+                raise AttributeError("Checkpoint could not be loaded. Check the logs" \
+                                     "for more information")
+
+        # Setup continous log and state saving
+        self._setup_state_logging(run_dir)
+        # Save initial random state
+        self.random_state = np.random.get_state()
 
     def __getstate__(self):
         """Allows the object to picklable while having Dask client as a class attribute."""
@@ -731,6 +748,10 @@ class DEHB(DEHBBase):
         with state_path.open("w") as f:
             json.dump(state, f, indent=2)
 
+        # Save random state
+        rnd_state_path = self.run_dir / "random_state.pkl"
+        with rnd_state_path.open("wb") as f:
+            pickle.dump(self.random_state, f)
 
 
     def _is_run_budget_exhausted(self, fevals=None, brackets=None, total_cost=None):
@@ -811,16 +832,8 @@ class DEHB(DEHBBase):
         try:
             self.run_dir.mkdir(parents=True)
         except FileExistsError:
-            self.logger.warning("Run directory already exists, " /
+            self.logger.warning("Run directory already exists, " \
                                 "results could potentially be overwritten.")
-
-        # Create timer to continuously save the state
-        self.saving_timer = threading.Timer(60, self.save_state, args=(True,))
-        self.saving_timer.start()
-
-    def _clean_up_saving_timer(self):
-        self.saving_timer.cancel()
-        self.saving_timer = None
 
     def _load_checkpoint(self, run_dir: str):
         # Check if path exists, otherwise give warning
@@ -907,7 +920,10 @@ class DEHB(DEHBBase):
             }
 
             self.tell(job_info, result, replay=True)
-
+        # Load and set random state
+        rnd_state_path = run_dir / "random_state.pkl"
+        with rnd_state_path.open("rb") as f:
+            np.random.set_state(pickle.load(f))
         return True
 
     def tell(self, job_info: dict, result: dict, replay: bool=False):
@@ -978,8 +994,7 @@ class DEHB(DEHBBase):
 
     @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None, single_node_with_gpus=False,
-            verbose=False, debug=False, save_intermediate=True, save_history=True, name=None,
-            resume=None, **kwargs):
+            verbose=False, debug=False, save_intermediate=True, save_history=True, **kwargs):
         """Main interface to run optimization by DEHB.
 
         This function waits on workers and if a worker is free, asks for a configuration and a
@@ -998,17 +1013,6 @@ class DEHB(DEHBBase):
             logger.warning("DEHB has already been run. Calling 'run' twice could lead to unintended"
                            + " behavior. Please restart DEHB with an increased compute budget"
                            + " instead of calling 'run' twice.")
-
-        if resume is not None:
-            success = self._load_checkpoint(resume)
-            if not success:
-                self.logger.error("Checkpoint could not be loaded. \
-                                  Please refer to the prior warning in order to \
-                                  identifiy the problem.")
-                raise AttributeError("Checkpoint could not be loaded.")
-
-        # Setup continous log and state saving
-        self._setup_state_logging(name)
 
         # checks if a Dask client exists
         if len(kwargs) > 0 and self.n_workers > 1 and isinstance(self.client, Client):
@@ -1065,6 +1069,8 @@ class DEHB(DEHBBase):
                             f"Best score seen/Incumbent score: {self.inc_score}",
                         )
                     self._verbosity_debug()
+                    # Save random state after job submission
+                    self.random_state = np.random.get_state()
             self._fetch_results_from_workers()
             self.clean_inactive_brackets()
         # end of while
@@ -1076,9 +1082,9 @@ class DEHB(DEHBBase):
         while len(self.futures) > 0:
             self._fetch_results_from_workers()
             if save_intermediate and self.inc_config is not None:
-                self._save_incumbent(name)
+                self._save_incumbent()
             if save_history and self.history is not None:
-                self._save_history(name)
+                self._save_history()
             time.sleep(0.05)  # waiting 50ms
 
         if verbose:
@@ -1094,7 +1100,6 @@ class DEHB(DEHBBase):
                     self.logger.info(f"{k}: {v}")
             else:
                 self.logger.info(f"{self.inc_config}")
-        self._clean_up_saving_timer()
         self.save_state()
         # reset waiting jobs of active bracket to allow for continuation
         self.active_brackets = []
