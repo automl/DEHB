@@ -9,23 +9,25 @@
       
       
       
+        <link rel="prev" href="../parallel/">
       
-        <link rel="next" href="getting_started/single_worker/">
+      
+        <link rel="next" href="../../examples/00_interfacing_DEHB/">
       
       
-      <link rel="icon" href="assets/automl_org.png">
+      <link rel="icon" href="../../assets/automl_org.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.13">
     
     
       
-        <title>DEHB</title>
+        <title>Ask & Tell - DEHB</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.7e359304.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e359304.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -44,15 +46,15 @@
       
     
     
-      <link rel="stylesheet" href="assets/_markdown_exec_pyodide.css">
+      <link rel="stylesheet" href="../../assets/_markdown_exec_pyodide.css">
     
-      <link rel="stylesheet" href="assets/_markdown_exec_ansi.css">
+      <link rel="stylesheet" href="../../assets/_markdown_exec_ansi.css">
     
-      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.css">
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -78,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#welcome-to-dehbs-documentation" class="md-skip">
+        <a href="#using-the-ask-tell-interface" class="md-skip">
           Skip to content
         </a>
       
@@ -98,9 +100,9 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="DEHB" class="md-header__button md-logo" aria-label="DEHB" data-md-component="logo">
+    <a href="../.." title="DEHB" class="md-header__button md-logo" aria-label="DEHB" data-md-component="logo">
       
-  <img src="assets/automl_org.png" alt="logo">
+  <img src="../../assets/automl_org.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -117,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              Ask & Tell
             
           </span>
         </div>
@@ -223,11 +225,9 @@
         
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="." class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
         
   
     
@@ -242,11 +242,13 @@
         
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="getting_started/single_worker/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../single_worker/" class="md-tabs__link">
           
   
   Getting Started
@@ -264,7 +266,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="examples/00_interfacing_DEHB/" class="md-tabs__link">
+        <a href="../../examples/00_interfacing_DEHB/" class="md-tabs__link">
           
   
   Examples
@@ -282,7 +284,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="references/dehb/" class="md-tabs__link">
+        <a href="../../references/dehb/" class="md-tabs__link">
           
   
   Code Reference
@@ -321,9 +323,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="DEHB" class="md-nav__button md-logo" aria-label="DEHB" data-md-component="logo">
+    <a href="../.." title="DEHB" class="md-nav__button md-logo" aria-label="DEHB" data-md-component="logo">
       
-  <img src="assets/automl_org.png" alt="logo">
+  <img src="../../assets/automl_org.png" alt="logo">
 
     </a>
     DEHB
@@ -347,30 +349,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Home
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="." class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -379,71 +361,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#introduction" class="md-nav__link">
-    <span class="md-ellipsis">
-      Introduction
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Installation
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-dehb" class="md-nav__link">
-    <span class="md-ellipsis">
-      Using DEHB
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#contributing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Contributing
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#to-cite-the-paper-or-code" class="md-nav__link">
-    <span class="md-ellipsis">
-      To cite the paper or code
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -452,23 +369,28 @@
       
   
   
+    
   
   
+  
     
     
     
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -479,7 +401,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             Getting Started
@@ -493,7 +415,7 @@
   
   
     <li class="md-nav__item">
-      <a href="getting_started/single_worker/" class="md-nav__link">
+      <a href="../single_worker/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -514,7 +436,7 @@
   
   
     <li class="md-nav__item">
-      <a href="getting_started/parallel/" class="md-nav__link">
+      <a href="../parallel/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -532,10 +454,28 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="getting_started/ask_tell/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Ask & Tell
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -544,6 +484,33 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#using-the-ask-tell-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using the Ask &amp; Tell interface
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -601,7 +568,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/00_interfacing_DEHB/" class="md-nav__link">
+      <a href="../../examples/00_interfacing_DEHB/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -622,7 +589,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/01.1_Optimizing_RandomForest_using_DEHB/" class="md-nav__link">
+      <a href="../../examples/01.1_Optimizing_RandomForest_using_DEHB/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -643,7 +610,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/01.2_Optimizing_RandomForest_using_Ask_Tell/" class="md-nav__link">
+      <a href="../../examples/01.2_Optimizing_RandomForest_using_Ask_Tell/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -664,7 +631,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/02_using_DEHB_without_ConfigSpace/" class="md-nav__link">
+      <a href="../../examples/02_using_DEHB_without_ConfigSpace/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -730,7 +697,7 @@
   
   
     <li class="md-nav__item">
-      <a href="references/dehb/" class="md-nav__link">
+      <a href="../../references/dehb/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -751,7 +718,7 @@
   
   
     <li class="md-nav__item">
-      <a href="references/de/" class="md-nav__link">
+      <a href="../../references/de/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -772,7 +739,7 @@
   
   
     <li class="md-nav__item">
-      <a href="references/bracket_manager/" class="md-nav__link">
+      <a href="../../references/bracket_manager/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -793,7 +760,7 @@
   
   
     <li class="md-nav__item">
-      <a href="references/config_repository/" class="md-nav__link">
+      <a href="../../references/config_repository/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -831,8 +798,6 @@
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -841,45 +806,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#introduction" class="md-nav__link">
+  <a href="#using-the-ask-tell-interface" class="md-nav__link">
     <span class="md-ellipsis">
-      Introduction
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Installation
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-dehb" class="md-nav__link">
-    <span class="md-ellipsis">
-      Using DEHB
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#contributing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Contributing
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#to-cite-the-paper-or-code" class="md-nav__link">
-    <span class="md-ellipsis">
-      To cite the paper or code
+      Using the Ask &amp; Tell interface
     </span>
   </a>
   
@@ -903,39 +832,26 @@
   
 
 
-<h1 id="welcome-to-dehbs-documentation">Welcome to DEHB's documentation!<a class="headerlink" href="#welcome-to-dehbs-documentation" title="Permanent link">#</a></h1>
-<h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">#</a></h2>
-<p>DEHB was designed to be an algorithm for Hyper Parameter Optimization (HPO). DEHB uses Differential Evolution (DE) under-the-hood as an Evolutionary Algorithm to power the black-box optimization that HPO problems pose. DE is a black-box optimization algorithm that generates candidate configurations <span class="arithmatex">\(x\)</span>, to the black-box function <span class="arithmatex">\(f(x)\)</span>, that is being optimized. The <span class="arithmatex">\(x\)</span> is evaluated by the black-box and the corresponding response <span class="arithmatex">\(y\)</span> is made available to the DE algorithm, which can then use this observation (<span class="arithmatex">\(x\)</span>, <span class="arithmatex">\(y\)</span>), along with previous such observations, to suggest a new candidate <span class="arithmatex">\(x\)</span> for the next evaluation. DEHB also uses Hyperband along with DE, to allow for cheaper approximations of the actual evaluations of <span class="arithmatex">\(x\)</span>.</p>
-<p><code>dehb</code> is a python package implementing the <a href="https://arxiv.org/abs/2105.09821">DEHB</a> algorithm. It offers an intuitive interface to optimize user-defined problems using DEHB.</p>
-<p>This documentation explains how to use <code>dehb</code> and demonstrates its features. In the following section you will be guided how to install the <code>dehb</code> package and how to use it in your own projects. Examples with more hands-on material can be found in the <a href="https://github.com/automl/DEHB/tree/master/examples">examples folder</a>.</p>
-<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
-<p>To start using the <code>dehb</code> package, you can install it via pip. You can either install the package right from git or install it as an editable package to modify the code and rerun your experiments:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Install from pypi</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>pip<span class="w"> </span>install<span class="w"> </span>dehb
-</code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">From Source</p>
-<p>To install directly from from source</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/automl/DEHB.git
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>DEHB<span class="w">  </span><span class="c1"># -e stands for editable, lets you modify the code and rerun things</span>
-</code></pre></div>
-</div>
-<h2 id="using-dehb">Using DEHB<a class="headerlink" href="#using-dehb" title="Permanent link">#</a></h2>
-<p>DEHB allows users to either utilize the Ask &amp; Tell interface for manual task distribution or leverage the built-in functionality (<code>run</code>) to set up a Dask cluster autonomously. Please refer to our <a href="getting_started/single_worker/">Getting Started</a> examples.</p>
-<h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">#</a></h2>
-<p>Please have a look at our <a href="https://github.com/automl/DEHB/blob/master/CONTRIBUTING.md">contributing guidelines</a>.</p>
-<h2 id="to-cite-the-paper-or-code">To cite the paper or code<a class="headerlink" href="#to-cite-the-paper-or-code" title="Permanent link">#</a></h2>
-<p>If you use DEHB in one of your research projects, please cite our paper(s):
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nc">@inproceedings</span><span class="p">{</span><span class="nl">awad-ijcai21</span><span class="p">,</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="na">author</span><span class="w">    </span><span class="p">=</span><span class="w"> </span><span class="s">{N. Awad and N. Mallik and F. Hutter}</span><span class="p">,</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="na">title</span><span class="w">     </span><span class="p">=</span><span class="w"> </span><span class="s">{{DEHB}: Evolutionary Hyberband for Scalable, Robust and Efficient Hyperparameter Optimization}</span><span class="p">,</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="na">pages</span><span class="w">     </span><span class="p">=</span><span class="w"> </span><span class="s">{2147--2153}</span><span class="p">,</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="na">booktitle</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Proceedings of the Thirtieth International Joint Conference on</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="s">               Artificial Intelligence, {IJCAI-21}}</span><span class="p">,</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="na">publisher</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{ijcai.org}</span><span class="p">,</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="na">editor</span><span class="w">    </span><span class="p">=</span><span class="w"> </span><span class="s">{Z. Zhou}</span><span class="p">,</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="na">year</span><span class="w">      </span><span class="p">=</span><span class="w"> </span><span class="s">{2021}</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="p">}</span>
+  <h1>Ask & Tell</h1>
+
+<h3 id="using-the-ask-tell-interface">Using the Ask &amp; Tell interface<a class="headerlink" href="#using-the-ask-tell-interface" title="Permanent link">#</a></h3>
+<p>DEHB allows users to either utilize the Ask &amp; Tell interface for manual task distribution or leverage the built-in functionality (<code>run</code>) to set up a Dask cluster autonomously.
+The Ask &amp; Tell functionality can be utilized as follows:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">optimizer</span> <span class="o">=</span> <span class="n">DEHB</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">f</span><span class="o">=</span><span class="n">your_target_function</span><span class="p">,</span> <span class="c1"># Here we do not need to necessarily specify the target function, but it can still be useful to call &#39;run&#39; later.</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">cs</span><span class="o">=</span><span class="n">config_space</span><span class="p">,</span> 
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">dimensions</span><span class="o">=</span><span class="n">dimensions</span><span class="p">,</span> 
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">min_fidelity</span><span class="o">=</span><span class="n">min_fidelity</span><span class="p">,</span> 
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">max_fidelity</span><span class="o">=</span><span class="n">max_fidelity</span><span class="p">)</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># Ask for next configuration to run</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">job_info</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">ask</span><span class="p">()</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># Run the configuration for the given fidelity. Here you can freely distribute the computation to any worker you&#39;d like.</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">result</span> <span class="o">=</span> <span class="n">your_target_function</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">],</span> <span class="n">fidelity</span><span class="o">=</span><span class="n">job_info</span><span class="p">[</span><span class="s2">&quot;fidelity&quot;</span><span class="p">])</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="c1"># When you received the result, feed them back to the optimizer</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">optimizer</span><span class="o">.</span><span class="n">tell</span><span class="p">(</span><span class="n">job_info</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 </code></pre></div></p>
 
 
@@ -965,15 +881,31 @@
       
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
+          
+          <a href="../parallel/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Parallel">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Parallel
+              </div>
+            </div>
+          </a>
+        
         
           
-          <a href="getting_started/single_worker/" class="md-footer__link md-footer__link--next" aria-label="Next: Single Worker">
+          <a href="../../examples/00_interfacing_DEHB/" class="md-footer__link md-footer__link--next" aria-label="Next: Interfacing DEHB">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Single Worker
+                Interfacing DEHB
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1007,14 +939,14 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": ".", "features": ["content.code.annotate", "content.code.copy", "navigation.footer", "navigation.tabs", "navigation.tabs.sticky", "toc.follow", "header.autohide", "search.suggest", "search.highlight", "search.share"], "search": "assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "content.code.copy", "navigation.footer", "navigation.tabs", "navigation.tabs.sticky", "toc.follow", "header.autohide", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="assets/javascripts/bundle.c8d2eff1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c8d2eff1.min.js"></script>
       
-        <script src="assets/_markdown_exec_pyodide.js"></script>
+        <script src="../../assets/_markdown_exec_pyodide.js"></script>
       
-        <script src="javascripts/katex.js"></script>
+        <script src="../../javascripts/katex.js"></script>
       
         <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.js"></script>
       

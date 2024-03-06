@@ -9,14 +9,14 @@
       
       
       
-        <link rel="prev" href="../../getting_started/parallel/">
+        <link rel="prev" href="../../getting_started/ask_tell/">
       
       
         <link rel="next" href="../01.1_Optimizing_RandomForest_using_DEHB/">
       
       
       <link rel="icon" href="../../assets/automl_org.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.9">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.13">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.f2e4d321.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e359304.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -51,6 +51,8 @@
       <link rel="stylesheet" href="../../assets/_markdown_exec_ansi.css">
     
       <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.css">
     
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -200,6 +202,18 @@
 </div>
     
     
+      <div class="md-header__source">
+        <a href="https://github.com/automl/DEHB/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
   </nav>
   
     
@@ -317,6 +331,18 @@
     DEHB
   </label>
   
+    <div class="md-nav__source">
+      <a href="https://github.com/automl/DEHB/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
   <ul class="md-nav__list" data-md-scrollfix>
     
       
@@ -410,6 +436,27 @@
   
   <span class="md-ellipsis">
     Parallel
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/ask_tell/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Ask & Tell
   </span>
   
 
@@ -530,6 +577,93 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#getting-started-with-dehb" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting started with DEHB
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sample-interface-for-target-function-that-dehb-optimizes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sample interface for target function that DEHB optimizes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defining-a-sample-search-space" class="md-nav__link">
+    <span class="md-ellipsis">
+      Defining a sample search space
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defining-fidelity-range-for-the-target-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      Defining fidelity range for the target function
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instantiating-and-running-dehb" class="md-nav__link">
+    <span class="md-ellipsis">
+      Instantiating and running DEHB
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Instantiating and running DEHB">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-running-dehb-for-a-certain-number-of-successive-halving-brackets" class="md-nav__link">
+    <span class="md-ellipsis">
+      1) Running DEHB for a certain number of (successive halving) brackets
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-running-dehb-for-total-number-of-function-evaluations" class="md-nav__link">
+    <span class="md-ellipsis">
+      2) Running DEHB for total number of function evaluations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-running-dehb-for-total-amount-of-wallclock-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      3) Running DEHB for total amount of wallclock time
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conclusion
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -571,7 +705,7 @@
         
   
   <span class="md-ellipsis">
-    Using the Ask &amp; Tell interface
+    Optimizing RandomForest using the Ask &amp; Tell interface
   </span>
   
 
@@ -710,6 +844,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/config_repository/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration Repository
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -752,6 +907,93 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#getting-started-with-dehb" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting started with DEHB
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sample-interface-for-target-function-that-dehb-optimizes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sample interface for target function that DEHB optimizes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defining-a-sample-search-space" class="md-nav__link">
+    <span class="md-ellipsis">
+      Defining a sample search space
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defining-fidelity-range-for-the-target-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      Defining fidelity range for the target function
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instantiating-and-running-dehb" class="md-nav__link">
+    <span class="md-ellipsis">
+      Instantiating and running DEHB
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Instantiating and running DEHB">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-running-dehb-for-a-certain-number-of-successive-halving-brackets" class="md-nav__link">
+    <span class="md-ellipsis">
+      1) Running DEHB for a certain number of (successive halving) brackets
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-running-dehb-for-total-number-of-function-evaluations" class="md-nav__link">
+    <span class="md-ellipsis">
+      2) Running DEHB for total number of function evaluations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-running-dehb-for-total-amount-of-wallclock-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      3) Running DEHB for total amount of wallclock time
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conclusion
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -765,6 +1007,9 @@
               <article class="md-content__inner md-typeset">
                 
                   
+
+  
+  
 
 
 <script>
@@ -1208,7 +1453,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="interfacing-dehb">Interfacing DEHB<a class="anchor-link" href="#interfacing-dehb">¶</a></h1><h4 id="how-to-read-this-notebook">How to read this notebook<a class="anchor-link" href="#how-to-read-this-notebook">¶</a></h4><p>This notebook is designed to serve as a high-level, highly abstracted view of DEHB and how it can be used. The examples here are mere placeholders and <em>only</em> offer an interface to run DEHB on toy or actual problems.</p>
+<h1 id="interfacing-dehb">Interfacing DEHB<a class="anchor-link" href="#interfacing-dehb">¶</a></h1><h2 id="how-to-read-this-notebook">How to read this notebook<a class="anchor-link" href="#how-to-read-this-notebook">¶</a></h2><p>This notebook is designed to serve as a high-level, highly abstracted view of DEHB and how it can be used. The examples here are mere placeholders and <em>only</em> offer an interface to run DEHB on toy or actual problems.</p>
 <hr/>
 </div>
 </div>
@@ -1259,7 +1504,7 @@ warnings.filterwarnings('ignore')</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="getting-started-with-dehb">Getting started with DEHB<a class="anchor-link" href="#getting-started-with-dehb">¶</a></h1>
+<h2 id="getting-started-with-dehb">Getting started with DEHB<a class="anchor-link" href="#getting-started-with-dehb">¶</a></h2>
 </div>
 </div>
 </div>
@@ -1271,9 +1516,10 @@ warnings.filterwarnings('ignore')</div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>DEHB was designed to be an algorithm for Hyper Parameter Optimization (HPO). DEHB uses Differential Evolution (DE) under-the-hood as an Evolutionary Algorithm to power the black-box optimization that HPO problems pose. DE is a black-box optimization algorithm that generates candidate configurations $x$, to the black-box function $f(x)$, that is being optimized. The $x$ is evaluated by the black-box and the corresponding response $y$ is made available to the DE algorithm, which can then use this observation ($x$, $y$), along with previous such observations, to suggest a new candidate $x$ for the next evaluation.</p>
-<p>DEHB also uses Hyperband along with DE, to allow for cheaper approximations of the actual evaluations of $x$. Let $f(x)$ be the validation error of training a multilayer perceptron (MLP) on the complete training set. Multi-fidelity algorithms such as Hyperband, allow for cheaper approximations along a possible <em>fidelity</em>. For the MLP, a subset of the dataset maybe a cheaper approximation to the full data set evaluation. Whereas the fidelity can be quantifies as the fraction of the dataset used to evaluate the configuration $x$, instead of the full dataset. Such approximations can allow sneak-peek into the black-box, potentially revealing certain landscape feature of <em>f(x)</em>, thus rendering it a <em>gray</em>-box and not completely opaque and black!</p>
+<p>DEHB also uses Hyperband along with DE, to allow for cheaper approximations of the actual evaluations of $x$. Let $f(x)$ be the validation error of training a multilayer perceptron (MLP) on the complete training set. Multi-fidelity algorithms such as Hyperband, allow for cheaper approximations along a possible <em>fidelity</em>. For the MLP, a subset of the dataset maybe a cheaper approximation to the full data set evaluation. Whereas the fidelity can be quantified as the fraction of the dataset used to evaluate the configuration $x$, instead of the full dataset. Such approximations can allow sneak-peek into the black-box, potentially revealing certain landscape features of <em>f(x)</em>, thus rendering it a <em>gray</em>-box and not completely opaque and black!</p>
 <p>The $z$ parameter is the fidelity parameter to the black-box function. If $z \in [fidelity_{min}, fidelity_{max}]$, then $f(x, fidelity_{max})$ would be equivalent to the black-box case of $f(x)$.</p>
-<p><img alt="boxes" src="imgs/black-gray-box.png"/></p>
+<!--- Here we need to use the weblink in order to correctly show the image in the docs--->
+<p><img alt="boxes" src="https://github.com/automl/DEHB/blob/master/examples/imgs/black-gray-box.png?raw=true"/></p>
 </div>
 </div>
 </div>
@@ -1285,7 +1531,7 @@ warnings.filterwarnings('ignore')</div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>HPO algorithms optimize such black/gray box by wrapping around this <em>target</em> function an interface, by which the algorithms can suggest new $x$ and also consume the result of the corresponding evaluation to store a collection of such ($x$, $y$) pairs. Therefore, to run DEHB, the most essential component required as input is the target function to optimize. Since DEHB can leverage a Hyperband, the target function interface should account for possible input of fidelity too.</p>
-<h3 id="sample-interface-for-target-function-that-dehb-optimizes">Sample interface for target function that DEHB optimizes<a class="anchor-link" href="#sample-interface-for-target-function-that-dehb-optimizes">¶</a></h3>
+<h2 id="sample-interface-for-target-function-that-dehb-optimizes">Sample interface for target function that DEHB optimizes<a class="anchor-link" href="#sample-interface-for-target-function-that-dehb-optimizes">¶</a></h2>
 </div>
 </div>
 </div>
@@ -1400,7 +1646,7 @@ warnings.filterwarnings('ignore')</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="defining-a-sample-search-space">Defining a sample search space<a class="anchor-link" href="#defining-a-sample-search-space">¶</a></h3>
+<h2 id="defining-a-sample-search-space">Defining a sample search space<a class="anchor-link" href="#defining-a-sample-search-space">¶</a></h2>
 </div>
 </div>
 </div>
@@ -1549,7 +1795,7 @@ cs.sample_configuration()</div>
 <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>Configuration(values={
-  'x0': 3.7815050835513295,
+  'x0': 4.255526708157786,
 })</pre>
 </div>
 </div>
@@ -1575,7 +1821,7 @@ cs.sample_configuration()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="defining-fidelity-range-for-the-target-function">Defining fidelity range for the target function<a class="anchor-link" href="#defining-fidelity-range-for-the-target-function">¶</a></h3>
+<h2 id="defining-fidelity-range-for-the-target-function">Defining fidelity range for the target function<a class="anchor-link" href="#defining-fidelity-range-for-the-target-function">¶</a></h2>
 </div>
 </div>
 </div>
@@ -1624,7 +1870,7 @@ cs.sample_configuration()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>The above definitions are all the information that DEHB needs about a problem. We are now in a position to call upon DEHB and start running it, to tune $x$.</p>
+<p>The above definitions are all the information that DEHB needs about a problem. We are now in a position to call upon DEHB and start running it to tune $x$.</p>
 </div>
 </div>
 </div>
@@ -1635,7 +1881,7 @@ cs.sample_configuration()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="instantiating-and-running-dehb">Instantiating and running DEHB<a class="anchor-link" href="#instantiating-and-running-dehb">¶</a></h3>
+<h2 id="instantiating-and-running-dehb">Instantiating and running DEHB<a class="anchor-link" href="#instantiating-and-running-dehb">¶</a></h2>
 </div>
 </div>
 </div>
@@ -1731,7 +1977,7 @@ dehb = DEHB(
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>DEHB allows the option of 3 different resources for its runtime budget:</p>
-<h4 id="1-running-dehb-for-a-certain-number-of-successive-halving-brackets">1) Running DEHB for a certain number of (successive halving) <em>brackets</em><a class="anchor-link" href="#1-running-dehb-for-a-certain-number-of-successive-halving-brackets">¶</a></h4>
+<h3 id="1-running-dehb-for-a-certain-number-of-successive-halving-brackets">1) Running DEHB for a certain number of (successive halving) <em>brackets</em><a class="anchor-link" href="#1-running-dehb-for-a-certain-number-of-successive-halving-brackets">¶</a></h3>
 </div>
 </div>
 </div>
@@ -1771,7 +2017,7 @@ print(dehb.vector_to_configspace(dehb.inc_config))</div>
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Configuration(values={
-  'x0': 6.114108773223553,
+  'x0': 4.55728826059503,
 })
 </pre>
 </div>
@@ -1786,7 +2032,7 @@ print(dehb.vector_to_configspace(dehb.inc_config))</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h4 id="2-running-dehb-for-total-number-of-function-evaluations">2) Running DEHB for total number of <em>function evaluations</em><a class="anchor-link" href="#2-running-dehb-for-total-number-of-function-evaluations">¶</a></h4>
+<h3 id="2-running-dehb-for-total-number-of-function-evaluations">2) Running DEHB for total number of <em>function evaluations</em><a class="anchor-link" href="#2-running-dehb-for-total-number-of-function-evaluations">¶</a></h3>
 </div>
 </div>
 </div>
@@ -1831,9 +2077,9 @@ print(dehb.get_incumbents())</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-02-17 18:43:41.971</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">reset</span>:<span class="ansi-cyan-fg">121</span> - <span class="ansi-bold">
+<pre><span class="ansi-green-fg">2024-03-06 10:25:46.258</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">reset</span>:<span class="ansi-cyan-fg">121</span> - <span class="ansi-bold">
 
-RESET at 02/17/24 18:43:41 UTC
+RESET at 03/06/24 10:25:46 UTC
 
 </span>
 </pre>
@@ -1843,8 +2089,8 @@ RESET at 02/17/24 18:43:41 UTC
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>(Configuration(values={
-  'x0': 4.3308291276024296,
-}), 0.0006615571519237307)
+  'x0': 7.670987336063824,
+}), 0.16842444226780517)
 </pre>
 </div>
 </div>
@@ -1858,7 +2104,7 @@ RESET at 02/17/24 18:43:41 UTC
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h4 id="3-running-dehb-for-total-amount-of-wallclock-time">3) Running DEHB for total amount of <em>wallclock time</em><a class="anchor-link" href="#3-running-dehb-for-total-amount-of-wallclock-time">¶</a></h4>
+<h3 id="3-running-dehb-for-total-amount-of-wallclock-time">3) Running DEHB for total amount of <em>wallclock time</em><a class="anchor-link" href="#3-running-dehb-for-total-amount-of-wallclock-time">¶</a></h3>
 </div>
 </div>
 </div>
@@ -1903,9 +2149,9 @@ print(dehb.get_incumbents())</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-02-17 18:43:44.235</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">reset</span>:<span class="ansi-cyan-fg">121</span> - <span class="ansi-bold">
+<pre><span class="ansi-green-fg">2024-03-06 10:25:48.541</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">reset</span>:<span class="ansi-cyan-fg">121</span> - <span class="ansi-bold">
 
-RESET at 02/17/24 18:43:44 UTC
+RESET at 03/06/24 10:25:48 UTC
 
 </span>
 </pre>
@@ -1915,8 +2161,8 @@ RESET at 02/17/24 18:43:44 UTC
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>(Configuration(values={
-  'x0': 7.46476761107802,
-}), 0.0004114277636214636)
+  'x0': 5.577822253258404,
+}), 0.004966289921936706)
 </pre>
 </div>
 </div>
@@ -1995,8 +2241,8 @@ print(dehb.get_incumbents())</div>
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>(Configuration(values={
-  'x0': 4.441128052735529,
-}), 0.0013695938061896173)
+  'x0': 7.036619798553282,
+}), 0.004305756711604158)
 </pre>
 </div>
 </div>
@@ -2037,7 +2283,7 @@ print(dehb.get_incumbents())</div>
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Configuration(values={
-  'x0': 4.441128052735529,
+  'x0': 7.036619798553282,
 })
 </pre>
 </div>
@@ -2080,9 +2326,9 @@ print(dehb.vector_to_configspace(dehb.inc_config))</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>0.0013695938061896173 0.0013695938061896173
+<pre>0.004305756711604158 0.004305756711604158
 Configuration(values={
-  'x0': 4.441128052735529,
+  'x0': 7.036619798553282,
 })
 </pre>
 </div>
@@ -2098,46 +2344,19 @@ Configuration(values={
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <hr/>
-<h3 id="conclusion">Conclusion<a class="anchor-link" href="#conclusion">¶</a></h3><p>As detailed above, the problem definition needs to be input to DEHB as the following information:</p>
+<h2 id="conclusion">Conclusion<a class="anchor-link" href="#conclusion">¶</a></h2><p>As detailed above, the problem definition needs to be input to DEHB as the following information:</p>
 <ul>
-<li>the <em>target_function</em> (<code>f</code>) that is the primary black-box function to optimize</li>
-<li>the fidelity range of <code>min_fidelity</code> and <code>max_fidelity</code> that allows the cheaper, faster gray-box optimization of <code>f</code></li>
-<li>the search space or the input domain of the function <code>f</code>, that can be represented as a <code>ConfigSpace</code> object and passed to DEHB at initialization</li>
+<li>the <em>target_function</em> (<code>f</code>) that is the primary black-box function to optimize,</li>
+<li>the fidelity range of <code>min_fidelity</code> and <code>max_fidelity</code> that allows the cheaper, faster gray-box optimization of <code>f</code> and</li>
+<li>the search space or the input domain of the function <code>f</code>, that can be represented as a <code>ConfigSpace</code> object and passed to DEHB at initialization.</li>
 </ul>
 <p>Following which, DEHB can be run for any amount of practical real-world budget. It can be run for either:</p>
 <ul>
 <li>a total amount of actual wallclock time, example one day (~86400 seconds), or</li>
-<li>a total number of function evaluations, or the number of times we want the black-box to be accessed for evaluation, across all fidelities</li>
-<li>the total number of <em>brackets</em> we want to run the DEHB algorithm for</li>
+<li>a total number of function evaluations, or the number of times we want the black-box to be accessed for evaluation, across all fidelities or</li>
+<li>the total number of <em>brackets</em> we want to run the DEHB algorithm for.</li>
 </ul>
 <p>DEHB will terminate once its chosen runtime budget is exhausted, and report the incumbent found. DEHB, as an <em>anytime</em> algorithm, constantly writes to disk a lightweight <code>json</code> file with the best found configuration and its score seen till that point.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="CodeMirror cm-s-jupyter">
-<div class="zeroclipboard-container">
-<clipboard-copy for="cell-15">
-<div>
-<span class="notice" hidden="">Copied!</span>
-<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
-<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
-<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
-</svg>
-</div>
-</clipboard-copy>
-</div>
-<div class="highlight-ipynb hl-python"><pre><span></span>
-</pre></div>
-<div class="clipboard-copy-txt" id="cell-15"></div>
-</div>
-</div>
 </div>
 </div>
 </div>
@@ -2178,7 +2397,7 @@ Configuration(values={
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../../getting_started/parallel/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Parallel">
+          <a href="../../getting_started/ask_tell/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Ask &amp; Tell">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -2188,7 +2407,7 @@ Configuration(values={
                 Previous
               </span>
               <div class="md-ellipsis">
-                Parallel
+                Ask & Tell
               </div>
             </div>
           </a>
@@ -2238,9 +2457,15 @@ Configuration(values={
     <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "content.code.copy", "navigation.footer", "navigation.tabs", "navigation.tabs.sticky", "toc.follow", "header.autohide", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c8d2eff1.min.js"></script>
       
         <script src="../../assets/_markdown_exec_pyodide.js"></script>
+      
+        <script src="../../javascripts/katex.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/contrib/auto-render.min.js"></script>
       
     
   </body>
