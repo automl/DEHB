@@ -1,4 +1,5 @@
 site_name: DEHB
+repo_url: https://github.com/automl/DEHB/
 
 nav:
   - Home: index.md
@@ -15,6 +16,7 @@ nav:
     - DEHB: references/dehb.md
     - DE: references/de.md
     - Bracket Manager: references/bracket_manager.md
+    - Configuration Repository: references/config_repository.md
 
 theme:
   name: material
@@ -80,6 +82,8 @@ markdown_extensions:
       - name: mermaid
         class: mermaid
         format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.arithmatex:
+      generic: true
 
 plugins:
   - search
@@ -108,6 +112,14 @@ plugins:
             show_signature_annotations: false
   - mkdocs-jupyter:
       execute: true
+
+extra_javascript:
+  - javascripts/katex.js
+  - https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.js
+  - https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/contrib/auto-render.min.js
+
+extra_css:
+  - https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.css
 
 extra:
   version:
