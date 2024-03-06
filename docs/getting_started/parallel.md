@@ -4,12 +4,12 @@ DEHB has been designed to interface a [Dask client](https://distributed.dask.org
 DEHB can either create a Dask client during instantiation and close/kill the client during garbage collection. 
 Or a client can be passed as an argument during instantiation.
 
-* Setting `n_workers` during instantiation \
-    If set to `1` (default) then the entire process is a sequential run without invoking Dask. \
-    If set to `>1` then a Dask Client is initialized with as many workers as `n_workers`. \
+* Setting `n_workers` during instantiation  
+    If set to `1` (default) then the entire process is a sequential run without invoking Dask.  
+    If set to `>1` then a Dask Client is initialized with as many workers as `n_workers`.  
     This parameter is ignored if `client` is not None.
-* Setting `client` during instantiation \
-    When `None` (default), a Dask client is created using `n_workers` specified. \
+* Setting `client` during instantiation  
+    When `None` (default), a Dask client is created using `n_workers` specified.  
     Else, any custom-configured Dask Client can be created and passed as the `client` argument to DEHB.
   
 #### Using GPUs in a parallel run
