@@ -63,7 +63,7 @@ class ConfigRepository:
         result_dict = {
                 fidelity: ResultItem(np.inf, -1, {}),
             }
-        config_item = ConfigItem(config_id, config, result_dict)
+        config_item = ConfigItem(config_id, config.copy(), result_dict)
         self.configs.append(config_item)
         return config_id
 
