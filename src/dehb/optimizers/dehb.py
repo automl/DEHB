@@ -231,8 +231,8 @@ class DEHB(DEHBBase):
                                   "identifiy the problem.")
                 raise AttributeError("Checkpoint could not be loaded. Check the logs" \
                                      "for more information")
-        elif self.output_path.exists():
-            self.logger.warning("Run directory already exists, " \
+        elif (self.output_path / "dehb_state.json").exists():
+            self.logger.warning("A checkpoint already exists, " \
                                 "results could potentially be overwritten.")
 
         # Save initial random state
