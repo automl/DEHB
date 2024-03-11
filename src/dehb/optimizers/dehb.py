@@ -177,7 +177,7 @@ class DEHB(DEHBBase):
                  crossover_prob=0.5, strategy="rand1_bin", min_fidelity=None,
                  max_fidelity=None, eta=3, min_clip=None, max_clip=None, configspace=True,
                  boundary_fix_type="random", max_age=np.inf, n_workers=None, client=None,
-                 async_strategy="immediate", save_freq="incumbent", run_dir=None, resume=False,
+                 async_strategy="immediate", save_freq="incumbent", resume=False,
                  **kwargs):
         super().__init__(cs=cs, f=f, dimensions=dimensions, mutation_factor=mutation_factor,
                          crossover_prob=crossover_prob, strategy=strategy, min_fidelity=min_fidelity,
@@ -223,19 +223,21 @@ class DEHB(DEHBBase):
 
         # Setup logging and potentially reload state
         if resume:
-            run_path = self.output_path / run_dir
-            success = self._load_checkpoint(run_path)
+            self.logger.info("Loading checkpoint...")
+            success = self._load_checkpoint(self.output_path)
             if not success:
                 self.logger.error("Checkpoint could not be loaded. " \
                                   "Please refer to the prior warning in order to " \
                                   "identifiy the problem.")
                 raise AttributeError("Checkpoint could not be loaded. Check the logs" \
                                      "for more information")
+        elif self.output_path.exists():
+            self.logger.warning("Run directory already exists, " \
+                                "results could potentially be overwritten.")
 
-        # Setup continous log and state saving
-        self._setup_state_logging(run_dir)
         # Save initial random state
         self.random_state = np.random.get_state()
+        self.cs_random_state = self.cs.random.get_state()
 
     def __getstate__(self):
         """Allows the object to picklable while having Dask client as a class attribute."""
@@ -694,33 +696,12 @@ class DEHB(DEHBBase):
 
         return fevals, brackets
 
-    def save_state(self):
-        self.logger.info("Saving state...")
+    def _save_state(self):
         # Save ConfigRepository
-        config_repo_path = self.run_dir / "config_repository.json"
+        config_repo_path = self.output_path / "config_repository.json"
         self.config_repository.save_state(config_repo_path)
 
-        # Save history, incumbents etc.
-        self._save_history()
-        self._save_incumbent()
-
         state = {}
-        # DE subpopulations
-        de_dict = {}
-        for fidelity, de_object in self.de.items():
-            de_instance = {}
-            de_instance["population_ids"] = de_object.population_ids.tolist()
-            de_instance["fitness"] = de_object.fitness.tolist()
-            de_instance["age"] = de_object.age
-            de_instance["parent_counter"] = de_object.parent_counter
-            if de_object.promotion_pop_ids is not None:
-                de_instance["promotion_pop_ids"] = de_object.promotion_pop_ids.tolist()
-                de_instance["promotion_fitness"] = de_object.promotion_fitness.tolist()
-            else:
-                de_instance["promotion_pop_ids"] = []
-                de_instance["promotion_fitness"] = []
-            de_dict[fidelity] = de_instance
-        state["DE"] = de_dict
         # DE parameters
         serializable_de_params = self.de_params.copy()
         serializable_de_params.pop("cs")
@@ -743,15 +724,20 @@ class DEHB(DEHBBase):
             dehb_internals["inc_config"] = self.inc_config.tolist()
             dehb_internals["inc_info"] = self.inc_info
         state["internals"] = dehb_internals
-        # Save state
-        state_path = self.run_dir / "dehb_state.json"
+
+        # Write state to disk
+        state_path = self.output_path / "dehb_state.json"
         with state_path.open("w") as f:
             json.dump(state, f, indent=2)
 
-        # Save random state
-        rnd_state_path = self.run_dir / "random_state.pkl"
+        # Write random state to disk
+        rnd_state_path = self.output_path / "random_state.pkl"
         with rnd_state_path.open("wb") as f:
             pickle.dump(self.random_state, f)
+
+        cs_rnd_path = self.output_path / "cs_random_state.pkl"
+        with cs_rnd_path.open("wb") as f:
+            pickle.dump(self.cs_random_state, f)
 
 
     def _is_run_budget_exhausted(self, fevals=None, brackets=None, total_cost=None):
@@ -781,6 +767,9 @@ class DEHB(DEHBBase):
         return False
 
     def _save_incumbent(self):
+        # Return early if there is no incumbent yet
+        if self.inc_config is None:
+            return
         try:
             res = {}
             if self.use_configspace:
@@ -790,15 +779,18 @@ class DEHB(DEHBBase):
                 res["config"] = self.inc_config.tolist()
             res["score"] = self.inc_score
             res["info"] = self.inc_info
-            incumbent_path = self.run_dir / "incumbent.json"
+            incumbent_path = self.output_path / "incumbent.json"
             with incumbent_path.open("w") as f:
                 json.dump(res, f)
         except Exception as e:
             self.logger.warning(f"Incumbent not saved: {e!r}")
 
     def _save_history(self):
+        # Return early if there is no history yet
+        if self.history is None:
+            return
         try:
-            history_path = self.run_dir / "history.pkl"
+            history_path = self.output_path / "history.pkl"
             with history_path.open("wb") as f:
                 pickle.dump(self.history, f)
         except Exception as e:
@@ -820,20 +812,6 @@ class DEHB(DEHBBase):
         self.logger.info(
             f"{remaining[0]}/{remaining[1]} {remaining[2]}",
         )
-
-    def _setup_state_logging(self, name):
-        # Create run directory
-        if name is None:
-            name = time.strftime("%x %X %Z", time.localtime(self.start))
-            name = name.replace("/", "-").replace(":", "-").replace(" ", "_")
-            name = "run_" + name
-
-        self.run_dir = self.output_path / name
-        try:
-            self.run_dir.mkdir(parents=True)
-        except FileExistsError:
-            self.logger.warning("Run directory already exists, " \
-                                "results could potentially be overwritten.")
 
     def _load_checkpoint(self, run_dir: str):
         # Check if path exists, otherwise give warning
@@ -920,11 +898,24 @@ class DEHB(DEHBBase):
             }
 
             self.tell(job_info, result, replay=True)
+        # Clean inactive brackets
+        self.clean_inactive_brackets()
+
         # Load and set random state
         rnd_state_path = run_dir / "random_state.pkl"
         with rnd_state_path.open("rb") as f:
             np.random.set_state(pickle.load(f))
+
+        cs_rnd_state_path = run_dir / "cs_random_state.pkl"
+        with cs_rnd_state_path.open("rb") as f:
+            self.cs.random.set_state(pickle.load(f))
         return True
+
+    def save(self):
+        self.logger.info("Saving state to disk...")
+        self._save_incumbent()
+        self._save_history()
+        self._save_state()
 
     def tell(self, job_info: dict, result: dict, replay: bool=False):
         """Feed a result back to the optimizer.
@@ -981,7 +972,7 @@ class DEHB(DEHBBase):
                 info=info,
             )
             if self.save_freq == "incumbent" and not replay:
-                self.save_state()
+                self._save_state()
         # book-keeping
         self._update_trackers(
             traj=self.inc_score, runtime=cost, history=(
@@ -990,11 +981,11 @@ class DEHB(DEHBBase):
         )
 
         if self.save_freq == "iteration" and not replay:
-            self.save_state()
+            self._save_state()
 
     @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None, single_node_with_gpus=False,
-            verbose=False, debug=False, save_intermediate=True, save_history=True, **kwargs):
+            verbose=False, debug=False, **kwargs):
         """Main interface to run optimization by DEHB.
 
         This function waits on workers and if a worker is free, asks for a configuration and a
@@ -1071,6 +1062,7 @@ class DEHB(DEHBBase):
                     self._verbosity_debug()
                     # Save random state after job submission
                     self.random_state = np.random.get_state()
+                    self.cs_random_state = self.cs.random.get_state()
             self._fetch_results_from_workers()
             self.clean_inactive_brackets()
         # end of while
@@ -1081,10 +1073,6 @@ class DEHB(DEHBBase):
             )
         while len(self.futures) > 0:
             self._fetch_results_from_workers()
-            if save_intermediate and self.inc_config is not None:
-                self._save_incumbent()
-            if save_history and self.history is not None:
-                self._save_history()
             time.sleep(0.05)  # waiting 50ms
 
         if verbose:
@@ -1100,7 +1088,7 @@ class DEHB(DEHBBase):
                     self.logger.info(f"{k}: {v}")
             else:
                 self.logger.info(f"{self.inc_config}")
-        self.save_state()
+        self.save()
         # reset waiting jobs of active bracket to allow for continuation
         self.active_brackets = []
         if len(self.active_brackets) > 0:

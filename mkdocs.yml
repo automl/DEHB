@@ -10,6 +10,7 @@ nav:
     - Optimizing RandomForest using DEHB: examples/01.1_Optimizing_RandomForest_using_DEHB.ipynb
     - Using the Ask & Tell interface: examples/01.2_Optimizing_RandomForest_using_Ask_Tell.ipynb
     - Using DEHB without ConfigSpace: examples/02_using_DEHB_without_ConfigSpace.ipynb
+    - Logging and Restarting: examples/04_restarting_an_optimization_run.ipynb
   - Code Reference:
     - DEHB: references/dehb.md
     - DE: references/de.md
