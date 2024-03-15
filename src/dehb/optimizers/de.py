@@ -15,7 +15,10 @@ class DEBase():
     '''
     def __init__(self, cs=None, f=None, dimensions=None, pop_size=None, max_age=None,
                  mutation_factor=None, crossover_prob=None, strategy=None,
-                 boundary_fix_type='random', config_repository=None, **kwargs):
+                 boundary_fix_type='random', config_repository=None, seed=None, rng=None, **kwargs):
+        # Rng, either uses the rng passed by user/DEHB or creates its own
+        self.rng = rng if rng is not None else np.random.default_rng(seed)
+
         # Benchmark related variables
         self.cs = cs
         self.f = f
@@ -70,14 +73,14 @@ class DEBase():
 
     def _shuffle_pop(self):
         pop_order = np.arange(len(self.population))
-        np.random.shuffle(pop_order)
+        self.rng.shuffle(pop_order)
         self.population = self.population[pop_order]
         self.fitness = self.fitness[pop_order]
         self.age = self.age[pop_order]
 
     def _sort_pop(self):
         pop_order = np.argsort(self.fitness)
-        np.random.shuffle(pop_order)
+        self.rng.shuffle(pop_order)
         self.population = self.population[pop_order]
         self.fitness = self.fitness[pop_order]
         self.age = self.age[pop_order]
@@ -107,7 +110,7 @@ class DEBase():
             population = [self.configspace_to_vector(individual) for individual in population]
         else:
             # if no ConfigSpace representation available, uniformly sample from [0, 1]
-            population = np.random.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
+            population = self.rng.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
 
         return np.array(population)
 
@@ -120,16 +123,16 @@ class DEBase():
         if isinstance(alt_pop, list) or isinstance(alt_pop, np.ndarray):
             idx = [indv is None for indv in alt_pop]
             if any(idx):
-                selection = np.random.choice(np.arange(len(self.population)), size, replace=False)
+                selection = self.rng.choice(np.arange(len(self.population)), size, replace=False)
                 return self.population[selection]
             else:
                 if len(alt_pop) < 3:
                     alt_pop = np.vstack((alt_pop, self.population))
-                selection = np.random.choice(np.arange(len(alt_pop)), size, replace=False)
+                selection = self.rng.choice(np.arange(len(alt_pop)), size, replace=False)
                 alt_pop = np.stack(alt_pop)
                 return alt_pop[selection]
         else:
-            selection = np.random.choice(np.arange(len(self.population)), size, replace=False)
+            selection = self.rng.choice(np.arange(len(self.population)), size, replace=False)
             return self.population[selection]
 
     def boundary_check(self, vector: np.ndarray) -> np.ndarray:
@@ -152,7 +155,7 @@ class DEBase():
         if len(violations) == 0:
             return vector
         if self.fix_type == 'random':
-            vector[violations] = np.random.uniform(low=0.0, high=1.0, size=len(violations))
+            vector[violations] = self.rng.uniform(low=0.0, high=1.0, size=len(violations))
         else:
             vector[violations] = np.clip(vector[violations], a_min=0, a_max=1)
         return vector
@@ -244,11 +247,11 @@ class DEBase():
 
 class DE(DEBase):
     def __init__(self, cs=None, f=None, dimensions=None, pop_size=20, max_age=np.inf,
-                 mutation_factor=None, crossover_prob=None, strategy='rand1_bin',
-                 encoding=False, dim_map=None, config_repository=None, **kwargs):
+                 mutation_factor=None, crossover_prob=None, strategy='rand1_bin', encoding=False,
+                 dim_map=None, seed=None, rng=None, config_repository=None, **kwargs):
         super().__init__(cs=cs, f=f, dimensions=dimensions, pop_size=pop_size, max_age=max_age,
                          mutation_factor=mutation_factor, crossover_prob=crossover_prob,
-                         strategy=strategy, config_repository=config_repository,
+                         strategy=strategy, seed=seed, rng=rng, config_repository=config_repository,
                          **kwargs)
         if self.strategy is not None:
             self.mutation_strategy = self.strategy.split('_')[0]
@@ -295,7 +298,7 @@ class DE(DEBase):
 
     def map_to_original(self, vector):
         dimensions = len(self.dim_map.keys())
-        new_vector = np.random.uniform(size=dimensions)
+        new_vector = self.rng.uniform(size=dimensions)
         for i in range(dimensions):
             new_vector[i] = np.max(np.array(vector)[self.dim_map[i]])
         return new_vector
@@ -464,18 +467,18 @@ class DE(DEBase):
     def crossover_bin(self, target, mutant):
         '''Performs the binomial crossover of DE
         '''
-        cross_points = np.random.rand(self.dimensions) < self.crossover_prob
+        cross_points = self.rng.random(self.dimensions) < self.crossover_prob
         if not np.any(cross_points):
-            cross_points[np.random.randint(0, self.dimensions)] = True
+            cross_points[self.rng.integers(0, self.dimensions)] = True
         offspring = np.where(cross_points, mutant, target)
         return offspring
 
     def crossover_exp(self, target, mutant):
         '''Performs the exponential crossover of DE
         '''
-        n = np.random.randint(0, self.dimensions)
+        n = self.rng.integers(0, self.dimensions)
         L = 0
-        while ((np.random.rand() < self.crossover_prob) and L < self.dimensions):
+        while ((self.rng.random() < self.crossover_prob) and L < self.dimensions):
             idx = (n+L) % self.dimensions
             target[idx] = mutant[idx]
             L = L + 1
@@ -552,7 +555,7 @@ class DE(DEBase):
 
         old_strategy = self.mutation_strategy
         self.mutation_strategy = 'rand1'
-        mutants = np.random.uniform(low=0.0, high=1.0, size=(size, self.dimensions))
+        mutants = self.rng.uniform(low=0.0, high=1.0, size=(size, self.dimensions))
         for i in range(size):
             mutant = self.mutation(current=None, best=None, alt_pop=population)
             mutants[i] = self.boundary_check(mutant)
@@ -587,7 +590,7 @@ class DE(DEBase):
 class AsyncDE(DE):
     def __init__(self, cs=None, f=None, dimensions=None, pop_size=None, max_age=np.inf,
                  mutation_factor=None, crossover_prob=None, strategy='rand1_bin',
-                 async_strategy='immediate', config_repository=None, **kwargs):
+                 async_strategy='immediate', seed=None, rng=None, config_repository=None, **kwargs):
         '''Extends DE to be Asynchronous with variations
 
         Parameters
@@ -606,7 +609,7 @@ class AsyncDE(DE):
         '''
         super().__init__(cs=cs, f=f, dimensions=dimensions, pop_size=pop_size, max_age=max_age,
                          mutation_factor=mutation_factor, crossover_prob=crossover_prob,
-                         strategy=strategy, config_repository=config_repository,
+                         strategy=strategy, seed=seed, rng=rng, config_repository=config_repository,
                          **kwargs)
         if self.strategy is not None:
             self.mutation_strategy = self.strategy.split('_')[0]
@@ -638,7 +641,7 @@ class AsyncDE(DE):
     def _init_mutant_population(self, pop_size, population, target=None, best=None):
         '''Generates pop_size mutants from the passed population
         '''
-        mutants = np.random.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
+        mutants = self.rng.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
         for i in range(pop_size):
             mutants[i] = self.mutation(current=target, best=best, alt_pop=population)
         return mutants
@@ -675,7 +678,7 @@ class AsyncDE(DE):
             new_pop = self.init_population(pop_size=filler)  # chosen in a uniformly random manner
             population = np.concatenate((population, new_pop))
 
-        selection = np.random.choice(np.arange(len(population)), size, replace=False)
+        selection = self.rng.choice(np.arange(len(population)), size, replace=False)
         return population[selection]
 
     def eval_pop(self, population=None, population_ids=None, fidelity=None, **kwargs):
@@ -754,9 +757,9 @@ class AsyncDE(DE):
         if population is None:
             population = self.population
 
-        mutants = np.random.uniform(low=0.0, high=1.0, size=(size, self.dimensions))
+        mutants = self.rng.uniform(low=0.0, high=1.0, size=(size, self.dimensions))
         for i in range(size):
-            j = np.random.choice(np.arange(len(population)))
+            j = self.rng.choice(np.arange(len(population)))
             mutant = self.mutation(current=population[j], best=self.inc_config, alt_pop=population)
             mutants[i] = self.boundary_check(mutant)
 
@@ -812,7 +815,7 @@ class AsyncDE(DE):
             for count in range(self.pop_size):
                 # choosing target individual
                 if self.async_strategy == "random":
-                    i = np.random.choice(np.arange(self.pop_size))
+                    i = self.rng.choice(np.arange(self.pop_size))
                 else:  # async_strategy == 'worst'
                     i = np.argsort(-self.fitness)[0]
                 target = self.population[i]

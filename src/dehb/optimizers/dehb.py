@@ -2,7 +2,6 @@ import json
 import os
 import pickle
 import sys
-import threading
 import time
 from copy import deepcopy
 from pathlib import Path
@@ -27,8 +26,11 @@ _logger_props = {
 class DEHBBase:
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=None,
                  crossover_prob=None, strategy=None, min_fidelity=None,
-                 max_fidelity=None, eta=None, min_clip=None, max_clip=None,
+                 max_fidelity=None, eta=None, min_clip=None, max_clip=None, seed=None,
                  boundary_fix_type='random', max_age=np.inf, **kwargs):
+        # Rng
+        self.rng = np.random.default_rng(seed)
+
         # Miscellaneous
         self._setup_logger(kwargs)
         self.config_repository = ConfigRepository()
@@ -59,7 +61,8 @@ class DEHBBase:
             "max_age": self.max_age,
             "cs": self.cs,
             "dimensions": self.dimensions,
-            "f": f
+            "rng": self.rng,
+            "f": f,
         }
 
         # Hyperband related variables
@@ -175,14 +178,14 @@ class DEHBBase:
 class DEHB(DEHBBase):
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=0.5,
                  crossover_prob=0.5, strategy="rand1_bin", min_fidelity=None,
-                 max_fidelity=None, eta=3, min_clip=None, max_clip=None, configspace=True,
-                 boundary_fix_type="random", max_age=np.inf, n_workers=None, client=None,
-                 async_strategy="immediate", save_freq="incumbent", resume=False,
+                 max_fidelity=None, eta=3, min_clip=None, max_clip=None, seed=None,
+                 configspace=True, boundary_fix_type="random", max_age=np.inf, n_workers=None,
+                 client=None, async_strategy="immediate", save_freq="incumbent", resume=False,
                  **kwargs):
         super().__init__(cs=cs, f=f, dimensions=dimensions, mutation_factor=mutation_factor,
                          crossover_prob=crossover_prob, strategy=strategy, min_fidelity=min_fidelity,
-                         max_fidelity=max_fidelity, eta=eta, min_clip=min_clip, max_clip=max_clip,
-                         configspace=configspace, boundary_fix_type=boundary_fix_type,
+                         max_fidelity=max_fidelity, eta=eta, min_clip=min_clip, max_clip=max_clip, 
+                         seed=seed, configspace=configspace, boundary_fix_type=boundary_fix_type,
                          max_age=max_age, **kwargs)
         self.de_params.update({"async_strategy": async_strategy})
         self.iteration_counter = -1
@@ -297,7 +300,7 @@ class DEHB(DEHBBase):
         assert start_id in available_gpus
         available_gpus = deepcopy(available_gpus)
         available_gpus.remove(start_id)
-        np.random.shuffle(available_gpus)
+        self.rng.shuffle(available_gpus)
         final_variable = [str(start_id)] + [str(_id) for _id in available_gpus]
         final_variable = ",".join(final_variable)
         return final_variable
@@ -359,7 +362,7 @@ class DEHB(DEHBBase):
             population = self.cs.sample_configuration(size=pop_size)
             population = [self.configspace_to_vector(individual) for individual in population]
         else:
-            population = np.random.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
+            population = self.rng.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
         return population
 
     def clean_inactive_brackets(self):
@@ -559,17 +562,24 @@ class DEHB(DEHBBase):
         config_id = self.config_repository.announce_config(config, fidelity)
         return config, config_id, parent_id
 
-    def _get_next_job(self):
-        """Loads a configuration and fidelity to be evaluated next.
+    def _get_next_bracket(self, only_id=False):
+        """Used to retrieve what bracket the bracket for the next job.
+
+        Optionally, a new bracket is started, if there are no more pending jobs or
+        when all active brackets are waiting.
+
+        Args:
+            only_id (bool): Only returns the id of the next bracket
 
         Returns:
-            dict: Dicitonary containing all necessary information of the next job.
+            SHBracketmanager or int: bracket or bracket ID of next job
         """
         bracket = None
+        start_new_bracket = False
         if len(self.active_brackets) == 0 or \
                 np.all([bracket.is_bracket_done() for bracket in self.active_brackets]):
             # start new bracket when no pending jobs from existing brackets or empty bracket list
-            bracket = self._start_new_bracket()
+            start_new_bracket = True
         else:
             for _bracket in self.active_brackets:
                 # check if _bracket is not waiting for previous rung results of same bracket
@@ -581,7 +591,20 @@ class DEHB(DEHBBase):
                     break
             if bracket is None:
                 # start new bracket when existing list has all waiting brackets
-                bracket = self._start_new_bracket()
+                start_new_bracket = True
+
+        if only_id:
+            return self.iteration_counter + 1 if start_new_bracket else bracket.bracket_id
+
+        return self._start_new_bracket() if start_new_bracket else bracket
+
+    def _get_next_job(self):
+        """Loads a configuration and fidelity to be evaluated next.
+
+        Returns:
+            dict: Dicitonary containing all necessary information of the next job.
+        """
+        bracket = self._get_next_bracket()
         # fidelity that the SH bracket allots
         fidelity = bracket.get_next_job_fidelity()
         config, config_id, parent_id = self._acquire_config(bracket, fidelity)
@@ -621,12 +644,15 @@ class DEHB(DEHBBase):
         Returns:
             dict or list of dict: Job info(s) of next configuration to evaluate.
         """
-        if n_configs == 1:
-            return self._get_next_job()
-
         jobs = []
-        for _ in range(n_configs):
-            jobs.append(self._get_next_job())
+        if n_configs == 1:
+            jobs = self._get_next_job()
+        else:
+            for _ in range(n_configs):
+                jobs.append(self._get_next_job())
+        # Save random state after ask
+        self.random_state = self.rng.bit_generator.state
+        self.cs_random_state = self.cs.random.get_state()
         return jobs
 
     def _get_gpu_id_with_low_load(self):
@@ -634,7 +660,7 @@ class DEHB(DEHBBase):
         for k, v in self.gpu_usage.items():
             if v == min(self.gpu_usage.values()):
                 candidates.append(k)
-        device_id = np.random.choice(candidates)
+        device_id = self.rng.choice(candidates)
         # creating string for setting environment variable CUDA_VISIBLE_DEVICES
         gpu_ids = self._create_cuda_visible_devices(
             self.available_gpus, device_id,
@@ -705,6 +731,7 @@ class DEHB(DEHBBase):
         # DE parameters
         serializable_de_params = self.de_params.copy()
         serializable_de_params.pop("cs")
+        serializable_de_params.pop("rng")
         serializable_de_params.pop("f")
         serializable_de_params["output_path"] = str(serializable_de_params["output_path"])
         state["DE_params"] = serializable_de_params
@@ -904,7 +931,7 @@ class DEHB(DEHBBase):
         # Load and set random state
         rnd_state_path = run_dir / "random_state.pkl"
         with rnd_state_path.open("rb") as f:
-            np.random.set_state(pickle.load(f))
+            self.rng.bit_generator.state = pickle.load(f)
 
         cs_rnd_state_path = run_dir / "cs_random_state.pkl"
         with cs_rnd_state_path.open("rb") as f:
@@ -1031,8 +1058,8 @@ class DEHB(DEHBBase):
             if self._is_run_budget_exhausted(fevals, brackets, total_cost):
                 break
             if self.is_worker_available():
-                job_info = self.ask()
-                if brackets is not None and job_info["bracket_id"] >= brackets:
+                next_bracket_id = self._get_next_bracket(only_id=True)
+                if brackets is not None and next_bracket_id >= brackets:
                     # ignore submission and only collect results
                     # when brackets are chosen as run budget, an extra bracket is created
                     # since iteration_counter is incremented in ask() and then checked
@@ -1046,7 +1073,9 @@ class DEHB(DEHBBase):
                         self.logger.debug("{}/{} worker(s) available.".format(
                             self._get_worker_count() - len(self.futures), self._get_worker_count(),
                         ))
-                    # submits job_info to a worker for execution
+                    # Ask for new job_info
+                    job_info = self.ask()
+                    # Submit job_info to a worker for execution
                     self.submit_job(job_info, **kwargs)
                     if verbose:
                         fidelity = job_info["fidelity"]
@@ -1060,9 +1089,6 @@ class DEHB(DEHBBase):
                             f"Best score seen/Incumbent score: {self.inc_score}",
                         )
                     self._verbosity_debug()
-                    # Save random state after job submission
-                    self.random_state = np.random.get_state()
-                    self.cs_random_state = self.cs.random.get_state()
             self._fetch_results_from_workers()
             self.clean_inactive_brackets()
         # end of while
