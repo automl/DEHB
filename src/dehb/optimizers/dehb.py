@@ -240,7 +240,8 @@ class DEHB(DEHBBase):
 
         # Save initial random state
         self.random_state = np.random.get_state()
-        self.cs_random_state = self.cs.random.get_state()
+        if self.use_configspace:
+            self.cs_random_state = self.cs.random.get_state()
 
     def __getstate__(self):
         """Allows the object to picklable while having Dask client as a class attribute."""
@@ -652,7 +653,8 @@ class DEHB(DEHBBase):
                 jobs.append(self._get_next_job())
         # Save random state after ask
         self.random_state = self.rng.bit_generator.state
-        self.cs_random_state = self.cs.random.get_state()
+        if self.use_configspace:
+            self.cs_random_state = self.cs.random.get_state()
         return jobs
 
     def _get_gpu_id_with_low_load(self):
@@ -762,9 +764,10 @@ class DEHB(DEHBBase):
         with rnd_state_path.open("wb") as f:
             pickle.dump(self.random_state, f)
 
-        cs_rnd_path = self.output_path / "cs_random_state.pkl"
-        with cs_rnd_path.open("wb") as f:
-            pickle.dump(self.cs_random_state, f)
+        if self.use_configspace:
+            cs_rnd_path = self.output_path / "cs_random_state.pkl"
+            with cs_rnd_path.open("wb") as f:
+                pickle.dump(self.cs_random_state, f)
 
 
     def _is_run_budget_exhausted(self, fevals=None, brackets=None, total_cost=None):
@@ -933,9 +936,10 @@ class DEHB(DEHBBase):
         with rnd_state_path.open("rb") as f:
             self.rng.bit_generator.state = pickle.load(f)
 
-        cs_rnd_state_path = run_dir / "cs_random_state.pkl"
-        with cs_rnd_state_path.open("rb") as f:
-            self.cs.random.set_state(pickle.load(f))
+        if self.use_configspace:
+            cs_rnd_state_path = run_dir / "cs_random_state.pkl"
+            with cs_rnd_state_path.open("rb") as f:
+                self.cs.random.set_state(pickle.load(f))
         return True
 
     def save(self):
