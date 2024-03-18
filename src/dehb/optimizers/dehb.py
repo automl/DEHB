@@ -196,6 +196,9 @@ class DEHB(DEHBBase):
         self.runtime = []
         self.history = []
         self.start = None
+        if save_freq not in ["incumbent", "step", "end"] and save_freq is not None:
+            self.logger.warning(f"Save frequency {save_freq} unknown. Resorting to using 'end'.")
+            save_freq = "end"
         self.save_freq = "end" if save_freq is None else save_freq
 
         # Dask variables
@@ -724,11 +727,7 @@ class DEHB(DEHBBase):
 
         return fevals, brackets
 
-    def _save_state(self):
-        # Save ConfigRepository
-        config_repo_path = self.output_path / "config_repository.json"
-        self.config_repository.save_state(config_repo_path)
-
+    def _get_state(self):
         state = {}
         # DE parameters
         serializable_de_params = self.de_params.copy()
@@ -747,13 +746,20 @@ class DEHB(DEHBBase):
         state["HB_params"] = hb_dict
         # Save DEHB interals
         dehb_internals = {}
-        dehb_internals["iteration_counter"] = self.iteration_counter
         if self.inc_config is not None:
             dehb_internals["inc_score"] = self.inc_score
             dehb_internals["inc_config"] = self.inc_config.tolist()
             dehb_internals["inc_info"] = self.inc_info
         state["internals"] = dehb_internals
+        return state
 
+    def _save_state(self):
+        # Save ConfigRepository
+        config_repo_path = self.output_path / "config_repository.json"
+        self.config_repository.save_state(config_repo_path)
+
+        # Get state
+        state = self._get_state()
         # Write state to disk
         state_path = self.output_path / "dehb_state.json"
         with state_path.open("w") as f:
@@ -782,10 +788,11 @@ class DEHB(DEHBBase):
             if len(self.traj) >= fevals:
                 return True
         elif brackets is not None:
-            if self.iteration_counter >= brackets:
+            future_iteration_counter = self._get_next_bracket(only_id=True)
+            if future_iteration_counter >= brackets:
                 for bracket in self.active_brackets:
                     # waits for all brackets < iteration_counter to finish by collecting results
-                    if bracket.bracket_id < self.iteration_counter and \
+                    if bracket.bracket_id < future_iteration_counter and \
                             not bracket.is_bracket_done():
                         return False
                 return True
@@ -1011,7 +1018,7 @@ class DEHB(DEHBBase):
             ),
         )
 
-        if self.save_freq == "iteration" and not replay:
+        if self.save_freq == "step" and not replay:
             self._save_state()
 
     @logger.catch
