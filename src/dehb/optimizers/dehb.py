@@ -242,7 +242,7 @@ class DEHB(DEHBBase):
                                 "results could potentially be overwritten.")
 
         # Save initial random state
-        self.random_state = np.random.get_state()
+        self.random_state = self.rng.bit_generator.state
         if self.use_configspace:
             self.cs_random_state = self.cs.random.get_state()
 
@@ -1010,7 +1010,7 @@ class DEHB(DEHBBase):
                 info=info,
             )
             if self.save_freq == "incumbent" and not replay:
-                self._save_state()
+                self.save()
         # book-keeping
         self._update_trackers(
             traj=self.inc_score, runtime=cost, history=(
@@ -1019,7 +1019,7 @@ class DEHB(DEHBBase):
         )
 
         if self.save_freq == "step" and not replay:
-            self._save_state()
+            self.save()
 
     @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None, single_node_with_gpus=False,
