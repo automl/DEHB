@@ -1070,7 +1070,7 @@ class DEHB(DEHBBase):
             )
         fevals, brackets = self._adjust_budgets(fevals, brackets)
         # Set alarm for specified runtime budget
-        if total_cost > 0:
+        if total_cost is not None:
             signal.alarm(total_cost)
         try:
             while True:
