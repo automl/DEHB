@@ -1,6 +1,7 @@
 import json
 import os
 import pickle
+import signal
 import sys
 import time
 from copy import deepcopy
@@ -246,6 +247,9 @@ class DEHB(DEHBBase):
         if self.use_configspace:
             self.cs_random_state = self.cs.random.get_state()
 
+        # Register timeout handler for SIGALRM signal
+        signal.signal(signal.SIGALRM, self._timeout_handler)
+
     def __getstate__(self):
         """Allows the object to picklable while having Dask client as a class attribute."""
         d = dict(self.__dict__)
@@ -329,6 +333,10 @@ class DEHB(DEHBBase):
         for _id in self.available_gpus:
             self.gpu_usage[_id] = 0
 
+    def _timeout_handler(self, signum: int, frame) -> None:
+        self.logger.warning("Runtime budget exhausted. Stopping optimization now.")
+        raise TimeoutError("Runtime budget exhausted.")
+
     def vector_to_configspace(self, config):
         assert hasattr(self, "de")
         assert len(self.fidelities) > 0
@@ -369,7 +377,7 @@ class DEHB(DEHBBase):
             population = self.rng.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
         return population
 
-    def clean_inactive_brackets(self):
+    def _clean_inactive_brackets(self):
         """Removes brackets from the active list if it is done as communicated by Bracket Manager."""
         if len(self.active_brackets) == 0:
             return
@@ -776,14 +784,8 @@ class DEHB(DEHBBase):
                 pickle.dump(self.cs_random_state, f)
 
 
-    def _is_run_budget_exhausted(self, fevals=None, brackets=None, total_cost=None):
+    def _is_run_budget_exhausted(self, fevals=None, brackets=None):
         """Checks if the DEHB run should be terminated or continued."""
-        delimiters = [fevals, brackets, total_cost]
-        delim_sum = sum(x is not None for x in delimiters)
-        if delim_sum == 0:
-            raise ValueError(
-                "Need one of 'fevals', 'brackets' or 'total_cost' as budget for DEHB to run."
-            )
         if fevals is not None:
             if len(self.traj) >= fevals:
                 return True
@@ -795,11 +797,6 @@ class DEHB(DEHBBase):
                     if bracket.bracket_id < future_iteration_counter and \
                             not bracket.is_bracket_done():
                         return False
-                return True
-        else:
-            if time.time() - self.start >= total_cost:
-                return True
-            if len(self.runtime) > 0 and self.runtime[-1] - self.start >= total_cost:
                 return True
         return False
 
@@ -936,7 +933,7 @@ class DEHB(DEHBBase):
 
             self.tell(job_info, result, replay=True)
         # Clean inactive brackets
-        self.clean_inactive_brackets()
+        self._clean_inactive_brackets()
 
         # Load and set random state
         rnd_state_path = run_dir / "random_state.pkl"
@@ -1057,7 +1054,6 @@ class DEHB(DEHBBase):
             self.distribute_gpus()
 
         self.start = self.start = time.time()
-        fevals, brackets = self._adjust_budgets(fevals, brackets)
         if verbose:
             print("\nLogging at {} for optimization starting at {}\n".format(
                 Path.cwd() / self.log_filename,
@@ -1065,52 +1061,63 @@ class DEHB(DEHBBase):
             ))
         if debug:
             logger.configure(handlers=[{"sink": sys.stdout}])
-        while True:
-            if self._is_run_budget_exhausted(fevals, brackets, total_cost):
-                break
-            if self.is_worker_available():
-                next_bracket_id = self._get_next_bracket(only_id=True)
-                if brackets is not None and next_bracket_id >= brackets:
-                    # ignore submission and only collect results
-                    # when brackets are chosen as run budget, an extra bracket is created
-                    # since iteration_counter is incremented in ask() and then checked
-                    # in _is_run_budget_exhausted(), therefore, need to skip suggestions
-                    # coming from the extra allocated bracket
-                    # _is_run_budget_exhausted() will not return True until all the lower brackets
-                    # have finished computation and returned its results
-                    pass
-                else:
-                    if self.n_workers > 1 or isinstance(self.client, Client):
-                        self.logger.debug("{}/{} worker(s) available.".format(
-                            self._get_worker_count() - len(self.futures), self._get_worker_count(),
-                        ))
-                    # Ask for new job_info
-                    job_info = self.ask()
-                    # Submit job_info to a worker for execution
-                    self.submit_job(job_info, **kwargs)
-                    if verbose:
-                        fidelity = job_info["fidelity"]
-                        config_id = job_info["config_id"]
-                        self._verbosity_runtime(fevals, brackets, total_cost)
-                        self.logger.info(
-                            "Evaluating configuration {} with fidelity {} under "
-                            "bracket ID {}".format(config_id, fidelity, job_info["bracket_id"]),
-                        )
-                        self.logger.info(
-                            f"Best score seen/Incumbent score: {self.inc_score}",
-                        )
-                    self._verbosity_debug()
-            self._fetch_results_from_workers()
-            self.clean_inactive_brackets()
-        # end of while
 
-        if verbose and len(self.futures) > 0:
-            self.logger.info(
-                "DEHB optimisation over! Waiting to collect results from workers running..."
+        delimiters = [fevals, brackets, total_cost]
+        delim_sum = sum(x is not None for x in delimiters)
+        if delim_sum == 0:
+            raise ValueError(
+                "Need one of 'fevals', 'brackets' or 'total_cost' as budget for DEHB to run."
             )
-        while len(self.futures) > 0:
+        fevals, brackets = self._adjust_budgets(fevals, brackets)
+        # Set alarm for specified runtime budget
+        if total_cost > 0:
+            signal.alarm(total_cost)
+        try:
+            while True:
+                if self._is_run_budget_exhausted(fevals, brackets):
+                    break
+                if self.is_worker_available():
+                    next_bracket_id = self._get_next_bracket(only_id=True)
+                    if brackets is not None and next_bracket_id >= brackets:
+                        # ignore submission and only collect results
+                        # when brackets are chosen as run budget, an extra bracket is created
+                        # since iteration_counter is incremented in ask() and then checked
+                        # in _is_run_budget_exhausted(), therefore, need to skip suggestions
+                        # coming from the extra allocated bracket
+                        # _is_run_budget_exhausted() will not return True until all the lower brackets
+                        # have finished computation and returned its results
+                        pass
+                    else:
+                        if self.n_workers > 1 or isinstance(self.client, Client):
+                            self.logger.debug("{}/{} worker(s) available.".format(
+                                self._get_worker_count() - len(self.futures), self._get_worker_count(),
+                            ))
+                        # Ask for new job_info
+                        job_info = self.ask()
+                        # Submit job_info to a worker for execution
+                        self.submit_job(job_info, **kwargs)
+                        if verbose:
+                            fidelity = job_info["fidelity"]
+                            config_id = job_info["config_id"]
+                            self._verbosity_runtime(fevals, brackets, total_cost)
+                            self.logger.info(
+                                "Evaluating configuration {} with fidelity {} under "
+                                "bracket ID {}".format(config_id, fidelity, job_info["bracket_id"]),
+                            )
+                            self.logger.info(
+                                f"Best score seen/Incumbent score: {self.inc_score}",
+                            )
+                        self._verbosity_debug()
+                self._fetch_results_from_workers()
+                self._clean_inactive_brackets()
+            # end of while
+        except TimeoutError:
+            # Try to collect results one last time
             self._fetch_results_from_workers()
-            time.sleep(0.05)  # waiting 50ms
+            self._clean_inactive_brackets()
+            # Stop dask workes from executing
+            if self.n_workers > 1 or isinstance(self.client, Client):
+                self.client.cancel(self.futures, force=True)
 
         if verbose:
             time_taken = time.time() - self.start
