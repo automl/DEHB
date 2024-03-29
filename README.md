@@ -6,15 +6,43 @@
 [![PyPI](https://img.shields.io/pypi/v/dehb)](https://pypi.org/project/dehb/)
 [![Static Badge](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20-blue)](https://pypi.org/project/dehb/)
 [![arXiv](https://img.shields.io/badge/arXiv-2105.09821-b31b1b.svg)](https://arxiv.org/abs/2105.09821)
-### Installation
-```bash
-# from pypi
-pip install dehb
 
-# to run examples, install from github
-git clone https://github.com/automl/DEHB.git
-pip install -e DEHB  # -e stands for editable, lets you modify the code and rerun things
+Welcome to DEHB, an algorithm for Hyperparameter Optimization (HPO). DEHB uses Differential Evolution (DE) under-the-hood as an Evolutionary Algorithm to power the black-box optimization that HPO problems pose.
+
+`dehb` is a python package implementing the [DEHB](https://arxiv.org/abs/2105.09821) algorithm. It offers an intuitive interface to optimize user-defined problems using DEHB.
+
+### Getting Started
+#### Installation
+```bash
+pip install dehb
 ```
+#### Using DEHB
+DEHB allows users to either utilize the Ask & Tell interface for manual task distribution or leverage the built-in functionality (`run`) to set up a Dask cluster autonomously. The following snippet offers a small look in to how to use DEHB. For further information, please refer to our [getting started examples](https://automl.github.io/DEHB/latest/getting_started/single_worker/) in our documentation.
+```python
+optimizer = DEHB(
+    f=your_target_function,
+    cs=config_space, 
+    dimensions=dimensions, 
+    min_fidelity=min_fidelity, 
+    max_fidelity=max_fidelity)
+
+##### Using Ask & Tell
+# Ask for next configuration to run
+job_info = optimizer.ask()
+
+# Run the configuration for the given fidelity. Here you can freely distribute the computation to any worker you'd like.
+result = your_target_function(config=job_info["config"], fidelity=job_info["fidelity"])
+
+# When you received the result, feed them back to the optimizer
+optimizer.tell(job_info, result)
+
+##### Using run()
+# Run optimization for 1 bracket. Output files will be saved to ./logs
+traj, runtime, history = optimizer.run(brackets=1, verbose=True)
+```
+
+#### Running DEHB in a parallel setting
+For a more in-depth look in how-to run DEHB in a parallel setting, please have a look at our [documentation](https://automl.github.io/DEHB/latest/getting_started/parallel/).
 
 ### Tutorials/Example notebooks
 
@@ -32,99 +60,11 @@ python examples/03_pytorch_mnist_hpo.py \
     --runtime 60 \
     --verbose
 ```
+### Documentation
+For more details and features, please have a look at our [documentation](https://automl.github.io/DEHB/latest/).
 
-#### Ask & Tell interface
-DEHB allows users to either utilize the Ask & Tell interface for manual task distribution or leverage the built-in functionality (`run`) to set up a Dask cluster autonomously.
-The Ask & Tell functionality can be utilized as follows:
-```python
-optimizer = DEHB(
-    f=your_target_function, # Here we do not need to necessarily specify the target function, but it can still be useful to call 'run' later.
-    cs=config_space, 
-    dimensions=dimensions, 
-    min_fidelity=min_fidelity, 
-    max_fidelity=max_fidelity)
-
-# Ask for next configuration to run
-job_info = optimizer.ask()
-
-# Run the configuration for the given fidelity. Here you can freely distribute the computation to any worker you'd like.
-result = your_target_function(config=job_info["config"], fidelity=job_info["fidelity"])
-
-# When you received the result, feed them back to the optimizer
-optimizer.tell(job_info, result)
-```
-
-### Running DEHB in a parallel setting
-
-DEHB has been designed to interface a [Dask client](https://distributed.dask.org/en/latest/api.html#distributed.Client).
-DEHB can either create a Dask client during instantiation and close/kill the client during garbage collection. 
-Or a client can be passed as an argument during instantiation.
-
-* Setting `n_workers` during instantiation \
-    If set to `1` (default) then the entire process is a sequential run without invoking Dask. \
-    If set to `>1` then a Dask Client is initialized with as many workers as `n_workers`. \
-    This parameter is ignored if `client` is not None.
-* Setting `client` during instantiation \
-    When `None` (default), a Dask client is created using `n_workers` specified. \
-    Else, any custom-configured Dask Client can be created and passed as the `client` argument to DEHB.
-  
-#### Using GPUs in a parallel run
-
-Certain target function evaluations (especially for Deep Learning) require computations to be 
-carried out on GPUs. The GPU devices are often ordered by device ID and if not configured, all 
-spawned worker processes access these devices in the same order and can either run out of memory or
-not exhibit parallelism.
-
-For `n_workers>1` and when running on a single node (or local), the `single_node_with_gpus` can be 
-passed to the `run()` call to DEHB. Setting it to `False` (default) has no effect on the default setup 
-of the machine. Setting it to `True` will reorder the GPU device IDs dynamically by setting the environment 
-variable `CUDA_VISIBLE_DEVICES` for each worker process executing a target function evaluation. The re-ordering 
-is done in a manner that the first priority device is the one with the least number of active jobs assigned 
-to it by that DEHB run.
-
-To run the PyTorch MNIST example on a single node using 2 workers:  
-```bash
-python examples/03_pytorch_mnist_hpo.py \
-    --min_fidelity 1 \
-    --max_fidelity 3 \
-    --runtime 60 \
-    --n_workers 2 \
-    --single_node_with_gpus \
-    --verbose
-```
-
-#### Multi-node runs
-
-Multi-node parallelism is often contingent on the cluster setup to be deployed on. Dask provides useful 
-frameworks to interface various cluster designs. As long as the `client` passed to DEHB during 
-instantiation is of type `dask.distributed.Client`, DEHB can interact with this client and 
-distribute its optimization process in a parallel manner. 
-
-For instance, `Dask-CLI` can be used to create a `dask-scheduler` which can dump its connection 
-details to a file on a cluster node accessible to all processes. Multiple `dask-worker` can then be
-created to interface the `dask-scheduler` by connecting to the details read from the file dumped. Each
-dask-worker can be triggered on any remote machine. Each worker can be configured as required, 
-including mapping to specific GPU devices. 
-
-Some helper scripts can be found [here](utils/), that can be used as a reference to run DEHB in a multi-node 
-manner on clusters managed by SLURM. (*not expected to work off-the-shelf*)
-
-To run the PyTorch MNIST example on a multi-node setup using 4 workers:
-```bash
-bash utils/run_dask_setup.sh \
-    -f dask_dump/scheduler.json \  # This is how the workers will be discovered by DEHB
-    -e env_name \
-    -n 4
-
-# Make sure to sleep to allow the workers to setup properly
-sleep 5
-python examples/03_pytorch_mnist_hpo.py \
-    --min_fidelity 1 \
-    --max_fidelity 3 \
-    --runtime 60 \
-    --scheduler_file dask_dump/scheduler.json \
-    --verbose
-```
+### Contributing
+Any contribution is greaty appreciated! Please take the time to check out our [contributing guidelines](./CONTRIBUTING.md)
 
 ### DEHB Hyperparameters
 
