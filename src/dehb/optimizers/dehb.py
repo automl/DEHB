@@ -359,6 +359,7 @@ class DEHB(DEHBBase):
         self.history = []
         self._ask_counter = 0
         self._tell_counter = 0
+        self.config_repository.reset()
         self._get_pop_sizes()
         self._init_subpop()
         self.available_gpus = None
