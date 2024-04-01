@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2024-04-01
+
+### Added
+- Improved logging and state saving
+- Checkpointing and restarting an optimization run (#31)
+- Clear communication, that warmstarting via tell is currently not supported
+- Add class specific random number generators for better reproducibility
+
+### Changes
+- Interface changes for run, removing unnecessary logging frequency parameters, since they have been moved to the constructor
+
 ## [0.1.0] - 2024-02-15
 
 ### Added
@@ -66,7 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial project release and push to PyPI
 
-[unreleased]: https://github.com/automl/DEHB/compare/v0.1.0...master
+[unreleased]: https://github.com/automl/DEHB/compare/v0.1.1...master
+[0.1.1]: https://github.com/automl/DEHB/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/automl/DEHB/compare/v0.0.7...v0.1.0
 [0.0.7]: https://github.com/automl/DEHB/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/automl/DEHB/releases/tag/v0.0.6

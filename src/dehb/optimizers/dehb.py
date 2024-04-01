@@ -1,19 +1,19 @@
-import os
-import sys
 import json
-import time
+import os
 import pickle
-import numpy as np
-import ConfigSpace
-from typing import List
+import sys
+import time
 from copy import deepcopy
-from loguru import logger
+from pathlib import Path
+from typing import List
+
+import ConfigSpace
+import numpy as np
 from distributed import Client
+from loguru import logger
 
-from .de import DE, AsyncDE
-from ..utils import SHBracketManager
-from ..utils import ConfigRepository
-
+from ..utils import ConfigRepository, SHBracketManager
+from .de import AsyncDE
 
 logger.configure(handlers=[{"sink": sys.stdout, "level": "INFO"}])
 _logger_props = {
@@ -26,16 +26,19 @@ _logger_props = {
 class DEHBBase:
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=None,
                  crossover_prob=None, strategy=None, min_fidelity=None,
-                 max_fidelity=None, eta=None, min_clip=None, max_clip=None,
+                 max_fidelity=None, eta=None, min_clip=None, max_clip=None, seed=None,
                  boundary_fix_type='random', max_age=np.inf, **kwargs):
+        # Rng
+        self.rng = np.random.default_rng(seed)
+
         # Miscellaneous
         self._setup_logger(kwargs)
         self.config_repository = ConfigRepository()
 
         # Benchmark related variables
         self.cs = cs
-        self.configspace = True if isinstance(self.cs, ConfigSpace.ConfigurationSpace) else False
-        if self.configspace:
+        self.use_configspace = True if isinstance(self.cs, ConfigSpace.ConfigurationSpace) else False
+        if self.use_configspace:
             self.dimensions = len(self.cs.get_hyperparameters())
         elif dimensions is None or not isinstance(dimensions, (int, np.integer)):
             assert "Need to specify `dimensions` as an int when `cs` is not available/specified!"
@@ -53,12 +56,13 @@ class DEHBBase:
             "mutation_factor": self.mutation_factor,
             "crossover_prob": self.crossover_prob,
             "strategy": self.strategy,
-            "configspace": self.configspace,
+            "configspace": self.use_configspace,
             "boundary_fix_type": self.fix_type,
             "max_age": self.max_age,
             "cs": self.cs,
             "dimensions": self.dimensions,
-            "f": f
+            "rng": self.rng,
+            "f": f,
         }
 
         # Hyperband related variables
@@ -77,15 +81,7 @@ class DEHBBase:
         self.max_clip = max_clip
 
         # Precomputing fidelity spacing and number of configurations for HB iterations
-        self.max_SH_iter = None
-        self.fidelities = None
-        if self.min_fidelity is not None and \
-           self.max_fidelity is not None and \
-           self.eta is not None:
-            self.max_SH_iter = -int(np.log(self.min_fidelity / self.max_fidelity) / np.log(self.eta)) + 1
-            self.fidelities = self.max_fidelity * np.power(self.eta,
-                                                     -np.linspace(start=self.max_SH_iter - 1,
-                                                                  stop=0, num=self.max_SH_iter))
+        self._pre_compute_fidelity_spacing()
 
         # Updating DE parameter list
         self.de_params.update({"output_path": self.output_path})
@@ -99,16 +95,27 @@ class DEHBBase:
 
     def _setup_logger(self, kwargs):
         """Sets up the logger."""
-        self.output_path = kwargs['output_path'] if 'output_path' in kwargs else './'
-        os.makedirs(self.output_path, exist_ok=True)
+        self.output_path = Path(kwargs["output_path"]) if "output_path" in kwargs else Path("./")
+        self.output_path.mkdir(parents=True, exist_ok=True)
         self.logger = logger
         log_suffix = time.strftime("%x %X %Z")
-        log_suffix = log_suffix.replace("/", '-').replace(":", '-').replace(" ", '_')
+        log_suffix = log_suffix.replace("/", "-").replace(":", "-").replace(" ", "_")
         self.logger.add(
-            "{}/dehb_{}.log".format(self.output_path, log_suffix),
-            **_logger_props
+            f"{self.output_path}/dehb_{log_suffix}.log",
+            **_logger_props,
         )
-        self.log_filename = "{}/dehb_{}.log".format(self.output_path, log_suffix)
+        self.log_filename = f"{self.output_path}/dehb_{log_suffix}.log"
+
+    def _pre_compute_fidelity_spacing(self):
+        self.max_SH_iter = None
+        self.fidelities = None
+        if self.min_fidelity is not None and \
+           self.max_fidelity is not None and \
+           self.eta is not None:
+            self.max_SH_iter = -int(np.log(self.min_fidelity / self.max_fidelity) / np.log(self.eta)) + 1
+            self.fidelities = self.max_fidelity * np.power(self.eta,
+                                                     -np.linspace(start=self.max_SH_iter - 1,
+                                                                  stop=0, num=self.max_SH_iter))
 
     def reset(self):
         self.inc_score = np.inf
@@ -124,7 +131,7 @@ class DEHBBase:
         raise NotImplementedError("Redefine!")
 
     def get_next_iteration(self, iteration):
-        '''Computes the Successive Halving spacing
+        """Computes the Successive Halving spacing.
 
         Given the iteration index, computes the fidelity spacing to be used and
         the number of configurations to be used for the SH iterations.
@@ -136,11 +143,11 @@ class DEHBBase:
         clip : int, {1, 2, 3, ..., None}
             If not None, clips the minimum number of configurations to 'clip'
 
-        Returns
+        Returns:
         -------
         ns : array
         fidelities : array
-        '''
+        """
         # number of 'SH runs'
         s = self.max_SH_iter - 1 - (iteration % self.max_SH_iter)
         # fidelity spacing for this iteration
@@ -156,8 +163,8 @@ class DEHBBase:
         return ns, fidelities
 
     def get_incumbents(self):
-        """ Returns a tuple of the (incumbent configuration, incumbent score/fitness). """
-        if self.configspace:
+        """Returns a tuple of the (incumbent configuration, incumbent score/fitness)."""
+        if self.use_configspace:
             return self.vector_to_configspace(self.inc_config), self.inc_score
         return self.inc_config, self.inc_score
 
@@ -170,14 +177,15 @@ class DEHBBase:
 
 class DEHB(DEHBBase):
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=0.5,
-                 crossover_prob=0.5, strategy='rand1_bin', min_fidelity=None,
-                 max_fidelity=None, eta=3, min_clip=None, max_clip=None, configspace=True,
-                 boundary_fix_type='random', max_age=np.inf, n_workers=None, client=None,
-                 async_strategy="immediate", **kwargs):
+                 crossover_prob=0.5, strategy="rand1_bin", min_fidelity=None,
+                 max_fidelity=None, eta=3, min_clip=None, max_clip=None, seed=None,
+                 configspace=True, boundary_fix_type="random", max_age=np.inf, n_workers=None,
+                 client=None, async_strategy="immediate", save_freq="incumbent", resume=False,
+                 **kwargs):
         super().__init__(cs=cs, f=f, dimensions=dimensions, mutation_factor=mutation_factor,
                          crossover_prob=crossover_prob, strategy=strategy, min_fidelity=min_fidelity,
-                         max_fidelity=max_fidelity, eta=eta, min_clip=min_clip, max_clip=max_clip,
-                         configspace=configspace, boundary_fix_type=boundary_fix_type,
+                         max_fidelity=max_fidelity, eta=eta, min_clip=min_clip, max_clip=max_clip, 
+                         seed=seed, configspace=configspace, boundary_fix_type=boundary_fix_type,
                          max_age=max_age, **kwargs)
         self.de_params.update({"async_strategy": async_strategy})
         self.iteration_counter = -1
@@ -187,7 +195,13 @@ class DEHB(DEHBBase):
         self.traj = []
         self.runtime = []
         self.history = []
+        self._ask_counter = 0
+        self._tell_counter = 0
         self.start = None
+        if save_freq not in ["incumbent", "step", "end"] and save_freq is not None:
+            self.logger.warning(f"Save frequency {save_freq} unknown. Resorting to using 'end'.")
+            save_freq = "end"
+        self.save_freq = "end" if save_freq is None else save_freq
 
         # Dask variables
         if n_workers is None and client is None:
@@ -215,23 +229,39 @@ class DEHB(DEHBBase):
         self.gpu_usage = None
         self.single_node_with_gpus = None
 
+        # Setup logging and potentially reload state
+        if resume:
+            self.logger.info("Loading checkpoint...")
+            success = self._load_checkpoint(self.output_path)
+            if not success:
+                self.logger.error("Checkpoint could not be loaded. " \
+                                  "Please refer to the prior warning in order to " \
+                                  "identifiy the problem.")
+                raise AttributeError("Checkpoint could not be loaded. Check the logs" \
+                                     "for more information")
+        elif (self.output_path / "dehb_state.json").exists():
+            self.logger.warning("A checkpoint already exists, " \
+                                "results could potentially be overwritten.")
+
+        # Save initial random state
+        self.random_state = self.rng.bit_generator.state
+        if self.use_configspace:
+            self.cs_random_state = self.cs.random.get_state()
+
     def __getstate__(self):
-        """ Allows the object to picklable while having Dask client as a class attribute.
-        """
+        """Allows the object to picklable while having Dask client as a class attribute."""
         d = dict(self.__dict__)
         d["client"] = None  # hack to allow Dask client to be a class attribute
         d["logger"] = None  # hack to allow logger object to be a class attribute
         return d
 
     def __del__(self):
-        """ Ensures a clean kill of the Dask client and frees up a port.
-        """
+        """Ensures a clean kill of the Dask client and frees up a port."""
         if hasattr(self, "client") and isinstance(self, Client):
             self.client.close()
 
     def _f_objective(self, job_info):
-        """ Wrapper to call DE's objective function.
-        """
+        """Wrapper to call DE's objective function."""
         # check if job_info appended during job submission self.submit_job() includes "gpu_devices"
         if "gpu_devices" in job_info and self.single_node_with_gpus:
             # should set the environment variable for the spawned worker process
@@ -266,7 +296,7 @@ class DEHB(DEHBBase):
         return run_info
 
     def _create_cuda_visible_devices(self, available_gpus: List[int], start_id: int) -> str:
-        """ Generates a string to set the CUDA_VISIBLE_DEVICES environment variable.
+        """Generates a string to set the CUDA_VISIBLE_DEVICES environment variable.
 
         Given a list of available GPU device IDs and a preferred ID (start_id), the environment
         variable is created by putting the start_id device first, followed by the remaining devices
@@ -276,13 +306,13 @@ class DEHB(DEHBBase):
         assert start_id in available_gpus
         available_gpus = deepcopy(available_gpus)
         available_gpus.remove(start_id)
-        np.random.shuffle(available_gpus)
+        self.rng.shuffle(available_gpus)
         final_variable = [str(start_id)] + [str(_id) for _id in available_gpus]
         final_variable = ",".join(final_variable)
         return final_variable
 
     def distribute_gpus(self):
-        """ Function to create a GPU usage tracker dict.
+        """Function to create a GPU usage tracker dict.
 
         The idea is to extract the exact GPU device IDs available. During job submission, each
         submitted job is given a preference of a GPU device ID based on the GPU device with the
@@ -295,7 +325,7 @@ class DEHB(DEHBBase):
             self.available_gpus = [int(_id) for _id in available_gpus]
         except KeyError as e:
             print("Unable to find valid GPU devices. "
-                  "Environment variable {} not visible!".format(str(e)))
+                  f"Environment variable {str(e)} not visible!")
             self.available_gpus = []
         self.gpu_usage = dict()
         for _id in self.available_gpus:
@@ -327,22 +357,25 @@ class DEHB(DEHBBase):
         self.traj = []
         self.runtime = []
         self.history = []
+        self._ask_counter = 0
+        self._tell_counter = 0
+        self.config_repository.reset()
         self._get_pop_sizes()
         self._init_subpop()
         self.available_gpus = None
         self.gpu_usage = None
+        self.saving_scheduler = None
 
     def init_population(self, pop_size):
-        if self.configspace:
+        if self.use_configspace:
             population = self.cs.sample_configuration(size=pop_size)
             population = [self.configspace_to_vector(individual) for individual in population]
         else:
-            population = np.random.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
+            population = self.rng.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
         return population
 
     def clean_inactive_brackets(self):
-        """ Removes brackets from the active list if it is done as communicated by Bracket Manager
-        """
+        """Removes brackets from the active list if it is done as communicated by Bracket Manager."""
         if len(self.active_brackets) == 0:
             return
         self.active_brackets = [
@@ -361,8 +394,7 @@ class DEHB(DEHBBase):
         self.inc_info = info
 
     def _get_pop_sizes(self):
-        """Determines maximum pop size for each fidelity
-        """
+        """Determines maximum pop size for each fidelity."""
         self._max_pop_size = {}
         for i in range(self.max_SH_iter):
             n, r = self.get_next_iteration(i)
@@ -372,8 +404,7 @@ class DEHB(DEHBBase):
                 ) if r_j in self._max_pop_size.keys() else n[j]
 
     def _init_subpop(self):
-        """ List of DE objects corresponding to the fidelities
-        """
+        """List of DE objects corresponding to the fidelities."""
         self.de = {}
         for i, f in enumerate(self._max_pop_size.keys()):
             self.de[f] = AsyncDE(**self.de_params, pop_size=self._max_pop_size[f],
@@ -388,8 +419,7 @@ class DEHB(DEHBBase):
             self.de[f].promotion_fitness = None
 
     def _concat_pops(self, exclude_fidelity=None):
-        """ Concatenates all subpopulations
-        """
+        """Concatenates all subpopulations."""
         fidelities = list(self.fidelities)
         if exclude_fidelity is not None:
             fidelities.remove(exclude_fidelity)
@@ -399,8 +429,7 @@ class DEHB(DEHBBase):
         return np.array(pop)
 
     def _start_new_bracket(self):
-        """ Starts a new bracket based on Hyperband
-        """
+        """Starts a new bracket based on Hyperband."""
         # start new bracket
         self.iteration_counter += 1  # iteration counter gives the bracket count or bracket ID
         n_configs, fidelities = self.get_next_iteration(self.iteration_counter)
@@ -417,8 +446,7 @@ class DEHB(DEHBBase):
             return 1
 
     def is_worker_available(self, verbose=False):
-        """ Checks if at least one worker is available to run a job
-        """
+        """Checks if at least one worker is available to run a job."""
         if self.n_workers == 1 or self.client is None or not isinstance(self.client, Client):
             # in the synchronous case, one worker is always available
             return True
@@ -432,7 +460,7 @@ class DEHB(DEHBBase):
         return True
 
     def _get_promotion_candidate(self, low_fidelity, high_fidelity, n_configs):
-        """ Manages the population to be promoted from the lower to the higher fidelity.
+        """Manages the population to be promoted from the lower to the higher fidelity.
 
         This is triggered or in action only during the first full HB bracket, which is equivalent
         to the number of brackets <= max_SH_iter.
@@ -492,16 +520,14 @@ class DEHB(DEHBBase):
         return config, config_id
 
     def _get_next_parent_for_subpop(self, fidelity):
-        """ Maintains a looping counter over a subpopulation, to iteratively select a parent
-        """
+        """Maintains a looping counter over a subpopulation, to iteratively select a parent."""
         parent_id = self.de[fidelity].parent_counter
         self.de[fidelity].parent_counter += 1
         self.de[fidelity].parent_counter = self.de[fidelity].parent_counter % self._max_pop_size[fidelity]
         return parent_id
 
     def _acquire_config(self, bracket, fidelity):
-        """ Generates/chooses a configuration based on the fidelity and iteration number
-        """
+        """Generates/chooses a configuration based on the fidelity and iteration number."""
         # select a parent/target
         parent_id = self._get_next_parent_for_subpop(fidelity)
         target = self.de[fidelity].population[parent_id]
@@ -545,17 +571,24 @@ class DEHB(DEHBBase):
         config_id = self.config_repository.announce_config(config, fidelity)
         return config, config_id, parent_id
 
-    def _get_next_job(self):
-        """Loads a configuration and fidelity to be evaluated next.
+    def _get_next_bracket(self, only_id=False):
+        """Used to retrieve what bracket the bracket for the next job.
+
+        Optionally, a new bracket is started, if there are no more pending jobs or
+        when all active brackets are waiting.
+
+        Args:
+            only_id (bool): Only returns the id of the next bracket
 
         Returns:
-            dict: Dicitonary containing all necessary information of the next job.
+            SHBracketmanager or int: bracket or bracket ID of next job
         """
         bracket = None
+        start_new_bracket = False
         if len(self.active_brackets) == 0 or \
                 np.all([bracket.is_bracket_done() for bracket in self.active_brackets]):
             # start new bracket when no pending jobs from existing brackets or empty bracket list
-            bracket = self._start_new_bracket()
+            start_new_bracket = True
         else:
             for _bracket in self.active_brackets:
                 # check if _bracket is not waiting for previous rung results of same bracket
@@ -567,13 +600,26 @@ class DEHB(DEHBBase):
                     break
             if bracket is None:
                 # start new bracket when existing list has all waiting brackets
-                bracket = self._start_new_bracket()
+                start_new_bracket = True
+
+        if only_id:
+            return self.iteration_counter + 1 if start_new_bracket else bracket.bracket_id
+
+        return self._start_new_bracket() if start_new_bracket else bracket
+
+    def _get_next_job(self):
+        """Loads a configuration and fidelity to be evaluated next.
+
+        Returns:
+            dict: Dicitonary containing all necessary information of the next job.
+        """
+        bracket = self._get_next_bracket()
         # fidelity that the SH bracket allots
         fidelity = bracket.get_next_job_fidelity()
         config, config_id, parent_id = self._acquire_config(bracket, fidelity)
 
         # transform config to proper representation
-        if self.configspace:
+        if self.use_configspace:
             # converts [0, 1] vector to a ConfigSpace object
             config = self.de[fidelity].vector_to_configspace(config)
 
@@ -588,9 +634,9 @@ class DEHB(DEHBBase):
 
         # pass information of job submission to Bracket Manager
         for bracket in self.active_brackets:
-            if bracket.bracket_id == job_info['bracket_id']:
+            if bracket.bracket_id == job_info["bracket_id"]:
                 # registering is IMPORTANT for Bracket Manager to perform SH
-                bracket.register_job(job_info['fidelity'])
+                bracket.register_job(job_info["fidelity"])
                 break
         return job_info
 
@@ -607,12 +653,18 @@ class DEHB(DEHBBase):
         Returns:
             dict or list of dict: Job info(s) of next configuration to evaluate.
         """
-        if n_configs == 1:
-            return self._get_next_job()
-
         jobs = []
-        for _ in range(n_configs):
-            jobs.append(self._get_next_job())
+        if n_configs == 1:
+            jobs = self._get_next_job()
+            self._ask_counter += 1
+        else:
+            for _ in range(n_configs):
+                jobs.append(self._get_next_job())
+                self._ask_counter += 1
+        # Save random state after ask
+        self.random_state = self.rng.bit_generator.state
+        if self.use_configspace:
+            self.cs_random_state = self.cs.random.get_state()
         return jobs
 
     def _get_gpu_id_with_low_load(self):
@@ -620,20 +672,19 @@ class DEHB(DEHBBase):
         for k, v in self.gpu_usage.items():
             if v == min(self.gpu_usage.values()):
                 candidates.append(k)
-        device_id = np.random.choice(candidates)
+        device_id = self.rng.choice(candidates)
         # creating string for setting environment variable CUDA_VISIBLE_DEVICES
         gpu_ids = self._create_cuda_visible_devices(
-            self.available_gpus, device_id
+            self.available_gpus, device_id,
         )
         # updating GPU usage
         self.gpu_usage[device_id] += 1
-        self.logger.debug("GPU device selected: {}".format(device_id))
-        self.logger.debug("GPU device usage: {}".format(self.gpu_usage))
+        self.logger.debug(f"GPU device selected: {device_id}")
+        self.logger.debug(f"GPU device usage: {self.gpu_usage}")
         return gpu_ids
 
     def submit_job(self, job_info, **kwargs):
-        """ Asks a free worker to run the objective function on config and fidelity
-        """
+        """Asks a free worker to run the objective function on config and fidelity."""
         job_info["kwargs"] = self.shared_data if self.shared_data is not None else kwargs
         # submit to Dask client
         if self.n_workers > 1 or isinstance(self.client, Client):
@@ -648,8 +699,7 @@ class DEHB(DEHBBase):
             self.futures.append(self._f_objective(job_info))
 
     def _fetch_results_from_workers(self):
-        """ Iterate over futures and collect results from finished workers
-        """
+        """Iterate over futures and collect results from finished workers."""
         if self.n_workers > 1 or isinstance(self.client, Client):
             done_list = [(i, future) for i, future in enumerate(self.futures) if future.done()]
         else:
@@ -657,7 +707,7 @@ class DEHB(DEHBBase):
             done_list = [(i, future) for i, future in enumerate(self.futures)]
         if len(done_list) > 0:
             self.logger.debug(
-                "Collecting {} of the {} job(s) active.".format(len(done_list), len(self.futures))
+                f"Collecting {len(done_list)} of the {len(self.futures)} job(s) active.",
             )
         for _, future in done_list:
             if self.n_workers > 1 or isinstance(self.client, Client):
@@ -680,13 +730,61 @@ class DEHB(DEHBBase):
         if fevals is not None and len(self.traj) > 0:
             fevals = len(self.traj) + fevals
         elif brackets is not None and self.iteration_counter > -1:
-            brackets = self.iteration_counter + brackets
+            brackets = self.iteration_counter + brackets + 1
 
         return fevals, brackets
 
+    def _get_state(self):
+        state = {}
+        # DE parameters
+        serializable_de_params = self.de_params.copy()
+        serializable_de_params.pop("cs")
+        serializable_de_params.pop("rng")
+        serializable_de_params.pop("f")
+        serializable_de_params["output_path"] = str(serializable_de_params["output_path"])
+        state["DE_params"] = serializable_de_params
+        # Hyperband variables
+        hb_dict = {}
+        hb_dict["min_fidelity"] = self.min_fidelity
+        hb_dict["max_fidelity"] = self.max_fidelity
+        hb_dict["min_clip"] = self.min_clip
+        hb_dict["max_clip"] = self.max_clip
+        hb_dict["eta"] = self.eta
+        state["HB_params"] = hb_dict
+        # Save DEHB interals
+        dehb_internals = {}
+        if self.inc_config is not None:
+            dehb_internals["inc_score"] = self.inc_score
+            dehb_internals["inc_config"] = self.inc_config.tolist()
+            dehb_internals["inc_info"] = self.inc_info
+        state["internals"] = dehb_internals
+        return state
+
+    def _save_state(self):
+        # Save ConfigRepository
+        config_repo_path = self.output_path / "config_repository.json"
+        self.config_repository.save_state(config_repo_path)
+
+        # Get state
+        state = self._get_state()
+        # Write state to disk
+        state_path = self.output_path / "dehb_state.json"
+        with state_path.open("w") as f:
+            json.dump(state, f, indent=2)
+
+        # Write random state to disk
+        rnd_state_path = self.output_path / "random_state.pkl"
+        with rnd_state_path.open("wb") as f:
+            pickle.dump(self.random_state, f)
+
+        if self.use_configspace:
+            cs_rnd_path = self.output_path / "cs_random_state.pkl"
+            with cs_rnd_path.open("wb") as f:
+                pickle.dump(self.cs_random_state, f)
+
+
     def _is_run_budget_exhausted(self, fevals=None, brackets=None, total_cost=None):
-        """ Checks if the DEHB run should be terminated or continued
-        """
+        """Checks if the DEHB run should be terminated or continued."""
         delimiters = [fevals, brackets, total_cost]
         delim_sum = sum(x is not None for x in delimiters)
         if delim_sum == 0:
@@ -697,10 +795,11 @@ class DEHB(DEHBBase):
             if len(self.traj) >= fevals:
                 return True
         elif brackets is not None:
-            if self.iteration_counter >= brackets:
+            future_iteration_counter = self._get_next_bracket(only_id=True)
+            if future_iteration_counter >= brackets:
                 for bracket in self.active_brackets:
                     # waits for all brackets < iteration_counter to finish by collecting results
-                    if bracket.bracket_id < self.iteration_counter and \
+                    if bracket.bracket_id < future_iteration_counter and \
                             not bracket.is_bracket_done():
                         return False
                 return True
@@ -711,55 +810,159 @@ class DEHB(DEHBBase):
                 return True
         return False
 
-    def _save_incumbent(self, name=None):
-        if name is None:
-            name = time.strftime("%x %X %Z", time.localtime(self.start))
-            name = name.replace("/", '-').replace(":", '-').replace(" ", '_')
+    def _save_incumbent(self):
+        # Return early if there is no incumbent yet
+        if self.inc_config is None:
+            return
         try:
-            res = dict()
-            if self.configspace:
+            res = {}
+            if self.use_configspace:
                 config = self.vector_to_configspace(self.inc_config)
                 res["config"] = config.get_dictionary()
             else:
                 res["config"] = self.inc_config.tolist()
             res["score"] = self.inc_score
             res["info"] = self.inc_info
-            with open(os.path.join(self.output_path, "incumbent_{}.json".format(name)), 'w') as f:
+            incumbent_path = self.output_path / "incumbent.json"
+            with incumbent_path.open("w") as f:
                 json.dump(res, f)
         except Exception as e:
-            self.logger.warning("Incumbent not saved: {}".format(repr(e)))
+            self.logger.warning(f"Incumbent not saved: {e!r}")
 
-    def _save_history(self, name=None):
-        if name is None:
-            name = time.strftime("%x %X %Z", time.localtime(self.start))
-            name = name.replace("/", '-').replace(":", '-').replace(" ", '_')
+    def _save_history(self):
+        # Return early if there is no history yet
+        if self.history is None:
+            return
         try:
-            with open(os.path.join(self.output_path, "history_{}.pkl".format(name)), 'wb') as f:
+            history_path = self.output_path / "history.pkl"
+            with history_path.open("wb") as f:
                 pickle.dump(self.history, f)
         except Exception as e:
-            self.logger.warning("History not saved: {}".format(repr(e)))
+            self.logger.warning(f"History not saved: {e!r}")
 
     def _verbosity_debug(self):
         for bracket in self.active_brackets:
-            self.logger.debug("Bracket ID {}:\n{}".format(
-                bracket.bracket_id,
-                str(bracket)
-            ))
+            self.logger.debug(f"Bracket ID {bracket.bracket_id}:\n{bracket!s}")
 
     def _verbosity_runtime(self, fevals, brackets, total_cost):
         if fevals is not None:
             remaining = (len(self.traj), fevals, "function evaluation(s) done")
         elif brackets is not None:
-            _suffix = "bracket(s) started; # active brackets: {}".format(len(self.active_brackets))
+            _suffix = f"bracket(s) started; # active brackets: {len(self.active_brackets)}"
             remaining = (self.iteration_counter + 1, brackets, _suffix)
         else:
             elapsed = np.format_float_positional(time.time() - self.start, precision=2)
             remaining = (elapsed, total_cost, "seconds elapsed")
         self.logger.info(
-            "{}/{} {}".format(remaining[0], remaining[1], remaining[2])
+            f"{remaining[0]}/{remaining[1]} {remaining[2]}",
         )
 
-    def tell(self, job_info: dict, result: dict):
+    def _load_checkpoint(self, run_dir: str):
+        # Check if path exists, otherwise give warning
+        run_dir = Path(run_dir)
+        if not Path.exists(run_dir):
+            self.logger.warning("Path to run directory does not exist.")
+            return False
+        # Load dehb state
+        dehb_state_path = run_dir / "dehb_state.json"
+        with dehb_state_path.open() as f:
+            dehb_state = json.load(f)
+        # Convert output_path of checkpoint to Path
+        dehb_state["DE_params"]["output_path"] = Path(dehb_state["DE_params"]["output_path"])
+        if not all(dehb_state["DE_params"][key] == self.de_params[key]
+                   for key in dehb_state["DE_params"]):
+            self.logger.warning("Initialized DE parameters do not match saved parameters.")
+            return False
+        self.de_params.update(dehb_state["DE_params"])
+
+        hb_vars = dehb_state["HB_params"]
+        if self.min_fidelity != hb_vars["min_fidelity"]:
+            self.logger.warning("Initialized min_fidelity does not match saved parameters.")
+            return False
+        self.min_fidelity = hb_vars["min_fidelity"]
+
+        if self.max_fidelity != hb_vars["max_fidelity"]:
+            self.logger.warning("Initialized max_fidelity does not match saved parameters.")
+            return False
+        self.max_fidelity = hb_vars["max_fidelity"]
+
+        if self.min_clip != hb_vars["min_clip"]:
+            self.logger.warning("Initialized min_clip does not match saved parameters.")
+            return False
+        self.min_clip = hb_vars["min_clip"]
+
+        if self.max_clip != hb_vars["max_clip"]:
+            self.logger.warning("Initialized max_clip does not match saved parameters.")
+            return False
+        self.max_clip = hb_vars["max_clip"]
+
+        if self.eta != hb_vars["eta"]:
+            self.logger.warning("Initialized eta does not match saved parameters.")
+            return False
+        self.eta = hb_vars["eta"]
+
+        self._pre_compute_fidelity_spacing()
+        self._get_pop_sizes()
+        self._init_subpop()
+        # Reset ConfigRepo after initializing DE
+        self.config_repository.reset()
+        # Load initial configurations from config repository
+        config_repo_path = run_dir / "config_repository.json"
+        with config_repo_path.open() as f:
+            config_repo_list = json.load(f)
+        # Get initial configs
+        num_initial_configs = sum(self._max_pop_size.values())
+        initial_config_entries = config_repo_list[:num_initial_configs]
+        # Filter initial configs by fidelity
+        initial_configs_by_fidelity = {fidelity: [np.array(item["config"]) for item in initial_config_entries
+                                                  if str(fidelity) in item["results"]]
+                                                  for fidelity in self.fidelities}
+        # Add initial configs to DE and announce them to ConfigRepo
+        for fidelity, sub_pop in initial_configs_by_fidelity.items():
+            self.de[fidelity].population = np.array(sub_pop)
+            self.de[fidelity].population_ids = self.config_repository.announce_population(sub_pop,
+                                                                                          fidelity)
+
+        # Load history
+        history_path = run_dir / "history.pkl"
+        with history_path.open("rb") as f:
+            history = pickle.load(f)
+
+        # Replay history
+        for config_id, config, fitness, cost, fidelity, info in history:
+            job_info = {
+                "fidelity": fidelity,
+                "config_id": config_id,
+                "config": np.array(config),
+            }
+            result = {
+                "fitness": fitness,
+                "cost": cost,
+                "info": info,
+            }
+
+            self.tell(job_info, result, replay=True)
+        # Clean inactive brackets
+        self.clean_inactive_brackets()
+
+        # Load and set random state
+        rnd_state_path = run_dir / "random_state.pkl"
+        with rnd_state_path.open("rb") as f:
+            self.rng.bit_generator.state = pickle.load(f)
+
+        if self.use_configspace:
+            cs_rnd_state_path = run_dir / "cs_random_state.pkl"
+            with cs_rnd_state_path.open("rb") as f:
+                self.cs.random.set_state(pickle.load(f))
+        return True
+
+    def save(self):
+        self.logger.info("Saving state to disk...")
+        self._save_incumbent()
+        self._save_history()
+        self._save_state()
+
+    def tell(self, job_info: dict, result: dict, replay: bool=False):
         """Feed a result back to the optimizer.
 
         In order to correctly interpret the results, the `job_info` dict, retrieved by `ask`,
@@ -771,7 +974,24 @@ class DEHB(DEHBBase):
             job_info (dict): Job info returned by ask().
             result (dict): Result dictionary with mandatory keys `fitness` and `cost`.
         """
-        # update bracket information
+        if replay:
+            # Get job_info container from ask and update fields
+            job_info_container = self.ask()
+            # Update according to given history
+            job_info_container["fidelity"] = job_info["fidelity"]
+            job_info_container["config"] = job_info["config"]
+            job_info_container["config_id"] = job_info["config_id"]
+
+            # Update entry in ConfigRepository
+            self.config_repository.configs[job_info["config_id"]].config = job_info["config"]
+            # Replace job_info with container to make sure all fields are given
+            job_info = job_info_container
+
+        if self._tell_counter >= self._ask_counter:
+            raise NotImplementedError("Called tell() more often than ask(). \
+                                      Warmstarting with tell is not supported. ")
+        self._tell_counter += 1
+        # Update bracket information
         fitness, cost = result["fitness"], result["cost"]
         info = result["info"] if "info" in result else dict()
         fidelity, parent_id = job_info["fidelity"], job_info["parent_id"]
@@ -785,7 +1005,7 @@ class DEHB(DEHBBase):
         self.config_repository.tell_result(config_id, fidelity, fitness, cost, info)
 
         # get hypercube representation from config repo
-        if self.configspace:
+        if self.use_configspace:
             config = self.config_repository.get(config_id)
 
         # carry out DE selection
@@ -798,19 +1018,24 @@ class DEHB(DEHBBase):
             self._update_incumbents(
                 config=self.de[fidelity].population[parent_id],
                 score=self.de[fidelity].fitness[parent_id],
-                info=info
+                info=info,
             )
+            if self.save_freq == "incumbent" and not replay:
+                self.save()
         # book-keeping
         self._update_trackers(
             traj=self.inc_score, runtime=cost, history=(
-                config.tolist(), float(fitness), float(cost), float(fidelity), info
-            )
+                config_id, config.tolist(), float(fitness), float(cost), float(fidelity), info,
+            ),
         )
+
+        if self.save_freq == "step" and not replay:
+            self.save()
 
     @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None, single_node_with_gpus=False,
-            verbose=False, debug=False, save_intermediate=True, save_history=True, name=None, **kwargs):
-        """ Main interface to run optimization by DEHB
+            verbose=False, debug=False, **kwargs):
+        """Main interface to run optimization by DEHB.
 
         This function waits on workers and if a worker is free, asks for a configuration and a
         fidelity to evaluate on and submits it to the worker. In each loop, it checks if a job
@@ -846,8 +1071,8 @@ class DEHB(DEHBBase):
         fevals, brackets = self._adjust_budgets(fevals, brackets)
         if verbose:
             print("\nLogging at {} for optimization starting at {}\n".format(
-                os.path.join(os.getcwd(), self.log_filename),
-                time.strftime("%x %X %Z", time.localtime(self.start))
+                Path.cwd() / self.log_filename,
+                time.strftime("%x %X %Z", time.localtime(self.start)),
             ))
         if debug:
             logger.configure(handlers=[{"sink": sys.stdout}])
@@ -855,8 +1080,8 @@ class DEHB(DEHBBase):
             if self._is_run_budget_exhausted(fevals, brackets, total_cost):
                 break
             if self.is_worker_available():
-                job_info = self.ask()
-                if brackets is not None and job_info["bracket_id"] >= brackets:
+                next_bracket_id = self._get_next_bracket(only_id=True)
+                if brackets is not None and next_bracket_id >= brackets:
                     # ignore submission and only collect results
                     # when brackets are chosen as run budget, an extra bracket is created
                     # since iteration_counter is incremented in ask() and then checked
@@ -868,9 +1093,11 @@ class DEHB(DEHBBase):
                 else:
                     if self.n_workers > 1 or isinstance(self.client, Client):
                         self.logger.debug("{}/{} worker(s) available.".format(
-                            self._get_worker_count() - len(self.futures), self._get_worker_count()
+                            self._get_worker_count() - len(self.futures), self._get_worker_count(),
                         ))
-                    # submits job_info to a worker for execution
+                    # Ask for new job_info
+                    job_info = self.ask()
+                    # Submit job_info to a worker for execution
                     self.submit_job(job_info, **kwargs)
                     if verbose:
                         fidelity = job_info["fidelity"]
@@ -878,17 +1105,13 @@ class DEHB(DEHBBase):
                         self._verbosity_runtime(fevals, brackets, total_cost)
                         self.logger.info(
                             "Evaluating configuration {} with fidelity {} under "
-                            "bracket ID {}".format(config_id, fidelity, job_info["bracket_id"])
+                            "bracket ID {}".format(config_id, fidelity, job_info["bracket_id"]),
                         )
                         self.logger.info(
-                            "Best score seen/Incumbent score: {}".format(self.inc_score)
+                            f"Best score seen/Incumbent score: {self.inc_score}",
                         )
                     self._verbosity_debug()
             self._fetch_results_from_workers()
-            if save_intermediate and self.inc_config is not None:
-                self._save_incumbent(name)
-            if save_history and self.history is not None:
-                self._save_history(name)
             self.clean_inactive_brackets()
         # end of while
 
@@ -898,28 +1121,24 @@ class DEHB(DEHBBase):
             )
         while len(self.futures) > 0:
             self._fetch_results_from_workers()
-            if save_intermediate and self.inc_config is not None:
-                self._save_incumbent(name)
-            if save_history and self.history is not None:
-                self._save_history(name)
             time.sleep(0.05)  # waiting 50ms
 
         if verbose:
             time_taken = time.time() - self.start
             self.logger.info("End of optimisation! Total duration: {}; Total fevals: {}\n".format(
-                time_taken, len(self.traj)
+                time_taken, len(self.traj),
             ))
-            self.logger.info("Incumbent score: {}".format(self.inc_score))
+            self.logger.info(f"Incumbent score: {self.inc_score}")
             self.logger.info("Incumbent config: ")
-            if self.configspace:
+            if self.use_configspace:
                 config = self.vector_to_configspace(self.inc_config)
                 for k, v in config.get_dictionary().items():
-                    self.logger.info("{}: {}".format(k, v))
+                    self.logger.info(f"{k}: {v}")
             else:
-                self.logger.info("{}".format(self.inc_config))
-        self._save_incumbent(name)
-        self._save_history(name)
+                self.logger.info(f"{self.inc_config}")
+        self.save()
         # reset waiting jobs of active bracket to allow for continuation
+        self.active_brackets = []
         if len(self.active_brackets) > 0:
             for active_bracket in self.active_brackets:
                 active_bracket.reset_waiting_jobs()

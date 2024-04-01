@@ -1,3 +1,4 @@
+import json
 import time
 import typing
 
@@ -23,8 +24,9 @@ def create_toy_searchspace():
     return cs
 
 def create_toy_optimizer(configspace: ConfigSpace.ConfigurationSpace, min_fidelity: float,
-                         max_fidelity: float, eta: int,
-                         objective_function: typing.Callable):
+                         max_fidelity: float, eta: int, objective_function: typing.Callable,
+                         save_freq: typing.Optional[str]=None, output_path: str="logs",
+                         resume: bool=False):
     """Creates a DEHB instance.
 
     Args:
@@ -39,8 +41,8 @@ def create_toy_optimizer(configspace: ConfigSpace.ConfigurationSpace, min_fideli
     """
     dim = len(configspace.get_hyperparameters()) if configspace else 1
     return DEHB(f=objective_function, cs=configspace, dimensions=dim,
-                min_fidelity=min_fidelity,
-                max_fidelity=max_fidelity, eta=eta, n_workers=1)
+                min_fidelity=min_fidelity, output_path=output_path, resume=resume,
+                max_fidelity=max_fidelity, eta=eta, save_freq=save_freq, n_workers=1)
 
 
 def objective_function(x: ConfigSpace.Configuration, fidelity: float, **kwargs):
@@ -144,10 +146,7 @@ class TestConfigID:
         # for the first bracket, we only mutate on the lowest fidelity and then promote the best
         # configs to the next fidelity. Please note, that this is only the case for the first
         # DEHB bracket!
-        # Note: The final + 1 is due to the inner workings of DEHB. If the run budget is exhausted,
-        # we keep evolving new configurations without evaluating them, since we are only waiting to
-        # to fetch all results started ahead of the budget exhaustion.
-        assert len(dehb.config_repository.configs) == num_initial_configs + 9 + 1
+        assert len(dehb.config_repository.configs) == num_initial_configs + 9
 
 class TestAskTell:
     """Class that bundles all tests regarding the ask and tell functionality of DEHB."""
@@ -200,6 +199,21 @@ class TestAskTell:
         job_info_b = dehb.ask()
         assert job_info_a != job_info_b
 
+    def test_tell_twice(self):
+        """Verifies, that tell should not be allowed to be called more often than ask."""
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    objective_function=objective_function)
+        # Get single job info
+        job_info = dehb.ask()
+        res = objective_function(job_info["config"], job_info["fidelity"])
+
+        # Tell twice, first should work
+        dehb.tell(job_info, res)
+        # Second tell should raise an error
+        with pytest.raises(NotImplementedError):
+            dehb.tell(job_info, res)
+
     def test_tell_successful(self):
         """Verifies, that tell successfully saves results."""
         cs = create_toy_searchspace()
@@ -238,3 +252,163 @@ class TestAskTell:
         # telling with wrong config_id should throw an error
         with pytest.raises(IndexError):
             dehb.tell(job_info, result)
+
+class TestLogging:
+    """Class that bundles all tests regarding the logging functionality of DEHB."""
+    def test_init_no_save_freq(self):
+        """Verifies, that default initializatin is 'end'."""
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    save_freq=None, objective_function=objective_function)
+        assert dehb.save_freq == "end"
+    def test_init_unkown_save_freq(self):
+        """Verifies, that default initializatin if save_freq is unkown is 'end'."""
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    save_freq="7Hz", objective_function=objective_function)
+        assert dehb.save_freq == "end"
+    def test_state_before_eval(self):
+        """Verifies, that returned state consists of all necessary fields."""
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    save_freq="end", objective_function=objective_function,
+                                    output_path="state_test")
+        state = dehb._get_state()
+        hb_params = state["HB_params"]
+        assert hb_params["min_fidelity"] == 3
+        assert hb_params["max_fidelity"] == 27
+        assert hb_params["eta"] == 3
+        assert hb_params["min_clip"] is None
+        assert hb_params["max_clip"] is None
+
+        # There should not be an incumbent yet
+        assert "inc_config" not in state["internals"]
+
+        de_params = state["DE_params"]
+        assert de_params["output_path"] == str(dehb.de_params["output_path"])
+        de_params.pop("output_path")
+        for key in de_params:
+            assert de_params[key] == dehb.de_params[key]
+    def test_freq_incumbent(self):
+        """Verifies, that the save_freq 'step' saves the state at the right times."""
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    save_freq="step", objective_function=objective_function,
+                                    output_path="step_test")
+        # Single ask/tell
+        job_info = dehb.ask()
+        result = objective_function(job_info["config"], job_info["fidelity"])
+        dehb.tell(job_info, result)
+
+        # Now state should be saved --> load config_repo
+        config_repo_path = dehb.output_path / "config_repository.json"
+        with config_repo_path.open() as f:
+            config_repo_list = json.load(f)
+
+        assert len(config_repo_list) == len(dehb.config_repository.configs)
+
+        # Second ask/tell
+        job_info = dehb.ask()
+        # Result should be worse than first result so that it can not trigger "incumbent" save_freq
+        result["fitness"] += 10
+        dehb.tell(job_info, result)
+
+        # Now state should be saved --> load config_repo
+        config_repo_path = dehb.output_path / "config_repository.json"
+        with config_repo_path.open() as f:
+            config_repo_list = json.load(f)
+
+        assert len(config_repo_list) == len(dehb.config_repository.configs)
+
+    def test_freq_incumbent(self):
+        """Verifies, that the save_freq 'incumbent' saves the state at the right times."""
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    save_freq="incumbent", objective_function=objective_function,
+                                    output_path="incumbent_test")
+        # Single ask/tell
+        job_info = dehb.ask()
+        result = objective_function(job_info["config"], job_info["fidelity"])
+        dehb.tell(job_info, result)
+
+        # Now state should be saved, because first config is always incumbent --> load config_repo
+        config_repo_path = dehb.output_path / "config_repository.json"
+        with config_repo_path.open() as f:
+            config_repo_list = json.load(f)
+
+        assert len(config_repo_list) == len(dehb.config_repository.configs)
+
+        # Second ask/tell
+        job_info = dehb.ask()
+        # Result should be worse than first result so that it can not trigger "incumbent" save_freq
+        result["fitness"] += 10
+        dehb.tell(job_info, result)
+
+        # State should not have been updated
+        config_repo_path = dehb.output_path / "config_repository.json"
+        with config_repo_path.open() as f:
+            config_repo_list = json.load(f)
+
+        assert len(config_repo_list) == len(dehb.config_repository.configs) - 1
+
+class TestRestart:
+    """Class that bundles all tests regarding the restarting functionality of DEHB."""
+    def test_restart_run(self):
+        """Verifies, that restarting after calling "run" works as expected."""
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    save_freq="step", objective_function=objective_function,
+                                    output_path="restart_run_test")
+        # Run for a single bracket
+        traj, _, _ = dehb.run(brackets=1)
+        n_configs = len(dehb.config_repository.configs)
+        it_counter = dehb.iteration_counter
+        len_traj = len(traj)
+
+        # Load checkpoint saved by previous run
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    save_freq="step", objective_function=objective_function,
+                                    output_path="restart_run_test", resume=True)
+
+        assert n_configs == len(dehb.config_repository.configs)
+        assert it_counter == dehb.iteration_counter
+        assert len_traj == len(dehb.traj)
+
+    def test_restart_ask_tell(self):
+        """Verifies, that restarting after using ask & tell works as expected."""
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    save_freq="step", objective_function=objective_function,
+                                    output_path="restart_ask_tell_test")
+        # Run for 10 feval
+        for _ in range(10):
+            job_info = dehb.ask()
+            result = objective_function(job_info["config"], job_info["fidelity"])
+            dehb.tell(job_info, result)
+
+        n_configs = len(dehb.config_repository.configs)
+        it_counter = dehb.iteration_counter
+        len_traj = len(dehb.traj)
+
+        # Load checkpoint saved by previous run
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    save_freq="step", objective_function=objective_function,
+                                    output_path="restart_ask_tell_test", resume=True)
+
+        assert n_configs == len(dehb.config_repository.configs)
+        assert it_counter == dehb.iteration_counter
+        assert len_traj == len(dehb.traj)
+
+    def test_restart_non_matching_configs(self):
+        """Verifies, that restarting throws an error when dehb instances are configured differently."""
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    save_freq="step", objective_function=objective_function,
+                                    output_path="restart_error_test")
+        dehb.save()
+
+        # Try to load checkpoint with different conifguration
+        with pytest.raises(AttributeError):
+            dehb = create_toy_optimizer(configspace=cs, min_fidelity=8, max_fidelity=123, eta=42,
+                                    save_freq="step", objective_function=objective_function,
+                                    output_path="restart_error_test", resume=True)

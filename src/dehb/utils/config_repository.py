@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+import json
+from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -61,7 +63,7 @@ class ConfigRepository:
         result_dict = {
                 fidelity: ResultItem(np.inf, -1, {}),
             }
-        config_item = ConfigItem(config_id, config, result_dict)
+        config_item = ConfigItem(config_id, config.copy(), result_dict)
         self.configs.append(config_item)
         return config_id
 
@@ -141,3 +143,17 @@ class ConfigRepository:
         except IndexError as e:
             raise IndexError("Config with the given ID can not be found.") from e
         return config_item.config
+
+    def save_state(self, save_path: Path):
+        """Saves the current state to `save_path`.
+
+        Args:
+            save_path (Path): Path where the state should be saved to.
+        """
+        with save_path.open("w") as f:
+            serialized_data = []
+            for config in self.configs:
+                serialized_config = asdict(config)
+                serialized_config["config"] = serialized_config["config"].tolist()
+                serialized_data.append(serialized_config)
+            json.dump(serialized_data, f, indent=2)
