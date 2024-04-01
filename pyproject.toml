@@ -53,6 +53,9 @@ dev = [
   "black",
   "pre-commit",
 ]
+examples = [
+  "scikit-learn"
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]                   # path to the test directory
