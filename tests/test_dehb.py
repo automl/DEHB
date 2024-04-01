@@ -199,6 +199,21 @@ class TestAskTell:
         job_info_b = dehb.ask()
         assert job_info_a != job_info_b
 
+    def test_tell_twice(self):
+        """Verifies, that tell should not be allowed to be called more often than ask."""
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                    objective_function=objective_function)
+        # Get single job info
+        job_info = dehb.ask()
+        res = objective_function(job_info["config"], job_info["fidelity"])
+
+        # Tell twice, first should work
+        dehb.tell(job_info, res)
+        # Second tell should raise an error
+        with pytest.raises(NotImplementedError):
+            dehb.tell(job_info, res)
+
     def test_tell_successful(self):
         """Verifies, that tell successfully saves results."""
         cs = create_toy_searchspace()

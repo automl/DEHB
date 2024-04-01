@@ -195,6 +195,8 @@ class DEHB(DEHBBase):
         self.traj = []
         self.runtime = []
         self.history = []
+        self._ask_counter = 0
+        self._tell_counter = 0
         self.start = None
         if save_freq not in ["incumbent", "step", "end"] and save_freq is not None:
             self.logger.warning(f"Save frequency {save_freq} unknown. Resorting to using 'end'.")
@@ -355,6 +357,9 @@ class DEHB(DEHBBase):
         self.traj = []
         self.runtime = []
         self.history = []
+        self._ask_counter = 0
+        self._tell_counter = 0
+        self.config_repository.reset()
         self._get_pop_sizes()
         self._init_subpop()
         self.available_gpus = None
@@ -651,9 +656,11 @@ class DEHB(DEHBBase):
         jobs = []
         if n_configs == 1:
             jobs = self._get_next_job()
+            self._ask_counter += 1
         else:
             for _ in range(n_configs):
                 jobs.append(self._get_next_job())
+                self._ask_counter += 1
         # Save random state after ask
         self.random_state = self.rng.bit_generator.state
         if self.use_configspace:
@@ -980,6 +987,10 @@ class DEHB(DEHBBase):
             # Replace job_info with container to make sure all fields are given
             job_info = job_info_container
 
+        if self._tell_counter >= self._ask_counter:
+            raise NotImplementedError("Called tell() more often than ask(). \
+                                      Warmstarting with tell is not supported. ")
+        self._tell_counter += 1
         # Update bracket information
         fitness, cost = result["fitness"], result["cost"]
         info = result["info"] if "info" in result else dict()
