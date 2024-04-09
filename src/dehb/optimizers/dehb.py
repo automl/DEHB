@@ -1,11 +1,11 @@
 import json
 import os
 import pickle
-import signal
 import sys
 import time
 from copy import deepcopy
 from pathlib import Path
+from threading import Timer
 from typing import List
 
 import ConfigSpace
@@ -99,13 +99,11 @@ class DEHBBase:
         self.output_path = Path(kwargs["output_path"]) if "output_path" in kwargs else Path("./")
         self.output_path.mkdir(parents=True, exist_ok=True)
         self.logger = logger
-        log_suffix = time.strftime("%x %X %Z")
-        log_suffix = log_suffix.replace("/", "-").replace(":", "-").replace(" ", "_")
+        self.log_filename = f"{self.output_path}/dehb.log"
         self.logger.add(
-            f"{self.output_path}/dehb_{log_suffix}.log",
+            self.log_filename,
             **_logger_props,
         )
-        self.log_filename = f"{self.output_path}/dehb_{log_suffix}.log"
 
     def _pre_compute_fidelity_spacing(self):
         self.max_SH_iter = None
@@ -241,14 +239,13 @@ class DEHB(DEHBBase):
         elif (self.output_path / "dehb_state.json").exists():
             self.logger.warning("A checkpoint already exists, " \
                                 "results could potentially be overwritten.")
+        self._time_budget_exhausted = False
+        self._runtime_budget_timer = None
 
         # Save initial random state
         self.random_state = self.rng.bit_generator.state
         if self.use_configspace:
             self.cs_random_state = self.cs.random.get_state()
-
-        # Register timeout handler for SIGALRM signal
-        signal.signal(signal.SIGALRM, self._timeout_handler)
 
     def __getstate__(self):
         """Allows the object to picklable while having Dask client as a class attribute."""
@@ -333,9 +330,11 @@ class DEHB(DEHBBase):
         for _id in self.available_gpus:
             self.gpu_usage[_id] = 0
 
-    def _timeout_handler(self, signum: int, frame) -> None:
-        self.logger.warning("Runtime budget exhausted. Stopping optimization now.")
-        raise TimeoutError("Runtime budget exhausted.")
+    def _timeout_handler(self) -> None:
+        self.logger.warning("Runtime budget exhausted. Saving optimization checkpoint now.")
+        self.save()
+        # Important to set this flag to true after saving
+        self._time_budget_exhausted = True
 
     def vector_to_configspace(self, config):
         assert hasattr(self, "de")
@@ -367,7 +366,8 @@ class DEHB(DEHBBase):
         self._init_subpop()
         self.available_gpus = None
         self.gpu_usage = None
-        self.saving_scheduler = None
+        self._time_budget_exhausted = False
+        self._runtime_budget_timer = None
 
     def init_population(self, pop_size):
         if self.use_configspace:
@@ -798,6 +798,8 @@ class DEHB(DEHBBase):
                             not bracket.is_bracket_done():
                         return False
                 return True
+        else:
+            return self._time_budget_exhausted
         return False
 
     def _save_incumbent(self):
@@ -819,12 +821,12 @@ class DEHB(DEHBBase):
         except Exception as e:
             self.logger.warning(f"Incumbent not saved: {e!r}")
 
-    def _save_history(self):
+    def _save_history(self, name="history.pkl"):
         # Return early if there is no history yet
         if self.history is None:
             return
         try:
-            history_path = self.output_path / "history.pkl"
+            history_path = self.output_path / name
             with history_path.open("wb") as f:
                 pickle.dump(self.history, f)
         except Exception as e:
@@ -948,9 +950,13 @@ class DEHB(DEHBBase):
 
     def save(self):
         self.logger.info("Saving state to disk...")
-        self._save_incumbent()
-        self._save_history()
-        self._save_state()
+        if self._time_budget_exhausted:
+            self.logger.info("Runtime budget exhausted. Resorting to only saving overtime history.")
+            self._save_history(name="overtime_history.pkl")
+        else:
+            self._save_incumbent()
+            self._save_history()
+            self._save_state()
 
     def tell(self, job_info: dict, result: dict, replay: bool=False):
         """Feed a result back to the optimizer.
@@ -1071,54 +1077,46 @@ class DEHB(DEHBBase):
         fevals, brackets = self._adjust_budgets(fevals, brackets)
         # Set alarm for specified runtime budget
         if total_cost is not None:
-            signal.alarm(total_cost)
-        try:
-            while True:
-                if self._is_run_budget_exhausted(fevals, brackets):
-                    break
-                if self.is_worker_available():
-                    next_bracket_id = self._get_next_bracket(only_id=True)
-                    if brackets is not None and next_bracket_id >= brackets:
-                        # ignore submission and only collect results
-                        # when brackets are chosen as run budget, an extra bracket is created
-                        # since iteration_counter is incremented in ask() and then checked
-                        # in _is_run_budget_exhausted(), therefore, need to skip suggestions
-                        # coming from the extra allocated bracket
-                        # _is_run_budget_exhausted() will not return True until all the lower brackets
-                        # have finished computation and returned its results
-                        pass
-                    else:
-                        if self.n_workers > 1 or isinstance(self.client, Client):
-                            self.logger.debug("{}/{} worker(s) available.".format(
-                                self._get_worker_count() - len(self.futures), self._get_worker_count(),
-                            ))
-                        # Ask for new job_info
-                        job_info = self.ask()
-                        # Submit job_info to a worker for execution
-                        self.submit_job(job_info, **kwargs)
-                        if verbose:
-                            fidelity = job_info["fidelity"]
-                            config_id = job_info["config_id"]
-                            self._verbosity_runtime(fevals, brackets, total_cost)
-                            self.logger.info(
-                                "Evaluating configuration {} with fidelity {} under "
-                                "bracket ID {}".format(config_id, fidelity, job_info["bracket_id"]),
-                            )
-                            self.logger.info(
-                                f"Best score seen/Incumbent score: {self.inc_score}",
-                            )
-                        self._verbosity_debug()
-                self._fetch_results_from_workers()
-                self._clean_inactive_brackets()
-            # end of while
-        except TimeoutError:
-            # Try to collect results one last time
+            self._runtime_budget_timer = Timer(total_cost, self._timeout_handler)
+            self._runtime_budget_timer.start()
+        while True:
+            if self._is_run_budget_exhausted(fevals, brackets):
+                break
+            if self.is_worker_available():
+                next_bracket_id = self._get_next_bracket(only_id=True)
+                if brackets is not None and next_bracket_id >= brackets:
+                    # ignore submission and only collect results
+                    # when brackets are chosen as run budget, an extra bracket is created
+                    # since iteration_counter is incremented in ask() and then checked
+                    # in _is_run_budget_exhausted(), therefore, need to skip suggestions
+                    # coming from the extra allocated bracket
+                    # _is_run_budget_exhausted() will not return True until all the lower brackets
+                    # have finished computation and returned its results
+                    pass
+                else:
+                    if self.n_workers > 1 or isinstance(self.client, Client):
+                        self.logger.debug("{}/{} worker(s) available.".format(
+                            self._get_worker_count() - len(self.futures), self._get_worker_count(),
+                        ))
+                    # Ask for new job_info
+                    job_info = self.ask()
+                    # Submit job_info to a worker for execution
+                    self.submit_job(job_info, **kwargs)
+                    if verbose:
+                        fidelity = job_info["fidelity"]
+                        config_id = job_info["config_id"]
+                        self._verbosity_runtime(fevals, brackets, total_cost)
+                        self.logger.info(
+                            "Evaluating configuration {} with fidelity {} under "
+                            "bracket ID {}".format(config_id, fidelity, job_info["bracket_id"]),
+                        )
+                        self.logger.info(
+                            f"Best score seen/Incumbent score: {self.inc_score}",
+                        )
+                    self._verbosity_debug()
             self._fetch_results_from_workers()
             self._clean_inactive_brackets()
-            # Stop dask workes from executing
-            if self.n_workers > 1 or isinstance(self.client, Client):
-                self.client.cancel(self.futures, force=True)
-
+        # end of while
         if verbose:
             time_taken = time.time() - self.start
             self.logger.info("End of optimisation! Total duration: {}; Total fevals: {}\n".format(
@@ -1133,6 +1131,9 @@ class DEHB(DEHBBase):
             else:
                 self.logger.info(f"{self.inc_config}")
         self.save()
+        # cancel timer
+        if self._runtime_budget_timer:
+            self._runtime_budget_timer.cancel()
         # reset waiting jobs of active bracket to allow for continuation
         self.active_brackets = []
         if len(self.active_brackets) > 0:
