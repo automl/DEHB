@@ -186,6 +186,11 @@ class DEHB(DEHBBase):
                          max_fidelity=max_fidelity, eta=eta, min_clip=min_clip, max_clip=max_clip, 
                          seed=seed, configspace=configspace, boundary_fix_type=boundary_fix_type,
                          max_age=max_age, **kwargs)
+        # Check for deprecated parameters
+        if "max_budget" in kwargs or "min_budget" in kwargs:
+            raise TypeError("Parameters min_budget and max_budget have been deprecated since" \
+                            "v0.1.0. Please use the new parameters min_fidelity and max_fidelity" \
+                            "or downgrade to a version prior to v0.1.0")
         self.de_params.update({"async_strategy": async_strategy})
         self.iteration_counter = -1
         self.de = {}
@@ -970,8 +975,11 @@ class DEHB(DEHBBase):
 
         In order to correctly interpret the results, the `job_info` dict, retrieved by `ask`,
         has to be given. Moreover, the `result` dict has to contain the keys `fitness` and `cost`.
-        It is also possible to add the field `info` to the `result` in order to store additional,
-        user-specific information.
+        `fitness` resembles the objective you are trying to optimize, e.g. validation loss.
+        `cost` resembles the computational cost for computing the result, e.g. the wallclock time
+        for training and validating a neural network to achieve the validation loss specified in
+        `fitness`. It is also possible to add the field `info` to the `result` in order to store
+        additional, user-specific information.
 
         Args:
             job_info (dict): Job info returned by ask().
@@ -995,7 +1003,7 @@ class DEHB(DEHBBase):
                                       Warmstarting with tell is not supported. ")
         self._tell_counter += 1
         # Update bracket information
-        fitness, cost = result["fitness"], result["cost"]
+        fitness, cost = float(result["fitness"]), float(result["cost"])
         info = result["info"] if "info" in result else dict()
         fidelity, parent_id = job_info["fidelity"], job_info["parent_id"]
         config, config_id = job_info["config"], job_info["config_id"]
