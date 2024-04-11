@@ -66,9 +66,18 @@ def objective_function(x: ConfigSpace.Configuration, fidelity: float, **kwargs):
 class TestBudgetExhaustion():
     """Class that bundles all Budget exhaustion tests.
 
-    These tests include budget exhaustion tests for number of function
+    These tests include budget exhaustion tests for runtime, number of function
     evaluations and number of brackets to run.
     """
+    def test_runtime_exhaustion(self):
+        """Test for runtime budget exhaustion."""
+        cs = create_toy_searchspace()
+        dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
+                                        objective_function=objective_function)
+
+        dehb.run(total_cost=1)
+
+        assert dehb._is_run_budget_exhausted(), "Run budget should be exhausted"
 
     def test_fevals_exhaustion(self):
         """Test for function evaluations budget exhaustion."""
