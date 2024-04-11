@@ -75,9 +75,9 @@ class TestBudgetExhaustion():
         dehb = create_toy_optimizer(configspace=cs, min_fidelity=3, max_fidelity=27, eta=3,
                                         objective_function=objective_function)
 
-        dehb.start = time.time() - 10
+        dehb.run(total_cost=1)
 
-        assert dehb._is_run_budget_exhausted(total_cost=1), "Run budget should be exhausted"
+        assert dehb._is_run_budget_exhausted(), "Run budget should be exhausted"
 
     def test_fevals_exhaustion(self):
         """Test for function evaluations budget exhaustion."""

@@ -5,6 +5,7 @@ import sys
 import time
 from copy import deepcopy
 from pathlib import Path
+from threading import Timer
 from typing import List
 
 import ConfigSpace
@@ -98,13 +99,11 @@ class DEHBBase:
         self.output_path = Path(kwargs["output_path"]) if "output_path" in kwargs else Path("./")
         self.output_path.mkdir(parents=True, exist_ok=True)
         self.logger = logger
-        log_suffix = time.strftime("%x %X %Z")
-        log_suffix = log_suffix.replace("/", "-").replace(":", "-").replace(" ", "_")
+        self.log_filename = f"{self.output_path}/dehb.log"
         self.logger.add(
-            f"{self.output_path}/dehb_{log_suffix}.log",
+            self.log_filename,
             **_logger_props,
         )
-        self.log_filename = f"{self.output_path}/dehb_{log_suffix}.log"
 
     def _pre_compute_fidelity_spacing(self):
         self.max_SH_iter = None
@@ -242,6 +241,8 @@ class DEHB(DEHBBase):
         elif (self.output_path / "dehb_state.json").exists():
             self.logger.warning("A checkpoint already exists, " \
                                 "results could potentially be overwritten.")
+        self._time_budget_exhausted = False
+        self._runtime_budget_timer = None
 
         # Save initial random state
         self.random_state = self.rng.bit_generator.state
@@ -331,6 +332,12 @@ class DEHB(DEHBBase):
         for _id in self.available_gpus:
             self.gpu_usage[_id] = 0
 
+    def _timeout_handler(self) -> None:
+        self.logger.warning("Runtime budget exhausted. Saving optimization checkpoint now.")
+        self.save()
+        # Important to set this flag to true after saving
+        self._time_budget_exhausted = True
+
     def vector_to_configspace(self, config):
         assert hasattr(self, "de")
         assert len(self.fidelities) > 0
@@ -364,7 +371,8 @@ class DEHB(DEHBBase):
         self._init_subpop()
         self.available_gpus = None
         self.gpu_usage = None
-        self.saving_scheduler = None
+        self._time_budget_exhausted = False
+        self._runtime_budget_timer = None
 
     def init_population(self, pop_size):
         if self.use_configspace:
@@ -374,7 +382,7 @@ class DEHB(DEHBBase):
             population = self.rng.uniform(low=0.0, high=1.0, size=(pop_size, self.dimensions))
         return population
 
-    def clean_inactive_brackets(self):
+    def _clean_inactive_brackets(self):
         """Removes brackets from the active list if it is done as communicated by Bracket Manager."""
         if len(self.active_brackets) == 0:
             return
@@ -783,14 +791,8 @@ class DEHB(DEHBBase):
                 pickle.dump(self.cs_random_state, f)
 
 
-    def _is_run_budget_exhausted(self, fevals=None, brackets=None, total_cost=None):
+    def _is_run_budget_exhausted(self, fevals=None, brackets=None):
         """Checks if the DEHB run should be terminated or continued."""
-        delimiters = [fevals, brackets, total_cost]
-        delim_sum = sum(x is not None for x in delimiters)
-        if delim_sum == 0:
-            raise ValueError(
-                "Need one of 'fevals', 'brackets' or 'total_cost' as budget for DEHB to run."
-            )
         if fevals is not None:
             if len(self.traj) >= fevals:
                 return True
@@ -804,10 +806,7 @@ class DEHB(DEHBBase):
                         return False
                 return True
         else:
-            if time.time() - self.start >= total_cost:
-                return True
-            if len(self.runtime) > 0 and self.runtime[-1] - self.start >= total_cost:
-                return True
+            return self._time_budget_exhausted
         return False
 
     def _save_incumbent(self):
@@ -829,12 +828,12 @@ class DEHB(DEHBBase):
         except Exception as e:
             self.logger.warning(f"Incumbent not saved: {e!r}")
 
-    def _save_history(self):
+    def _save_history(self, name="history.pkl"):
         # Return early if there is no history yet
         if self.history is None:
             return
         try:
-            history_path = self.output_path / "history.pkl"
+            history_path = self.output_path / name
             with history_path.open("wb") as f:
                 pickle.dump(self.history, f)
         except Exception as e:
@@ -943,7 +942,7 @@ class DEHB(DEHBBase):
 
             self.tell(job_info, result, replay=True)
         # Clean inactive brackets
-        self.clean_inactive_brackets()
+        self._clean_inactive_brackets()
 
         # Load and set random state
         rnd_state_path = run_dir / "random_state.pkl"
@@ -958,9 +957,13 @@ class DEHB(DEHBBase):
 
     def save(self):
         self.logger.info("Saving state to disk...")
-        self._save_incumbent()
-        self._save_history()
-        self._save_state()
+        if self._time_budget_exhausted:
+            self.logger.info("Runtime budget exhausted. Resorting to only saving overtime history.")
+            self._save_history(name="overtime_history.pkl")
+        else:
+            self._save_incumbent()
+            self._save_history()
+            self._save_state()
 
     def tell(self, job_info: dict, result: dict, replay: bool=False):
         """Feed a result back to the optimizer.
@@ -1068,7 +1071,6 @@ class DEHB(DEHBBase):
             self.distribute_gpus()
 
         self.start = self.start = time.time()
-        fevals, brackets = self._adjust_budgets(fevals, brackets)
         if verbose:
             print("\nLogging at {} for optimization starting at {}\n".format(
                 Path.cwd() / self.log_filename,
@@ -1076,8 +1078,20 @@ class DEHB(DEHBBase):
             ))
         if debug:
             logger.configure(handlers=[{"sink": sys.stdout}])
+
+        delimiters = [fevals, brackets, total_cost]
+        delim_sum = sum(x is not None for x in delimiters)
+        if delim_sum == 0:
+            raise ValueError(
+                "Need one of 'fevals', 'brackets' or 'total_cost' as budget for DEHB to run."
+            )
+        fevals, brackets = self._adjust_budgets(fevals, brackets)
+        # Set alarm for specified runtime budget
+        if total_cost is not None:
+            self._runtime_budget_timer = Timer(total_cost, self._timeout_handler)
+            self._runtime_budget_timer.start()
         while True:
-            if self._is_run_budget_exhausted(fevals, brackets, total_cost):
+            if self._is_run_budget_exhausted(fevals, brackets):
                 break
             if self.is_worker_available():
                 next_bracket_id = self._get_next_bracket(only_id=True)
@@ -1112,17 +1126,8 @@ class DEHB(DEHBBase):
                         )
                     self._verbosity_debug()
             self._fetch_results_from_workers()
-            self.clean_inactive_brackets()
+            self._clean_inactive_brackets()
         # end of while
-
-        if verbose and len(self.futures) > 0:
-            self.logger.info(
-                "DEHB optimisation over! Waiting to collect results from workers running..."
-            )
-        while len(self.futures) > 0:
-            self._fetch_results_from_workers()
-            time.sleep(0.05)  # waiting 50ms
-
         if verbose:
             time_taken = time.time() - self.start
             self.logger.info("End of optimisation! Total duration: {}; Total fevals: {}\n".format(
@@ -1137,6 +1142,9 @@ class DEHB(DEHBBase):
             else:
                 self.logger.info(f"{self.inc_config}")
         self.save()
+        # cancel timer
+        if self._runtime_budget_timer:
+            self._runtime_budget_timer.cancel()
         # reset waiting jobs of active bracket to allow for continuation
         self.active_brackets = []
         if len(self.active_brackets) > 0:
