@@ -412,3 +412,12 @@ class TestRestart:
             dehb = create_toy_optimizer(configspace=cs, min_fidelity=8, max_fidelity=123, eta=42,
                                     save_freq="step", objective_function=objective_function,
                                     output_path="restart_error_test", resume=True)
+
+class TestDeprecation:
+    """Class that bundles all tests regarding deprecation warnings."""
+    def test_budget_deprecation(self):
+        """Verifies, that an error is thrown if the user uses the old budget interface."""
+        cs = create_toy_searchspace()
+        with pytest.raises(TypeError):
+            dehb = DEHB(cs, objective_function, len(cs.get_hyperparameters()), min_budget=2,
+                        max_budget=5)

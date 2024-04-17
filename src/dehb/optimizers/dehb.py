@@ -29,6 +29,11 @@ class DEHBBase:
                  crossover_prob=None, strategy=None, min_fidelity=None,
                  max_fidelity=None, eta=None, min_clip=None, max_clip=None, seed=None,
                  boundary_fix_type='random', max_age=np.inf, **kwargs):
+        # Check for deprecated parameters
+        if "max_budget" in kwargs or "min_budget" in kwargs:
+            raise TypeError("Parameters min_budget and max_budget have been deprecated since " \
+                            "v0.1.0. Please use the new parameters min_fidelity and max_fidelity " \
+                            "or downgrade to a version prior to v0.1.0")
         # Rng
         self.rng = np.random.default_rng(seed)
 
@@ -186,11 +191,6 @@ class DEHB(DEHBBase):
                          max_fidelity=max_fidelity, eta=eta, min_clip=min_clip, max_clip=max_clip, 
                          seed=seed, configspace=configspace, boundary_fix_type=boundary_fix_type,
                          max_age=max_age, **kwargs)
-        # Check for deprecated parameters
-        if "max_budget" in kwargs or "min_budget" in kwargs:
-            raise TypeError("Parameters min_budget and max_budget have been deprecated since" \
-                            "v0.1.0. Please use the new parameters min_fidelity and max_fidelity" \
-                            "or downgrade to a version prior to v0.1.0")
         self.de_params.update({"async_strategy": async_strategy})
         self.iteration_counter = -1
         self.de = {}
@@ -1059,6 +1059,15 @@ class DEHB(DEHBBase):
         2) Number of Successive Halving brackets run under Hyperband (brackets)
         3) Total computational cost (in seconds) aggregated by all function evaluations (total_cost)
         """
+        # Warn if users use old state saving frequencies
+        if "save_history" in kwargs or "save_intermediate" in kwargs or "name" in kwargs:
+            logger.warning("The run parameters 'save_history', 'save_intermediate' and 'name' are "\
+                           "deprecated, since the changes in v0.1.1. Please use the 'saving_freq' "\
+                           "parameter in the constructor to adjust when to save DEHBs state " \
+                           "(including history). Please use the 'output_path' parameter to adjust "\
+                           "where the state and logs should be saved.")
+            raise TypeError("Used deprecated parameters 'save_history', 'save_intermediate' " \
+                            "and/or 'name'. Please check the logs for more information.")
         # check if run has already been called before
         if self.start is not None:
             logger.warning("DEHB has already been run. Calling 'run' twice could lead to unintended"
