@@ -3,7 +3,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from hpobench.benchmarks.ml.tabular_benchmark import TabularBenchmark
+from hpobench.benchmarks.ml.nn_benchmark import NNBenchmark
 from hpobench.benchmarks.nas.nasbench_201 import Cifar10ValidNasBench201BenchmarkOriginal
 from hpobench.benchmarks.od.od_ae import ODAutoencoder
 from hpobench.benchmarks.rl.cartpole import CartpoleReduced
@@ -12,8 +12,8 @@ from markdown_table_generator import generate_markdown, table_from_string_list
 from src.dehb import DEHB
 
 
-def objective_function(config, fidelity, b):
-    result_dict = b.objective_function(config, fidelity={"iter": int(fidelity)})
+def objective_function(config, fidelity, b, fidelity_name):
+    result_dict = b.objective_function(config, fidelity={fidelity_name: int(fidelity)})
     return {
         "fitness": result_dict["function_value"],
         "cost": result_dict["cost"],
@@ -37,18 +37,6 @@ def input_arguments():
         default=["ml"],
         help="Benchmarks to run DEHB on.",
         choices=["ml", "rl", "nas"],
-    )
-    parser.add_argument(
-        "--min_fidelity",
-        type=float,
-        default=3,
-        help="Minimum fidelity (epoch length)",
-    )
-    parser.add_argument(
-        "--max_fidelity",
-        type=float,
-        default=27,
-        help="Maximum fidelity (epoch length)",
     )
     parser.add_argument(
         "--eta",
@@ -100,26 +88,44 @@ def input_arguments():
     )
     return parser.parse_args()
 
-def get_benchmark(benchmark, seed):
-    if benchmark == "ml":
-        return TabularBenchmark(rng=seed, task_id=31, model="nn")
-    elif benchmark == "rl":
-        return CartpoleReduced(rng=seed)
-    elif benchmark == "nas":
-        return Cifar10ValidNasBench201BenchmarkOriginal(rng=seed)
-    elif benchmark == "surrogate":
-        return ParamNetReducedAdultOnTimeBenchmark(rng=seed)
-    elif benchmark == "od":
-        return ODAutoencoder(dataset_name="cardio", rng=seed)
-    raise ValueError(f"No benchmark '{benchmark}' found.")
+def get_fidelity_range(benchmark, fidelity_name, seed):
+    fidelity_space = benchmark.get_fidelity_space(seed)
+    iter_fidelity_param = fidelity_space.get_hyperparameter(fidelity_name)
+    min_fidelity = iter_fidelity_param.lower
+    max_fidelity = iter_fidelity_param.upper
+    return min_fidelity, max_fidelity
 
-def run_for(dehb, benchmark, brackets=None, fevals=None, ask_tell=False, verbose=True):
+def get_benchmark_and_fidelities(benchmark_name, seed):
+    if benchmark_name == "ml":
+        benchmark = NNBenchmark(rng=seed, task_id=31)
+        fidelity_name = "iter"
+    elif benchmark_name == "rl":
+        benchmark = CartpoleReduced(rng=seed)
+        fidelity_name = "budget"
+    elif benchmark_name == "nas":
+        benchmark = Cifar10ValidNasBench201BenchmarkOriginal(rng=seed)
+        fidelity_name = "epoch"
+    elif benchmark_name == "surrogate":
+        benchmark = ParamNetReducedAdultOnTimeBenchmark(rng=seed)
+        fidelity_name = "budget"
+    elif benchmark_name == "od":
+        fidelity_name = "epochs"
+        benchmark = ODAutoencoder(dataset_name="cardio", rng=seed)
+    else:
+        raise ValueError(f"No benchmark '{benchmark_name}' found.")
+
+    min_fidelity, max_fidelity = get_fidelity_range(benchmark, fidelity_name, seed)
+    return benchmark, fidelity_name, (min_fidelity, max_fidelity)
+
+def run_for(dehb, benchmark, fidelity_name, brackets=None, fevals=None, ask_tell=False, verbose=True):
     if brackets:
-        traj, runtime, history = dehb.run(brackets=brackets, verbose=verbose, b=benchmark)
+        traj, runtime, history = dehb.run(brackets=brackets, verbose=verbose, b=benchmark,
+                                          fidelity_name=fidelity_name)
     elif ask_tell:
         for _i in range(fevals):
             job_info = dehb.ask()
-            res = objective_function(job_info["config"], job_info["fidelity"], benchmark)
+            res = objective_function(job_info["config"], job_info["fidelity"], b=benchmark,
+                                     fidelity_name=fidelity_name)
             dehb.tell(job_info, res)
         traj = dehb.traj
         # Log the incumbent
@@ -128,7 +134,8 @@ def run_for(dehb, benchmark, brackets=None, fevals=None, ask_tell=False, verbose
         for k, v in config.get_dictionary().items():
                     dehb.logger.info("{}: {}".format(k, v))
     else:
-        traj, runtime, history = dehb.run(fevals=fevals, verbose=verbose, b=benchmark)
+        traj, runtime, history = dehb.run(fevals=fevals, verbose=verbose, b=benchmark,
+                                          fidelity_name=fidelity_name)
 
     return traj
 
@@ -136,11 +143,12 @@ def main():
     args = input_arguments()
     scores = {}
     table = [["Benchmark", "Score (mean ± std)"]]
-    for benchmark in args.benchmarks:
-        scores[benchmark] = []
+    for benchmark_name in args.benchmarks:
+        scores[benchmark_name] = []
         for seed in args.seeds:
-            b = get_benchmark(benchmark, seed)
-            cs = b.get_configuration_space(seed=seed)
+            benchmark, fid_name, (min_fidelity, max_fidelity) = get_benchmark_and_fidelities(
+                benchmark_name, seed)
+            cs = benchmark.get_configuration_space(seed=seed)
             dimensions = len(cs.get_hyperparameters())
 
             ###########################
@@ -150,16 +158,17 @@ def main():
                 f=objective_function,
                 cs=cs,
                 dimensions=dimensions,
-                min_fidelity=args.min_fidelity,
-                max_fidelity=args.max_fidelity,
+                min_fidelity=min_fidelity,
+                max_fidelity=max_fidelity,
                 eta=args.eta,
                 output_path=args.output_path,
                 n_workers=args.n_workers,
                 save_freq="incumbent",
                 seed=seed,
             )
-
-            traj = run_for(dehb, b, args.brackets, args.fevals, args.ask_tell, args.verbose)
+            traj = run_for(dehb, brackets=args.brackets, fevals=args.fevals, ask_tell=args.ask_tell,
+                           verbose=args.verbose,
+                           benchmark=benchmark, fidelity_name=fid_name)
 
             if args.restart:
                 dehb = DEHB(
@@ -175,13 +184,15 @@ def main():
                     seed=seed,
                     resume=True,
                 )
-                traj = run_for(dehb, b, args.brackets, args.fevals, args.ask_tell, args.verbose)
+                traj = run_for(dehb, brackets=args.brackets, fevals=args.fevals, ask_tell=args.ask_tell,
+                               verbose=args.verbose,
+                               benchmark=benchmark, fidelity_name=fid_name)
 
             inc_config, inc_value = dehb.get_incumbents()
-            scores[benchmark].append(inc_value)
-        mean_score = np.mean(scores[benchmark])
-        std_score = np.std(scores[benchmark])
-        table.append([benchmark, f"{mean_score:.3e} ± {std_score:.3e}"])
+            scores[benchmark_name].append(inc_value)
+        mean_score = np.mean(scores[benchmark_name])
+        std_score = np.std(scores[benchmark_name])
+        table.append([benchmark_name, f"{mean_score:.3e} ± {std_score:.3e}"])
 
     markdown_path = Path(args.output_path) / "benchmark_results.md"
     md_table = table_from_string_list(table)
