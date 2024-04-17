@@ -1,10 +1,12 @@
 import argparse
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from hpobench.benchmarks.ml.tabular_benchmark import TabularBenchmark as Benchmark
+from hpobench.benchmarks.rl.cartpole import CartpoleReduced
+from hpobench.benchmarks.ml.tabular_benchmark import TabularBenchmark
+from hpobench.benchmarks.nas.nasbench_201 import Cifar10ValidNasBench201BenchmarkOriginal
 from markdown_table_generator import generate_markdown, table_from_string_list
-from pathlib import Path
 from src.dehb import DEHB
 
 
@@ -30,9 +32,9 @@ def input_arguments():
         "--benchmarks",
         type=str,
         nargs="*",
-        default=["german_credit"],
+        default=["ml"],
         help="Benchmarks to run DEHB on.",
-        choices=["german_credit"],
+        choices=["ml", "rl", "nas"],
     )
     parser.add_argument(
         "--min_fidelity",
@@ -97,8 +99,12 @@ def input_arguments():
     return parser.parse_args()
 
 def get_benchmark(benchmark, seed):
-    if benchmark == "german_credit":
-        return Benchmark(rng=seed, task_id=31, model="nn")
+    if benchmark == "ml":
+        return TabularBenchmark(rng=seed, task_id=31, model="nn")
+    elif benchmark == "rl":
+        return CartpoleReduced(rng=seed)
+    elif benchmark == "nas":
+        return Cifar10ValidNasBench201BenchmarkOriginal(rng=seed)
     raise ValueError(f"No benchmark '{benchmark}' found.")
 
 def run_for(dehb, benchmark, brackets=None, fevals=None, ask_tell=False, verbose=True):
