@@ -1054,10 +1054,22 @@ class DEHB(DEHBBase):
         to the worker computations.
 
         The duration of the DEHB run can be controlled by specifying one of 3 parameters. If more
-        than one are specified, DEHB selects only one in the priority order (high to low):
-        1) Number of function evaluations (fevals)
-        2) Number of Successive Halving brackets run under Hyperband (brackets)
+        than one are specified, DEHB selects only one in the priority order (high to low): <br>
+        1) Number of function evaluations (fevals) <br>
+        2) Number of Successive Halving brackets run under Hyperband (brackets) <br>
         3) Total computational cost (in seconds) aggregated by all function evaluations (total_cost)
+
+
+        Args:
+            fevals (int, optional): Number of functions evaluations to run. Defaults to None.
+            brackets (int, optional): Number of brackets to run. Defaults to None.
+            total_cost (int, optional): Wallclock budget in seconds. Defaults to None.
+            single_node_with_gpus (bool): Workers get assigned different GPUs. Default to False.
+            verbose (bool): Activate verbose output. Defaults to False.
+            debug (bool): Activate debug output. Defaults to False.
+
+        Returns:
+            np.array, np.array, np.array: Trajectory, runtime and optimization history.
         """
         # Warn if users use old state saving frequencies
         if "save_history" in kwargs or "save_intermediate" in kwargs or "name" in kwargs:
