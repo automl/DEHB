@@ -36,7 +36,7 @@ def input_arguments():
         nargs="*",
         default=["ml"],
         help="Benchmarks to run DEHB on.",
-        choices=["ml", "rl", "nas"],
+        choices=["ml", "rl", "nas", "surrogate", "od"],
     )
     parser.add_argument(
         "--eta",
