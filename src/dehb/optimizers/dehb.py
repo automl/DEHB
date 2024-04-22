@@ -227,6 +227,7 @@ class DEHB(DEHBBase):
         # Initializing DE subpopulations
         self._get_pop_sizes()
         self._init_subpop()
+        self.config_repository.initial_configs = self.config_repository.configs.copy()
 
         # Misc.
         self.available_gpus = None
@@ -770,14 +771,11 @@ class DEHB(DEHBBase):
             dehb_internals["inc_score"] = self.inc_score
             dehb_internals["inc_config"] = self.inc_config.tolist()
             dehb_internals["inc_info"] = self.inc_info
+        dehb_internals["initial_configs"] = self.config_repository.get_serialized_initial_configs()
         state["internals"] = dehb_internals
         return state
 
     def _save_state(self):
-        # Save ConfigRepository
-        config_repo_path = self.output_path / "config_repository.json"
-        self.config_repository.save_state(config_repo_path)
-
         # Get state
         state = self._get_state()
         # Write state to disk
@@ -910,15 +908,11 @@ class DEHB(DEHBBase):
         self._init_subpop()
         # Reset ConfigRepo after initializing DE
         self.config_repository.reset()
-        # Load initial configurations from config repository
-        config_repo_path = run_dir / "config_repository.json"
-        with config_repo_path.open() as f:
-            config_repo_list = json.load(f)
-        # Get initial configs
-        num_initial_configs = sum(self._max_pop_size.values())
-        initial_config_entries = config_repo_list[:num_initial_configs]
+
+        # Load initial configurations from state
+        initial_configs = dehb_state["internals"]["initial_configs"]
         # Filter initial configs by fidelity
-        initial_configs_by_fidelity = {fidelity: [np.array(item["config"]) for item in initial_config_entries
+        initial_configs_by_fidelity = {fidelity: [np.array(item["config"]) for item in initial_configs
                                                   if str(fidelity) in item["results"]]
                                                   for fidelity in self.fidelities}
         # Add initial configs to DE and announce them to ConfigRepo
