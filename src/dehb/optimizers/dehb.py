@@ -10,6 +10,7 @@ from typing import List
 
 import ConfigSpace
 import numpy as np
+import pandas as pd
 from distributed import Client
 from loguru import logger
 
@@ -831,14 +832,15 @@ class DEHB(DEHBBase):
         except Exception as e:
             self.logger.warning(f"Incumbent not saved: {e!r}")
 
-    def _save_history(self, name="history.pkl"):
+    def _save_history(self, name="history.parquet.gzip"):
         # Return early if there is no history yet
         if self.history is None:
             return
         try:
             history_path = self.output_path / name
-            with history_path.open("wb") as f:
-                pickle.dump(self.history, f)
+            history_df = pd.DataFrame(self.history, columns=["config_id", "config", "fitness",
+                                                             "cost", "fidelity", "info"])
+            history_df.to_parquet(history_path, compression="gzip")
         except Exception as e:
             self.logger.warning(f"History not saved: {e!r}")
 
@@ -920,23 +922,23 @@ class DEHB(DEHBBase):
             self.de[fidelity].population = np.array(sub_pop)
             self.de[fidelity].population_ids = self.config_repository.announce_population(sub_pop,
                                                                                           fidelity)
+        self.config_repository.initial_configs = self.config_repository.configs.copy()
 
         # Load history
-        history_path = run_dir / "history.pkl"
-        with history_path.open("rb") as f:
-            history = pickle.load(f)
+        history_path = run_dir / "history.parquet.gzip"
+        history = pd.read_parquet(history_path)
 
         # Replay history
-        for config_id, config, fitness, cost, fidelity, info in history:
+        for _, row in history.iterrows():
             job_info = {
-                "fidelity": fidelity,
-                "config_id": config_id,
-                "config": np.array(config),
+                "fidelity": row["fidelity"],
+                "config_id": row["config_id"],
+                "config": np.array(row["config"]),
             }
             result = {
-                "fitness": fitness,
-                "cost": cost,
-                "info": info,
+                "fitness": row["fitness"],
+                "cost": row["cost"],
+                "info": row["info"],
             }
 
             self.tell(job_info, result, replay=True)
@@ -958,7 +960,7 @@ class DEHB(DEHBBase):
         self.logger.info("Saving state to disk...")
         if self._time_budget_exhausted:
             self.logger.info("Runtime budget exhausted. Resorting to only saving overtime history.")
-            self._save_history(name="overtime_history.pkl")
+            self._save_history(name="overtime_history.parquet.gzip")
         else:
             self._save_incumbent()
             self._save_history()
