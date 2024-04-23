@@ -56,6 +56,10 @@ dev = [
 examples = [
   "scikit-learn"
 ]
+benchmarks = [
+  "matplotlib",
+  "markdown_table_generator"
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]                   # path to the test directory

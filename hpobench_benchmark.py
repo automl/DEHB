@@ -5,9 +5,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from hpobench.benchmarks.ml.nn_benchmark import NNBenchmark
 from hpobench.benchmarks.nas.nasbench_201 import Cifar10ValidNasBench201BenchmarkOriginal
-from hpobench.benchmarks.od.od_ae import ODAutoencoder
-from hpobench.benchmarks.rl.cartpole import CartpoleReduced
-from hpobench.benchmarks.surrogates.paramnet_benchmark import ParamNetReducedAdultOnTimeBenchmark
 from markdown_table_generator import generate_markdown, table_from_string_list
 from src.dehb import DEHB
 
@@ -36,7 +33,7 @@ def input_arguments():
         nargs="*",
         default=["ml"],
         help="Benchmarks to run DEHB on.",
-        choices=["ml", "rl", "nas", "surrogate", "od"],
+        choices=["ml", "nas"],
     )
     parser.add_argument(
         "--eta",
@@ -48,43 +45,43 @@ def input_arguments():
         "--output_path",
         type=str,
         default="./hpobench_dehb",
-        help="Directory for DEHB to write logs and outputs",
+        help="Directory for DEHB to write logs and outputs.",
     )
     parser.add_argument(
         "--n_workers",
         type=int,
         default=1,
-        help="Number of CPU workers for DEHB to distribute function evaluations to",
+        help="Number of CPU workers for DEHB to distribute function evaluations to.",
     ),
     parser.add_argument(
         "--verbose",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="Decides verbosity of DEHB optimization",
+        help="Decides verbosity of DEHB optimization.",
     )
     parser.add_argument(
         "--brackets",
         type=int,
         default=None,
-        help="Total number of brackets as fidelity to run DEHB",
+        help="Total number of brackets as fidelity to run DEHB.",
     )
     parser.add_argument(
         "--fevals",
         type=int,
         default=None,
-        help="Total number of fevals as fidelity to run DEHB",
+        help="Total number of fevals as fidelity to run DEHB.",
     )
     parser.add_argument(
         "--ask_tell",
         action=argparse.BooleanOptionalAction,
         default=False,
-        help="Use ask and tell interface",
+        help="Use the ask and tell interface.",
     )
     parser.add_argument(
         "--restart",
         action=argparse.BooleanOptionalAction,
         default=False,
-        help="Use ask and tell interface",
+        help="Restart the training and run again for the same budget.",
     )
     return parser.parse_args()
 
@@ -99,18 +96,9 @@ def get_benchmark_and_fidelities(benchmark_name, seed):
     if benchmark_name == "ml":
         benchmark = NNBenchmark(rng=seed, task_id=31)
         fidelity_name = "iter"
-    elif benchmark_name == "rl":
-        benchmark = CartpoleReduced(rng=seed)
-        fidelity_name = "budget"
     elif benchmark_name == "nas":
         benchmark = Cifar10ValidNasBench201BenchmarkOriginal(rng=seed)
         fidelity_name = "epoch"
-    elif benchmark_name == "surrogate":
-        benchmark = ParamNetReducedAdultOnTimeBenchmark(rng=seed)
-        fidelity_name = "budget"
-    elif benchmark_name == "od":
-        fidelity_name = "epochs"
-        benchmark = ODAutoencoder(dataset_name="cardio", rng=seed)
     else:
         raise ValueError(f"No benchmark '{benchmark_name}' found.")
 
