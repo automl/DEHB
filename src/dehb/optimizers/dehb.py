@@ -768,10 +768,6 @@ class DEHB(DEHBBase):
         state["HB_params"] = hb_dict
         # Save DEHB interals
         dehb_internals = {}
-        if self.inc_config is not None:
-            dehb_internals["inc_score"] = self.inc_score
-            dehb_internals["inc_config"] = self.inc_config.tolist()
-            dehb_internals["inc_info"] = self.inc_info
         dehb_internals["initial_configs"] = self.config_repository.get_serialized_initial_configs()
         state["internals"] = dehb_internals
         return state
@@ -780,9 +776,12 @@ class DEHB(DEHBBase):
         # Get state
         state = self._get_state()
         # Write state to disk
-        state_path = self.output_path / "dehb_state.json"
-        with state_path.open("w") as f:
-            json.dump(state, f, indent=2)
+        try:
+            state_path = self.output_path / "dehb_state.json"
+            with state_path.open("w") as f:
+                json.dump(state, f, indent=2)
+        except Exception as e:
+            self.logger.warning(f"State not saved: {e!r}")
 
         # Write random state to disk
         rnd_state_path = self.output_path / "random_state.pkl"
