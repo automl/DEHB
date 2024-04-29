@@ -58,7 +58,12 @@ examples = [
 ]
 benchmarks = [
   "matplotlib",
-  "markdown_table_generator"
+  "markdown_table_generator",
+  "scikit-learn==0.23.2",
+  "numpy==1.20.0",
+  "tqdm",
+  "pandas==1.2.4",
+  "openml==0.12.2",
 ]
 
 [tool.pytest.ini_options]
