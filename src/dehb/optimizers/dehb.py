@@ -28,8 +28,14 @@ class DEHBBase:
                  crossover_prob=None, strategy=None, min_fidelity=None,
                  max_fidelity=None, eta=None, min_clip=None, max_clip=None, seed=None,
                  boundary_fix_type='random', max_age=np.inf, **kwargs):
-        # Rng
-        self.rng = np.random.default_rng(seed)
+        if seed is None:
+            seed = int(np.random.default_rng().integers(0, 2**32 - 1))
+        elif isinstance(seed, np.random.Generator):
+            seed = int(seed.integers(0, 2**32 - 1))
+
+        assert isinstance(seed, int)
+        self._original_seed = seed
+        self.rng = np.random.default_rng(self._original_seed)
 
         # Miscellaneous
         self._setup_logger(kwargs)
@@ -39,6 +45,7 @@ class DEHBBase:
         self.cs = cs
         self.use_configspace = True if isinstance(self.cs, ConfigSpace.ConfigurationSpace) else False
         if self.use_configspace:
+            self.cs.seed(self._original_seed)
             self.dimensions = len(self.cs.get_hyperparameters())
         elif dimensions is None or not isinstance(dimensions, (int, np.integer)):
             assert "Need to specify `dimensions` as an int when `cs` is not available/specified!"
@@ -61,7 +68,10 @@ class DEHBBase:
             "max_age": self.max_age,
             "cs": self.cs,
             "dimensions": self.dimensions,
-            "rng": self.rng,
+            # NOTE(eddiebergman): To make reset work, we pass
+            # in an explicitly generated seed at construction,
+            #  rather than share the rng state
+            # "rng": self.rng,
             "f": f,
         }
 
@@ -117,7 +127,7 @@ class DEHBBase:
                                                      -np.linspace(start=self.max_SH_iter - 1,
                                                                   stop=0, num=self.max_SH_iter))
 
-    def reset(self):
+    def reset(self, *, reset_seeds: bool = True):
         self.inc_score = np.inf
         self.inc_config = None
         self.population = None
@@ -125,6 +135,10 @@ class DEHBBase:
         self.traj = []
         self.runtime = []
         self.history = []
+        if reset_seeds:
+            if isinstance(self.cs, ConfigSpace.ConfigurationSpace):
+                self.cs.seed(self._original_seed)
+            self.rng = np.random.default_rng(self._original_seed)
         self.logger.info("\n\nRESET at {}\n\n".format(time.strftime("%x %X %Z")))
 
     def init_population(self):
@@ -341,8 +355,8 @@ class DEHB(DEHBBase):
         assert len(self.fidelities) > 0
         return self.de[self.fidelities[0]].configspace_to_vector(config)
 
-    def reset(self):
-        super().reset()
+    def reset(self, *, reset_seeds: bool = True):
+        super().reset(reset_seeds=reset_seeds)
         if self.n_workers > 1 and hasattr(self, "client") and isinstance(self.client, Client):
             self.client.restart()
         else:
@@ -406,9 +420,10 @@ class DEHB(DEHBBase):
     def _init_subpop(self):
         """List of DE objects corresponding to the fidelities."""
         self.de = {}
-        for i, f in enumerate(self._max_pop_size.keys()):
+        seeds = self.rng.integers(0, 2**32 - 1, size=len(self._max_pop_size))
+        for (i, f), _seed in zip(enumerate(self._max_pop_size.keys()), seeds):
             self.de[f] = AsyncDE(**self.de_params, pop_size=self._max_pop_size[f],
-                                 config_repository=self.config_repository)
+                                 config_repository=self.config_repository, seed=int(_seed))
             self.de[f].population = self.de[f].init_population(pop_size=self._max_pop_size[f])
             self.de[f].population_ids = self.config_repository.announce_population(self.de[f].population, f)
             self.de[f].fitness = np.array([np.inf] * self._max_pop_size[f])
@@ -738,9 +753,9 @@ class DEHB(DEHBBase):
         state = {}
         # DE parameters
         serializable_de_params = self.de_params.copy()
-        serializable_de_params.pop("cs")
-        serializable_de_params.pop("rng")
-        serializable_de_params.pop("f")
+        serializable_de_params.pop("cs", None)
+        serializable_de_params.pop("rng", None)
+        serializable_de_params.pop("f", None)
         serializable_de_params["output_path"] = str(serializable_de_params["output_path"])
         state["DE_params"] = serializable_de_params
         # Hyperband variables
