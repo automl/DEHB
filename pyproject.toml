@@ -56,9 +56,11 @@ dev = [
 examples = [
   "scikit-learn"
 ]
-benchmarks = [
+benchmarking = [
   "matplotlib",
   "markdown_table_generator",
+]
+hpobench_benchmark = [
   "scikit-learn==0.23.2",
   "numpy==1.20.0",
   "tqdm",
