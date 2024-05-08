@@ -68,6 +68,11 @@ hpobench_benchmark = [
   "openml==0.12.2",
 ]
 
+mfpbench_benchmark = [
+  "typing_extensions", # Keep this in for now, until it is properly integrated in mf-prior-bench
+  "mf-prior-bench[jahs-bench]"
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]                   # path to the test directory
 minversion = "3.8"
