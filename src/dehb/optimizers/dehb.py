@@ -257,11 +257,6 @@ class DEHB(DEHBBase):
             self.logger.warning("A checkpoint already exists, " \
                                 "results could potentially be overwritten.")
 
-        # Save initial random state
-        self.random_state = self.rng.bit_generator.state
-        if self.use_configspace:
-            self.cs_random_state = self.cs.random.get_state()
-
     def __getstate__(self):
         """Allows the object to picklable while having Dask client as a class attribute."""
         d = dict(self.__dict__)
@@ -676,10 +671,7 @@ class DEHB(DEHBBase):
             for _ in range(n_configs):
                 jobs.append(self._get_next_job())
                 self._ask_counter += 1
-        # Save random state after ask
-        self.random_state = self.rng.bit_generator.state
-        if self.use_configspace:
-            self.cs_random_state = self.cs.random.get_state()
+
         return jobs
 
     def _get_gpu_id_with_low_load(self):
@@ -786,16 +778,6 @@ class DEHB(DEHBBase):
         state_path = self.output_path / "dehb_state.json"
         with state_path.open("w") as f:
             json.dump(state, f, indent=2)
-
-        # Write random state to disk
-        rnd_state_path = self.output_path / "random_state.pkl"
-        with rnd_state_path.open("wb") as f:
-            pickle.dump(self.random_state, f)
-
-        if self.use_configspace:
-            cs_rnd_path = self.output_path / "cs_random_state.pkl"
-            with cs_rnd_path.open("wb") as f:
-                pickle.dump(self.cs_random_state, f)
 
 
     def _is_run_budget_exhausted(self, fevals=None, brackets=None, total_cost=None):
@@ -916,28 +898,6 @@ class DEHB(DEHBBase):
             return False
         self.eta = hb_vars["eta"]
 
-        self._pre_compute_fidelity_spacing()
-        self._get_pop_sizes()
-        self._init_subpop()
-        # Reset ConfigRepo after initializing DE
-        self.config_repository.reset()
-        # Load initial configurations from config repository
-        config_repo_path = run_dir / "config_repository.json"
-        with config_repo_path.open() as f:
-            config_repo_list = json.load(f)
-        # Get initial configs
-        num_initial_configs = sum(self._max_pop_size.values())
-        initial_config_entries = config_repo_list[:num_initial_configs]
-        # Filter initial configs by fidelity
-        initial_configs_by_fidelity = {fidelity: [np.array(item["config"]) for item in initial_config_entries
-                                                  if str(fidelity) in item["results"]]
-                                                  for fidelity in self.fidelities}
-        # Add initial configs to DE and announce them to ConfigRepo
-        for fidelity, sub_pop in initial_configs_by_fidelity.items():
-            self.de[fidelity].population = np.array(sub_pop)
-            self.de[fidelity].population_ids = self.config_repository.announce_population(sub_pop,
-                                                                                          fidelity)
-
         # Load history
         history_path = run_dir / "history.pkl"
         with history_path.open("rb") as f:
@@ -959,16 +919,6 @@ class DEHB(DEHBBase):
             self.tell(job_info, result, replay=True)
         # Clean inactive brackets
         self.clean_inactive_brackets()
-
-        # Load and set random state
-        rnd_state_path = run_dir / "random_state.pkl"
-        with rnd_state_path.open("rb") as f:
-            self.rng.bit_generator.state = pickle.load(f)
-
-        if self.use_configspace:
-            cs_rnd_state_path = run_dir / "cs_random_state.pkl"
-            with cs_rnd_state_path.open("rb") as f:
-                self.cs.random.set_state(pickle.load(f))
         return True
 
     def save(self):
