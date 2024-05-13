@@ -57,7 +57,7 @@ class ConfigRepository:
                                         Defaults to None.
 
         Returns:
-            int: ID of configuration
+            ID of configuration
         """
         config_id = len(self.configs)
         fidelity = float(fidelity or 0)
@@ -77,7 +77,7 @@ class ConfigRepository:
                                         Defaults to None.
 
         Returns:
-            np.ndarray: population ids
+            population ids
         """
         population_ids = []
         for indiv in population:
@@ -137,7 +137,7 @@ class ConfigRepository:
             config_id (int): ID of config
 
         Returns:
-            np.ndarray: Config in hypercube representation
+            Config in hypercube representation
         """
         try:
             config_item = self.configs[config_id]
@@ -145,14 +145,14 @@ class ConfigRepository:
             raise IndexError("Config with the given ID can not be found.") from e
         return config_item.config
 
-    def serialize_configs(self, configs):
+    def serialize_configs(self, configs) -> list:
         """Returns the configurations in logging format.
 
         Args:
             configs (list): Configs to parse into logging format
 
         Returns:
-            list: Configs in logging format
+            Configs in logging format
         """
         serialized_data = []
         for config in configs:

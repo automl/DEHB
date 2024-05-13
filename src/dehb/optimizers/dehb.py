@@ -132,26 +132,21 @@ class DEHBBase:
         self.history = []
         self.logger.info("\n\nRESET at {}\n\n".format(time.strftime("%x %X %Z")))
 
-    def init_population(self):
+    def _init_population(self):
         raise NotImplementedError("Redefine!")
 
-    def get_next_iteration(self, iteration):
+    def _get_next_iteration(self, iteration: int) -> tuple[np.array, np.array]:
         """Computes the Successive Halving spacing.
 
         Given the iteration index, computes the fidelity spacing to be used and
         the number of configurations to be used for the SH iterations.
 
-        Parameters
-        ----------
-        iteration : int
-            Iteration index
-        clip : int, {1, 2, 3, ..., None}
-            If not None, clips the minimum number of configurations to 'clip'
+        Args:
+            iteration (int): Iteration index.
 
         Returns:
-        -------
-        ns : array
-        fidelities : array
+            A tuple containing number of configurations in the bracket
+            and the respective fidelities
         """
         # number of 'SH runs'
         s = self.max_SH_iter - 1 - (iteration % self.max_SH_iter)
@@ -167,13 +162,17 @@ class DEHBBase:
 
         return ns, fidelities
 
-    def get_incumbents(self):
-        """Returns a tuple of the (incumbent configuration, incumbent score/fitness)."""
+    def get_incumbents(self) -> tuple[dict | ConfigSpace.Configuration, float]:
+        """Retrieve current incumbent configuration and score.
+        
+        Returns:
+            Tuple containing incumbent configuration and score.
+        """
         if self.use_configspace:
             return self.vector_to_configspace(self.inc_config), self.inc_score
         return self.inc_config, self.inc_score
 
-    def f_objective(self):
+    def _f_objective(self):
         raise NotImplementedError("The function needs to be defined in the sub class.")
 
     def run(self):
@@ -319,7 +318,7 @@ class DEHB(DEHBBase):
         final_variable = ",".join(final_variable)
         return final_variable
 
-    def distribute_gpus(self):
+    def _distribute_gpus(self):
         """Function to create a GPU usage tracker dict.
 
         The idea is to extract the exact GPU device IDs available. During job submission, each
@@ -345,12 +344,28 @@ class DEHB(DEHBBase):
         # Important to set this flag to true after saving
         self._time_budget_exhausted = True
 
-    def vector_to_configspace(self, config):
+    def vector_to_configspace(self, config: np.array) -> ConfigSpace.Configuration:
+        """Converts numpy representation to `Configuration`.
+
+        Args:
+            config (np.array): Configuration to convert.
+
+        Returns:
+            ConfigSpace.Configuration: Converted configuration
+        """
         assert hasattr(self, "de")
         assert len(self.fidelities) > 0
         return self.de[self.fidelities[0]].vector_to_configspace(config)
 
-    def configspace_to_vector(self, config):
+    def configspace_to_vector(self, config: ConfigSpace.Configuration) -> np.array:
+        """Converts `Configuration` to numpy array.
+
+        Args:
+            config (ConfigSpace.Configuration): Configuration to convert
+
+        Returns:
+            np.array: Converted configuration
+        """
         assert hasattr(self, "de")
         assert len(self.fidelities) > 0
         return self.de[self.fidelities[0]].configspace_to_vector(config)
@@ -381,7 +396,7 @@ class DEHB(DEHBBase):
         self._time_budget_exhausted = False
         self._runtime_budget_timer = None
 
-    def init_population(self, pop_size):
+    def _init_population(self, pop_size):
         if self.use_configspace:
             population = self.cs.sample_configuration(size=pop_size)
             population = [self.configspace_to_vector(individual) for individual in population]
@@ -412,7 +427,7 @@ class DEHB(DEHBBase):
         """Determines maximum pop size for each fidelity."""
         self._max_pop_size = {}
         for i in range(self.max_SH_iter):
-            n, r = self.get_next_iteration(i)
+            n, r = self._get_next_iteration(i)
             for j, r_j in enumerate(r):
                 self._max_pop_size[r_j] = max(
                     n[j], self._max_pop_size[r_j]
@@ -447,7 +462,7 @@ class DEHB(DEHBBase):
         """Starts a new bracket based on Hyperband."""
         # start new bracket
         self.iteration_counter += 1  # iteration counter gives the bracket count or bracket ID
-        n_configs, fidelities = self.get_next_iteration(self.iteration_counter)
+        n_configs, fidelities = self._get_next_iteration(self.iteration_counter)
         bracket = SHBracketManager(
             n_configs=n_configs, fidelities=fidelities, bracket_id=self.iteration_counter
         )
@@ -460,7 +475,7 @@ class DEHB(DEHBBase):
         else:
             return 1
 
-    def is_worker_available(self, verbose=False):
+    def _is_worker_available(self, verbose=False):
         """Checks if at least one worker is available to run a job."""
         if self.n_workers == 1 or self.client is None or not isinstance(self.client, Client):
             # in the synchronous case, one worker is always available
@@ -655,7 +670,7 @@ class DEHB(DEHBBase):
                 break
         return job_info
 
-    def ask(self, n_configs: int=1):
+    def ask(self, n_configs: int=1) -> dict | list[dict]:
         """Get the next configuration to run from the optimizer.
 
         The retrieved configuration can then be evaluated by the user.
@@ -698,7 +713,7 @@ class DEHB(DEHBBase):
         self.logger.debug(f"GPU device usage: {self.gpu_usage}")
         return gpu_ids
 
-    def submit_job(self, job_info, **kwargs):
+    def _submit_job(self, job_info, **kwargs):
         """Asks a free worker to run the objective function on config and fidelity."""
         job_info["kwargs"] = self.shared_data if self.shared_data is not None else kwargs
         # submit to Dask client
@@ -956,6 +971,7 @@ class DEHB(DEHBBase):
         return True
 
     def save(self):
+        """Saves the current incumbent, history and state to disk."""
         self.logger.info("Saving state to disk...")
         if self._time_budget_exhausted:
             self.logger.info("Runtime budget exhausted. Resorting to only saving overtime history.")
@@ -965,7 +981,7 @@ class DEHB(DEHBBase):
             self._save_history()
             self._save_state()
 
-    def tell(self, job_info: dict, result: dict, replay: bool=False):
+    def tell(self, job_info: dict, result: dict, replay: bool=False) -> None:
         """Feed a result back to the optimizer.
 
         In order to correctly interpret the results, the `job_info` dict, retrieved by `ask`,
@@ -975,6 +991,12 @@ class DEHB(DEHBBase):
         for training and validating a neural network to achieve the validation loss specified in
         `fitness`. It is also possible to add the field `info` to the `result` in order to store
         additional, user-specific information.
+
+        !!! note "User-specific information `info`"
+
+            Please note, that we only support types, that are serializable by `pandas`. If
+            non-serializable types are used, DEHB will not be able to save the history.
+            If you want to be on the safe side, please use built-in python types.
 
         Args:
             job_info (dict): Job info returned by ask().
@@ -1040,7 +1062,7 @@ class DEHB(DEHBBase):
 
     @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None, single_node_with_gpus=False,
-            verbose=False, debug=False, **kwargs):
+            verbose=False, debug=False, **kwargs) -> tuple[np.array, np.array, np.array]:
         """Main interface to run optimization by DEHB.
 
         This function waits on workers and if a worker is free, asks for a configuration and a
@@ -1054,6 +1076,10 @@ class DEHB(DEHBBase):
         2) Number of Successive Halving brackets run under Hyperband (brackets) <br>
         3) Total computational cost (in seconds) aggregated by all function evaluations (total_cost)
 
+        !!! note "Using `tell` under the hood."
+
+            Please note, that `run` uses `tell` under the hood, therefore please have a
+            look at the documentation of `tell` for more information e.g. about the result format.
 
         Args:
             fevals (int, optional): Number of functions evaluations to run. Defaults to None.
@@ -1064,7 +1090,7 @@ class DEHB(DEHBBase):
             debug (bool): Activate debug output. Defaults to False.
 
         Returns:
-            np.array, np.array, np.array: Trajectory, runtime and optimization history.
+            Trajectory, runtime and optimization history.
         """
         # Warn if users use old state saving frequencies
         if "save_history" in kwargs or "save_intermediate" in kwargs or "name" in kwargs:
@@ -1092,7 +1118,7 @@ class DEHB(DEHBBase):
         # where all available GPUs are accessible
         self.single_node_with_gpus = single_node_with_gpus
         if self.single_node_with_gpus:
-            self.distribute_gpus()
+            self._distribute_gpus()
 
         self.start = self.start = time.time()
         if verbose:
@@ -1117,7 +1143,7 @@ class DEHB(DEHBBase):
         while True:
             if self._is_run_budget_exhausted(fevals, brackets):
                 break
-            if self.is_worker_available():
+            if self._is_worker_available():
                 next_bracket_id = self._get_next_bracket(only_id=True)
                 if brackets is not None and next_bracket_id >= brackets:
                     # ignore submission and only collect results
@@ -1136,7 +1162,7 @@ class DEHB(DEHBBase):
                     # Ask for new job_info
                     job_info = self.ask()
                     # Submit job_info to a worker for execution
-                    self.submit_job(job_info, **kwargs)
+                    self._submit_job(job_info, **kwargs)
                     if verbose:
                         fidelity = job_info["fidelity"]
                         config_id = job_info["config_id"]
