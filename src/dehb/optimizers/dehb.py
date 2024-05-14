@@ -35,8 +35,14 @@ class DEHBBase:
             raise TypeError("Parameters min_budget and max_budget have been deprecated since " \
                             "v0.1.0. Please use the new parameters min_fidelity and max_fidelity " \
                             "or downgrade to a version prior to v0.1.0")
-        # Rng
-        self.rng = np.random.default_rng(seed)
+        if seed is None:
+            seed = int(np.random.default_rng().integers(0, 2**32 - 1))
+        elif isinstance(seed, np.random.Generator):
+            seed = int(seed.integers(0, 2**32 - 1))
+
+        assert isinstance(seed, int)
+        self._original_seed = seed
+        self.rng = np.random.default_rng(self._original_seed)
 
         # Miscellaneous
         self._setup_logger(kwargs)
@@ -46,6 +52,7 @@ class DEHBBase:
         self.cs = cs
         self.use_configspace = True if isinstance(self.cs, ConfigSpace.ConfigurationSpace) else False
         if self.use_configspace:
+            self.cs.seed(self._original_seed)
             self.dimensions = len(self.cs.get_hyperparameters())
         elif dimensions is None or not isinstance(dimensions, (int, np.integer)):
             assert "Need to specify `dimensions` as an int when `cs` is not available/specified!"
@@ -68,7 +75,10 @@ class DEHBBase:
             "max_age": self.max_age,
             "cs": self.cs,
             "dimensions": self.dimensions,
-            "rng": self.rng,
+            # NOTE(eddiebergman): To make reset work, we pass
+            # in an explicitly generated seed at construction,
+            #  rather than share the rng state
+            # "rng": self.rng,
             "f": f,
         }
 
@@ -122,7 +132,7 @@ class DEHBBase:
                                                      -np.linspace(start=self.max_SH_iter - 1,
                                                                   stop=0, num=self.max_SH_iter))
 
-    def reset(self):
+    def reset(self, *, reset_seeds: bool = True):
         self.inc_score = np.inf
         self.inc_config = None
         self.population = None
@@ -130,6 +140,10 @@ class DEHBBase:
         self.traj = []
         self.runtime = []
         self.history = []
+        if reset_seeds:
+            if isinstance(self.cs, ConfigSpace.ConfigurationSpace):
+                self.cs.seed(self._original_seed)
+            self.rng = np.random.default_rng(self._original_seed)
         self.logger.info("\n\nRESET at {}\n\n".format(time.strftime("%x %X %Z")))
 
     def _init_population(self):
@@ -250,11 +264,6 @@ class DEHB(DEHBBase):
         self._time_budget_exhausted = False
         self._runtime_budget_timer = None
 
-        # Save initial random state
-        self.random_state = self.rng.bit_generator.state
-        if self.use_configspace:
-            self.cs_random_state = self.cs.random.get_state()
-
     def __getstate__(self):
         """Allows the object to picklable while having Dask client as a class attribute."""
         d = dict(self.__dict__)
@@ -370,8 +379,8 @@ class DEHB(DEHBBase):
         assert len(self.fidelities) > 0
         return self.de[self.fidelities[0]].configspace_to_vector(config)
 
-    def reset(self):
-        super().reset()
+    def reset(self, *, reset_seeds: bool = True):
+        super().reset(reset_seeds=reset_seeds)
         if self.n_workers > 1 and hasattr(self, "client") and isinstance(self.client, Client):
             self.client.restart()
         else:
@@ -436,9 +445,10 @@ class DEHB(DEHBBase):
     def _init_subpop(self):
         """List of DE objects corresponding to the fidelities."""
         self.de = {}
-        for i, f in enumerate(self._max_pop_size.keys()):
+        seeds = self.rng.integers(0, 2**32 - 1, size=len(self._max_pop_size))
+        for (i, f), _seed in zip(enumerate(self._max_pop_size.keys()), seeds):
             self.de[f] = AsyncDE(**self.de_params, pop_size=self._max_pop_size[f],
-                                 config_repository=self.config_repository)
+                                 config_repository=self.config_repository, seed=int(_seed))
             self.de[f].population = self.de[f].init_population(pop_size=self._max_pop_size[f])
             self.de[f].population_ids = self.config_repository.announce_population(self.de[f].population, f)
             self.de[f].fitness = np.array([np.inf] * self._max_pop_size[f])
@@ -691,10 +701,7 @@ class DEHB(DEHBBase):
             for _ in range(n_configs):
                 jobs.append(self._get_next_job())
                 self._ask_counter += 1
-        # Save random state after ask
-        self.random_state = self.rng.bit_generator.state
-        if self.use_configspace:
-            self.cs_random_state = self.cs.random.get_state()
+
         return jobs
 
     def _get_gpu_id_with_low_load(self):
@@ -768,9 +775,9 @@ class DEHB(DEHBBase):
         state = {}
         # DE parameters
         serializable_de_params = self.de_params.copy()
-        serializable_de_params.pop("cs")
-        serializable_de_params.pop("rng")
-        serializable_de_params.pop("f")
+        serializable_de_params.pop("cs", None)
+        serializable_de_params.pop("rng", None)
+        serializable_de_params.pop("f", None)
         serializable_de_params["output_path"] = str(serializable_de_params["output_path"])
         state["DE_params"] = serializable_de_params
         # Hyperband variables
@@ -797,16 +804,6 @@ class DEHB(DEHBBase):
                 json.dump(state, f, indent=2)
         except Exception as e:
             self.logger.warning(f"State not saved: {e!r}")
-
-        # Write random state to disk
-        rnd_state_path = self.output_path / "random_state.pkl"
-        with rnd_state_path.open("wb") as f:
-            pickle.dump(self.random_state, f)
-
-        if self.use_configspace:
-            cs_rnd_path = self.output_path / "cs_random_state.pkl"
-            with cs_rnd_path.open("wb") as f:
-                pickle.dump(self.cs_random_state, f)
 
 
     def _is_run_budget_exhausted(self, fevals=None, brackets=None):
@@ -919,25 +916,6 @@ class DEHB(DEHBBase):
             return False
         self.eta = hb_vars["eta"]
 
-        self._pre_compute_fidelity_spacing()
-        self._get_pop_sizes()
-        self._init_subpop()
-        # Reset ConfigRepo after initializing DE
-        self.config_repository.reset()
-
-        # Load initial configurations from state
-        initial_configs = dehb_state["internals"]["initial_configs"]
-        # Filter initial configs by fidelity
-        initial_configs_by_fidelity = {fidelity: [np.array(item["config"]) for item in initial_configs
-                                                  if str(fidelity) in item["results"]]
-                                                  for fidelity in self.fidelities}
-        # Add initial configs to DE and announce them to ConfigRepo
-        for fidelity, sub_pop in initial_configs_by_fidelity.items():
-            self.de[fidelity].population = np.array(sub_pop)
-            self.de[fidelity].population_ids = self.config_repository.announce_population(sub_pop,
-                                                                                          fidelity)
-        self.config_repository.initial_configs = self.config_repository.configs.copy()
-
         # Load history
         history_path = run_dir / "history.parquet.gzip"
         history = pd.read_parquet(history_path)
@@ -958,16 +936,6 @@ class DEHB(DEHBBase):
             self.tell(job_info, result, replay=True)
         # Clean inactive brackets
         self._clean_inactive_brackets()
-
-        # Load and set random state
-        rnd_state_path = run_dir / "random_state.pkl"
-        with rnd_state_path.open("rb") as f:
-            self.rng.bit_generator.state = pickle.load(f)
-
-        if self.use_configspace:
-            cs_rnd_state_path = run_dir / "cs_random_state.pkl"
-            with cs_rnd_state_path.open("rb") as f:
-                self.cs.random.set_state(pickle.load(f))
         return True
 
     def save(self):
