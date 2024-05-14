@@ -1,6 +1,5 @@
 import json
 import os
-import pickle
 import sys
 import time
 from copy import deepcopy
@@ -75,10 +74,6 @@ class DEHBBase:
             "max_age": self.max_age,
             "cs": self.cs,
             "dimensions": self.dimensions,
-            # NOTE(eddiebergman): To make reset work, we pass
-            # in an explicitly generated seed at construction,
-            #  rather than share the rng state
-            # "rng": self.rng,
             "f": f,
         }
 
