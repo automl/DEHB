@@ -6,7 +6,7 @@ import time
 from copy import deepcopy
 from pathlib import Path
 from threading import Timer
-from typing import List
+from typing import Union
 
 import ConfigSpace
 import numpy as np
@@ -162,7 +162,7 @@ class DEHBBase:
 
         return ns, fidelities
 
-    def get_incumbents(self) -> tuple[dict | ConfigSpace.Configuration, float]:
+    def get_incumbents(self) -> tuple[Union[dict, ConfigSpace.Configuration], float]:
         """Retrieve current incumbent configuration and score.
         
         Returns:
@@ -302,7 +302,7 @@ class DEHB(DEHBBase):
             run_info.update({"device_id": device_id})
         return run_info
 
-    def _create_cuda_visible_devices(self, available_gpus: List[int], start_id: int) -> str:
+    def _create_cuda_visible_devices(self, available_gpus: list[int], start_id: int) -> str:
         """Generates a string to set the CUDA_VISIBLE_DEVICES environment variable.
 
         Given a list of available GPU device IDs and a preferred ID (start_id), the environment
@@ -670,7 +670,7 @@ class DEHB(DEHBBase):
                 break
         return job_info
 
-    def ask(self, n_configs: int=1) -> dict | list[dict]:
+    def ask(self, n_configs: int=1) -> Union[dict, list[dict]]:
         """Get the next configuration to run from the optimizer.
 
         The retrieved configuration can then be evaluated by the user.
