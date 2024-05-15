@@ -13,7 +13,13 @@ In the end, the results for the 3 different execution setups should be the same.
 Please follow the installtion guide below, to benchmark your changes.
 
 ## Installation Guide HPOBench
-The following guide walks you throuh installing hpobench and running the benchmarking script. Here, we assume that you execute the commands in your cloned DEHB repository and you have a clean (virtual) python 3.8 environment.
+The following guide walks you through installing hpobench and running the benchmarking script. Here, we assume that you execute the commands in your cloned DEHB repository.
+### Create Virtual Environment
+Before starting, please make sure you have clean virtual environment using python 3.8 ready. The following commands walk you through on how to do this with conda.
+```
+conda create --name dehb_hpobench python=3.8
+conda activate dehb_hpobench
+```
 ### Installing HPOBench
 ```shell
 git clone https://github.com/automl/HPOBench.git
@@ -34,7 +40,14 @@ python3.8 benchmarking/hpobench_benchmark.py --fevals 300 --ask_tell --restart -
 ```
 
 ## Installation Guide MFPBench
-The following guide walks you trough instaling mfpbench and running the benchmarking script. Here, we assume that you execute the commands in your cloned DEHB repository and you have a clean (virtual) python 3.8 environment.
+The following guide walks you trough instaling mfpbench and running the benchmarking script. Here, we assume that you execute the commands in your cloned DEHB repository.
+
+### Create Virtual Environment
+Before starting, please make sure you have clean virtual environment using python 3.8 ready. The following commands walk you through on how to do this with conda.
+```
+conda create --name dehb_mfpbench python=3.8
+conda activate dehb_mfpbench
+```
 
 ### Installing DEHB with MFPBench
 There are some additional dependencies needed for plotting and table generation, therefore please install DEHB with the benchmarking options:
