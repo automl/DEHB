@@ -1,18 +1,18 @@
 import argparse
 from pathlib import Path
 
+import mfpbench
 import numpy as np
 from markdown_table_generator import generate_markdown, table_from_string_list
-import mfpbench
 from utils import DEHBOptimizerBase, plot_incumbent_traj
 
 
 class DEHBOptimizerMFPBench(DEHBOptimizerBase):
     def _objective_function(self, config, fidelity):
-        res = self.benchmark.query(config, at=fidelity)
+        res = self.benchmark.query(config, at=self.fidelity_type(fidelity))
         return {
-            "fitness": res["valid_acc"],
-            "cost": res["runtime"].value,
+            "fitness": res.error,
+            "cost": res.cost,
         }
 
     def _get_config_space(self, seed):
@@ -23,10 +23,11 @@ class DEHBOptimizerMFPBench(DEHBOptimizerBase):
     def _get_benchmark_and_fidelities(self, benchmark_name, seed):
         if benchmark_name == "jahs":
             benchmark = mfpbench.get(name="jahs", task_id="CIFAR10", seed=seed)
-            fidelity_name = benchmark.fidelity_name
-            fidelity_type = int
         else:
-            raise ValueError(f"No benchmark '{benchmark_name}' found.")
+            benchmark = mfpbench.get(name=benchmark_name, seed=seed)
+
+        fidelity_name = benchmark.fidelity_name
+        fidelity_type = int
 
         min_fidelity, max_fidelity = self._get_fidelity_range(benchmark)
         return benchmark, fidelity_name, (min_fidelity, max_fidelity), fidelity_type
@@ -47,7 +48,8 @@ def input_arguments():
         nargs="*",
         default=["jahs"],
         help="Benchmarks to run DEHB on.",
-        choices=["jahs"],
+        choices=["jahs", "mfh3", "mfh6", "cifar100_wideresnet_2048", "imagenet_resnet_512",
+                 "lm1b_transformer_2048", "translatewmt_xformer_64"],
     )
     parser.add_argument(
         "--eta",
@@ -58,7 +60,7 @@ def input_arguments():
     parser.add_argument(
         "--output_path",
         type=str,
-        default="./hpobench_dehb",
+        default="./mfpbench_dehb",
         help="Directory for DEHB to write logs and outputs.",
     )
     parser.add_argument(

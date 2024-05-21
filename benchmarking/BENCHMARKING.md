@@ -40,19 +40,20 @@ python3.8 benchmarking/hpobench_benchmark.py --fevals 300 --ask_tell --restart -
 ```
 
 ## Installation Guide MFPBench
-The following guide walks you trough instaling mfpbench and running the benchmarking script. Here, we assume that you execute the commands in your cloned DEHB repository.
+The following guide walks you trough instaling mfpbench and running the benchmarking script. Here, we assume that you execute the commands in your cloned DEHB repository. Depending on the choice of benchmark, different requirements have to be installed, thus we divide the setup into two sections, one for installing JAHSBench and one for the PD1 benchmark.
 
+### JAHS benchmark
 ### Create Virtual Environment
 Before starting, please make sure you have clean virtual environment using python 3.8 ready. The following commands walk you through on how to do this with conda.
 ```
-conda create --name dehb_mfpbench python=3.8
-conda activate dehb_mfpbench
+conda create --name dehb_jahs python=3.8
+conda activate dehb_jahs
 ```
 
 ### Installing DEHB with MFPBench
 There are some additional dependencies needed for plotting and table generation, therefore please install DEHB with the benchmarking options:
 ```shell
-pip install -e .[benchmarking,mfpbench_benchmark]
+pip install -e .[benchmarking,jahs_benchmark]
 ```
 
 ### Downloading Benchmark Data
@@ -64,4 +65,28 @@ python -m mfpbench download --benchmark jahs
 The setup is similar as in the HPOBench section, however currently the only available benchmark is `jahs` (joint architecture and hyperparameter search).
 ```shell
 python3.8 benchmarking/mfpbench_benchmark.py --fevals 300 --ask_tell --restart --benchmarks jahs --seeds 1 2 3 4 5 --output_path logs/mfpbench_benchmarking
+```
+
+### PD1 benchmark
+### Create Virtual Environment
+Before starting, please make sure you have clean virtual environment using python 3.8 ready. The following commands walk you through on how to do this with conda.
+```
+conda create --name dehb_pd1 python=3.8
+conda activate dehb_pd1
+```
+
+### Installing DEHB with MFPBench
+There are some additional dependencies needed for plotting and table generation, therefore please install DEHB with the benchmarking options:
+```shell
+pip install -e .[benchmarking,pd1_benchmark]
+```
+
+### Downloading Benchmark Data
+In order to run the benchmark, first we need to download the benchmark data:
+```shell
+python -m mfpbench download --benchmark pd1
+```
+### Running the Benchmarking Script
+```shell
+python3.8 benchmarking/mfpbench_benchmark.py --fevals 300 --ask_tell --restart --benchmarks lm1b_transformer_2048 --seeds 1 2 3 4 5 --output_path logs/mfpbench_benchmarking
 ```
