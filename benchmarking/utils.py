@@ -6,22 +6,43 @@ import numpy as np
 from dehb import DEHB
 
 
-def plot_incumbent_traj(trajectories: list, output_path: Path, benchmark_name: str):
+def create_plot_for_benchmark(results: dict, output_path: Path,
+                              benchmark_name: str):
     plt.clf()
-    trajectories = np.array(trajectories)
-    traj_length = len(trajectories[0])
-    mean_trajectory = np.mean(trajectories, axis=0)
-    std_trajectory = np.std(trajectories, axis=0)
-    x_fevals = np.arange(traj_length)
-    plt.plot(x_fevals, mean_trajectory, label="Mean incumbent trajectory")
-    plt.fill_between(x_fevals, mean_trajectory - std_trajectory, mean_trajectory + std_trajectory, alpha=0.3)
+    for version, data in results.items():
+        mean_trajectory = data["mean_trajectory"]
+        std_trajectory = data["std_trajectory"]
+        traj_length = len(mean_trajectory)
+        x_fevals = np.arange(traj_length)
+        plt.plot(x_fevals, mean_trajectory, label=version)
+        plt.fill_between(x_fevals, mean_trajectory - std_trajectory, mean_trajectory + std_trajectory,
+                        alpha=0.3)
 
     plt.xlabel("Function evaluation")
     plt.ylabel("Incumbent score")
-    plt.title(f"Mean and Standard Deviation of Incumbent Trajectories on {benchmark_name}")
+    plt.title(f"Incumbent Trajectories on {benchmark_name}")
     plt.legend()
     plt.grid(True, which="both", linestyle="--", linewidth=0.5)
-    plt.savefig(output_path)
+    plt.savefig(output_path / f"{benchmark_name}_traj.png")
+
+def create_table_for_benchmark(results: dict) -> list:
+    table = []
+    header = ["DEHB Version"]
+    for budget in [.2, .4, .6, .8, 1]:
+        arbitrary_key = list(results.keys())[0]
+        traj_length = len(results[arbitrary_key]["mean_trajectory"])
+        header.append(str(int(budget * traj_length)))
+    table.append(header)
+    for version in results:
+        row = [version]
+        mean_traj = results[version]["mean_trajectory"]
+        std_traj = results[version]["std_trajectory"]
+        for budget in [.2, .4, .6, .8, 1]:
+            traj_idx = int(budget * len(mean_traj)) - 1
+            row.append(f"{mean_traj[traj_idx]:.3e} ± {std_traj[traj_idx]:.3e}")
+        table.append(row)
+
+    return table
 
 class DEHBOptimizerBase():
     def __init__(self, dehb_params, fevals, brackets, walltime, use_ask_tell, use_restart,
@@ -49,7 +70,7 @@ class DEHBOptimizerBase():
         raise NotImplementedError()
 
     def _get_config_space(self, seed):
-        # Implement int subclass
+        # Implement in subclass
         raise NotImplementedError()
 
     def _objective_function(self, config, fidelity):

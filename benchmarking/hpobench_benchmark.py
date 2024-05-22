@@ -2,14 +2,14 @@ import argparse
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from hpobench.benchmarks.ml.lr_benchmark import LRBenchmark
 from hpobench.benchmarks.ml.nn_benchmark import NNBenchmark
 from hpobench.benchmarks.ml.rf_benchmark import RandomForestBenchmark
 from hpobench.benchmarks.ml.svm_benchmark import SVMBenchmark
 from hpobench.benchmarks.nas.nasbench_201 import Cifar10ValidNasBench201BenchmarkOriginal
 from hpobench.benchmarks.surrogates.paramnet_benchmark import ParamNetReducedAdultOnStepsBenchmark
-from markdown_table_generator import generate_markdown, table_from_string_list
-from utils import DEHBOptimizerBase, plot_incumbent_traj
+from utils import DEHBOptimizerBase
 
 
 class DEHBOptimizerHPOBench(DEHBOptimizerBase):
@@ -52,7 +52,7 @@ class DEHBOptimizerHPOBench(DEHBOptimizerBase):
             benchmark = SVMBenchmark(rng=seed, task_id=31)
             fidelity_name = "subsample"
             fidelity_type = float
-        elif benchmark_name == "nas":
+        elif benchmark_name == "nasbench201":
             benchmark = Cifar10ValidNasBench201BenchmarkOriginal(rng=seed)
             fidelity_name = "epoch"
             fidelity_type = int
@@ -82,7 +82,7 @@ def input_arguments():
         nargs="*",
         default=["tab_nn"],
         help="Benchmarks to run DEHB on.",
-        choices=["tab_nn", "tab_lr", "tab_rf", "tab_svm", "surrogate", "nas"],
+        choices=["tab_nn", "tab_lr", "tab_rf", "tab_svm", "surrogate", "nasbench201"],
     )
     parser.add_argument(
         "--eta",
@@ -147,10 +147,8 @@ def main():
         "output_path": args.output_path,
         "n_workers": args.n_workers,
     }
-    scores = {}
-    table = [["Benchmark", "Score (mean ± std)"]]
+    results = {}
     for benchmark_name in args.benchmarks:
-        scores[benchmark_name] = []
         trajectories = []
         for seed in args.seeds:
             print(f"Running benchmark {benchmark_name} on seed {seed}")
@@ -163,22 +161,31 @@ def main():
                 use_ask_tell=args.ask_tell,
                 use_restart=args.restart,
                 benchmark_name=benchmark_name,
-                verbose=args.verbose
+                verbose=args.verbose,
             )
             traj = dehb_optimizer.run()
             trajectories.append(traj)
-            _, inc_value = dehb_optimizer.dehb.get_incumbents()
-            scores[benchmark_name].append(inc_value)
-        plot_incumbent_traj(trajectories, Path(args.output_path) / f"{benchmark_name}_traj.png", benchmark_name)
-        mean_score = np.mean(scores[benchmark_name])
-        std_score = np.std(scores[benchmark_name])
-        table.append([benchmark_name, f"{mean_score:.3e} ± {std_score:.3e}"])
 
-    markdown_path = Path(args.output_path) / "benchmark_results.md"
-    md_table = table_from_string_list(table)
-    markdown = generate_markdown(md_table)
-    with markdown_path.open("w") as f:
-         f.write(markdown)
+            # Explicitly delete dehb_optimizer to free space
+            del dehb_optimizer
+
+        trajectories = np.array(trajectories)
+        mean_trajectory = np.mean(trajectories, axis=0)
+        std_trajectory = np.std(trajectories, axis=0)
+
+        results[benchmark_name] = {
+            "mean_trajectory": mean_trajectory,
+            "std_trajectory": std_trajectory,
+        }
+    # Save benchmarking results to disc
+    results_path = Path("benchmarking", "results", "current")
+    for benchmark_name, result in results.items():
+        base_path = results_path / benchmark_name
+        base_path.mkdir(parents=True, exist_ok=True)
+
+        traj_save_path = base_path / "traj.parquet.gzip"
+        df_traj = pd.DataFrame.from_dict(result)
+        df_traj.to_parquet(traj_save_path, compression="gzip")
 
 if __name__ == "__main__":
     main()
