@@ -70,11 +70,11 @@ hpobench_benchmark = [
 
 jahs_benchmark = [
   "typing_extensions", # Keep this in for now, until it is properly integrated in mf-prior-bench
-  "mf-prior-bench[jahs-bench]==1.8.1"
+  "mf-prior-bench[jahs-bench]==1.9.0"
 ]
 
 pd1_benchmark = [
-  "mf-prior-bench[pd1]==1.8.1"
+  "mf-prior-bench[pd1]==1.9.0"
 ]
 
 [tool.pytest.ini_options]
