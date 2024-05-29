@@ -19,6 +19,7 @@ nav:
     - DE: references/de.md
     - Bracket Manager: references/bracket_manager.md
     - Configuration Repository: references/config_repository.md
+  - Contributing: CONTRIBUTING.md
 
 theme:
   name: material

@@ -29,10 +29,7 @@ pip install dehb
 DEHB allows users to either utilize the Ask & Tell interface for manual task distribution or leverage the built-in functionality (`run`) to set up a Dask cluster autonomously. Please refer to our [Getting Started](getting_started/single_worker.md) examples.
 
 ## Contributing
-Please have a look at our [contributing guidelines](../CONTRIBUTING.md).
-<!--
-TODO: Check if this renders in the github.io docs
--->
+Please have a look at our [contributing guidelines](./CONTRIBUTING.md).
 
 ## To cite the paper or code
 If you use DEHB in one of your research projects, please cite our paper(s):
