@@ -243,6 +243,9 @@ class DEHB(DEHBBase):
         self.gpu_usage = None
         self.single_node_with_gpus = None
 
+        self._time_budget_exhausted = False
+        self._runtime_budget_timer = None
+
         # Setup logging and potentially reload state
         if resume:
             self.logger.info("Loading checkpoint...")
@@ -256,8 +259,6 @@ class DEHB(DEHBBase):
         elif (self.output_path / "dehb_state.json").exists():
             self.logger.warning("A checkpoint already exists, " \
                                 "results could potentially be overwritten.")
-        self._time_budget_exhausted = False
-        self._runtime_budget_timer = None
 
     def __getstate__(self):
         """Allows the object to picklable while having Dask client as a class attribute."""
@@ -1009,14 +1010,14 @@ class DEHB(DEHBBase):
             self.de[fidelity].population_ids[parent_id] = config_id
             self.de[fidelity].fitness[parent_id] = fitness
         # updating incumbents
+        inc_changed = False
         if self.de[fidelity].fitness[parent_id] < self.inc_score:
             self._update_incumbents(
                 config=self.de[fidelity].population[parent_id],
                 score=self.de[fidelity].fitness[parent_id],
                 info=info,
             )
-            if self.save_freq == "incumbent" and not replay:
-                self.save()
+            inc_changed = True
         # book-keeping
         self._update_trackers(
             traj=self.inc_score, runtime=cost, history=(
@@ -1024,7 +1025,7 @@ class DEHB(DEHBBase):
             ),
         )
 
-        if self.save_freq == "step" and not replay:
+        if self.save_freq == "step" or (self.save_freq == "incumbent" and inc_changed) and not replay:
             self.save()
 
     @logger.catch
