@@ -15,7 +15,9 @@ def input_arguments():
         nargs="*",
         default=["tab_nn"],
         help="Benchmarks to run DEHB on.",
-        choices=["tab_nn", "tab_lr", "tab_rf", "tab_svm", "surrogate", "nasbench201"],
+        choices=["tab_nn", "tab_lr", "tab_rf", "tab_svm", "surrogate", "nasbench201",
+                 "jahs", "mfh3", "mfh6", "cifar100_wideresnet_2048", "imagenet_resnet_512",
+                 "lm1b_transformer_2048", "translatewmt_xformer_64", "counting_ones"],
     )
     return parser.parse_args()
 

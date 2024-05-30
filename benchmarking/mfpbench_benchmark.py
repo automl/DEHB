@@ -35,12 +35,16 @@ class DEHBOptimizerMFPBench(DEHBOptimizerBase):
 def input_arguments():
     parser = argparse.ArgumentParser(description="Optimizing MFPBench using DEHB.")
     parser.add_argument(
-        "--seeds",
+        "--seed",
         type=int,
-        nargs="*",
-        default=[1],
-        metavar="S",
-        help="Random seeds to benchmark DEHB on (default: 1)",
+        default=0,
+        help="Seed used to create random seeds for experiments to run. Defaults to 0.",
+    )
+    parser.add_argument(
+        "--n_seeds",
+        type=int,
+        default=5,
+        help="Number of random seeds to run. Defaults to 5.",
     )
     parser.add_argument(
         "--benchmarks",
@@ -114,10 +118,15 @@ def main():
         "output_path": args.output_path,
         "n_workers": args.n_workers,
     }
+
+    # Create random seeds from original seed
+    rng = np.random.default_rng(args.seed)
+    seeds = rng.integers(0, 2**32 - 1, size=args.n_seeds)
+
     results = {}
     for benchmark_name in args.benchmarks:
         trajectories = []
-        for seed in args.seeds:
+        for seed in seeds:
             print(f"Running benchmark {benchmark_name} on seed {seed}")
             dehb_params["seed"] = seed
             dehb_optimizer = DEHBOptimizerMFPBench(
