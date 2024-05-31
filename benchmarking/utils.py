@@ -33,6 +33,7 @@ def create_table_for_benchmark(results: dict) -> list:
         traj_length = len(results[arbitrary_key]["mean_trajectory"])
         header.append(str(int(budget * traj_length)))
     table.append(header)
+    results = dict(sorted(results.items()))
     for version in results:
         row = [version]
         mean_traj = results[version]["mean_trajectory"]
