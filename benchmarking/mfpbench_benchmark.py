@@ -8,8 +8,8 @@ from utils import DEHBOptimizerBase
 
 
 class DEHBOptimizerMFPBench(DEHBOptimizerBase):
-    def _objective_function(self, config, fidelity):
-        res = self.benchmark.query(config, at=self.fidelity_type(fidelity))
+    def _objective_function(self, config, budget):
+        res = self.benchmark.query(config, at=self.fidelity_type(budget))
         return {
             "fitness": res.error,
             "cost": res.cost,
@@ -50,7 +50,8 @@ def input_arguments():
         "--benchmarks",
         type=str,
         nargs="*",
-        default=["jahs"],
+        default=["mfh3", "mfh6", "cifar100_wideresnet_2048", "imagenet_resnet_512",
+                 "lm1b_transformer_2048", "translatewmt_xformer_64"],
         help="Benchmarks to run DEHB on.",
         choices=["jahs", "mfh3", "mfh6", "cifar100_wideresnet_2048", "imagenet_resnet_512",
                  "lm1b_transformer_2048", "translatewmt_xformer_64"],

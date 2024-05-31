@@ -13,16 +13,16 @@ from utils import DEHBOptimizerBase
 
 
 class DEHBOptimizerHPOBench(DEHBOptimizerBase):
-    def _objective_function(self, config, fidelity):
+    def _objective_function(self, config, budget):
         res = self.benchmark.objective_function(config,
                                                 fidelity=
                                                 {
-                                                    self.fidelity_name: self.fidelity_type(fidelity),
+                                                    self.fidelity_name: self.fidelity_type(budget),
                                                 })
         return {
             "fitness": res["function_value"],
             "cost": res["cost"],
-            "info": {"fidelity": fidelity},
+            "info": {"fidelity": budget},
         }
 
     def _get_config_space(self, seed):
@@ -84,7 +84,7 @@ def input_arguments():
         "--benchmarks",
         type=str,
         nargs="*",
-        default=["tab_nn"],
+        default=["tab_nn", "tab_lr", "tab_rf", "tab_svm", "surrogate", "nasbench201"],
         help="Benchmarks to run DEHB on.",
         choices=["tab_nn", "tab_lr", "tab_rf", "tab_svm", "surrogate", "nasbench201"],
     )

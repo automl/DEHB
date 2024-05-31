@@ -16,13 +16,13 @@ class DEHBOptimizerCountingOnes(DEHBOptimizerBase):
                          walltime=walltime, use_ask_tell=use_ask_tell, use_restart=use_restart,
                          benchmark_name=benchmark_name, verbose=verbose)
 
-    def _objective_function(self, config, fidelity):
+    def _objective_function(self, config, budget):
         res = self.benchmark.objective_function(config,
-                                                budget=self.fidelity_type(fidelity))
+                                                budget=self.fidelity_type(budget))
         return {
             "fitness": res["function_value"],
-            "cost": fidelity,
-            "info": {"fidelity": fidelity},
+            "cost": budget,
+            "info": {"fidelity": budget},
         }
 
     def _get_config_space(self, seed):
