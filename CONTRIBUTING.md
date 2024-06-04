@@ -78,6 +78,14 @@ To maintain consistency and readability, we follow a set of code style and guide
 - Write comprehensive and meaningful commit messages.
 - Write unit tests for new features and ensure existing tests pass.
 
+## Documentation
+
+TODO.
+<!--
+Instructions on where to add docstrings/comments and how to render docs locally for debugging. 
+Add guide on when documentation is must and how.
+-->
+
 ## Community Guidelines
 
 When participating in the DEHB community, please adhere to the following guidelines:
