@@ -76,7 +76,7 @@ def input_arguments():
     parser.add_argument(
         "--verbose",
         action="store_true",
-        default=True,
+        default=False,
         help="Decides verbosity of DEHB optimization.",
     )
     parser.add_argument(

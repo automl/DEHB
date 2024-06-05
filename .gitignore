@@ -23,6 +23,9 @@ dask-worker-space/
 dehb/examples/*/results
 dehb/examples/*/*/results
 .ipynb_checkpoints/
+data/
+benchmarking/results
+*.err
 
 
 # automl_template .gitignore
