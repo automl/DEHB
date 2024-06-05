@@ -6,7 +6,7 @@ Benchmarking DEHB is crucial for ensuring consistent performance across differen
 2. Using the Ask & Tell interface and
 3. Restarting the optimization run after half the budget.
 
-In the end, the results for the 3 different execution setups should be the same. With this setup guide, we encourage the developers of DEHB to continually benchmark their changes in order ensure, that 
+In the end, the results for the 3 different execution setups should be the same. With this setup guide, we encourage the developers of DEHB to continually benchmark their changes in order to ensure, that
 
 - the inner workings of DEHB are not corrupted by checking the different execution setup results and
 - that overall performance either remains the same, if no algortihmic changes have been made or is still comparable/better, if algorithmic changes have been made.
@@ -23,7 +23,7 @@ Before starting, please make sure you have clean virtual environment using pytho
 
 ```shell
 conda create --name dehb_hpo python=3.8
-conda activate dehb_hpobench
+conda activate dehb_hpo
 ```
 
 ### Installing HPOBench
