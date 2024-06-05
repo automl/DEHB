@@ -18,14 +18,14 @@ echo "Running job $SLURM_JOB_NAME using $SLURM_JOB_CPUS_PER_NODE cpus per node w
 
 if [ 1 -eq $SLURM_ARRAY_TASK_ID ]
 then
-    source activate dehb_mfp_pd1
+    source activate dehb_pd1
 
     python benchmarking/mfpbench_benchmark.py --seed 0 --n_seeds 10 --fevals $BUDGET --benchmarks mfh3 mfh6 cifar100_wideresnet_2048 imagenet_resnet_512 lm1b_transformer_2048 translatewmt_xformer_64 --output_path logs/pd1
 
     python generate_summary.py
 elif [ 2 -eq $SLURM_ARRAY_TASK_ID ]
 then
-    source activate dehb_mfp_jahs
+    source activate dehb_jahs
 
     python benchmarking/mfpbench_benchmark.py --seed 0 --n_seeds 10 --fevals $BUDGET --benchmarks jahs --output_path logs/jahs
 
@@ -39,7 +39,7 @@ then
     python generate_summary.py
 elif [ 4 -eq $SLURM_ARRAY_TASK_ID ]
 then
-    source activate dehb_mfp_pd1 # CountingOnes works with any dependencies, since it is only dependent on numpy
+    source activate dehb_pd1 # CountingOnes works with any dependencies, since it is only dependent on numpy
 
     python benchmarking/countingones_benchmark.py --seed 0 --n_seeds 10 --fevals $BUDGET --output_path logs/countingones --n_continuous 50 --n_categorical 50
 
