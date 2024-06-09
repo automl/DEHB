@@ -16,7 +16,6 @@ from loguru import logger
 from ..utils import ConfigRepository, SHBracketManager
 from .de import AsyncDE
 
-logger.configure(handlers=[{"sink": sys.stdout, "level": "INFO"}])
 _logger_props = {
     "format": "{time} {level} {message}",
     "enqueue": True,
@@ -107,6 +106,8 @@ class DEHBBase:
 
     def _setup_logger(self, kwargs):
         """Sets up the logger."""
+        log_level = kwargs["log_level"] if "log_level" in kwargs else "INFO"
+        logger.configure(handlers=[{"sink": sys.stdout, "level": log_level}])
         self.output_path = Path(kwargs["output_path"]) if "output_path" in kwargs else Path("./")
         self.output_path.mkdir(parents=True, exist_ok=True)
         self.logger = logger
@@ -1142,7 +1143,7 @@ class DEHB(DEHBBase):
                         self.logger.info(
                             f"Best score seen/Incumbent score: {self.inc_score}",
                         )
-                    self._verbosity_debug()
+                        self._verbosity_debug()
             self._fetch_results_from_workers()
             self._clean_inactive_brackets()
         # end of while
