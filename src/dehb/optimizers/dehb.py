@@ -19,7 +19,7 @@ from .de import AsyncDE
 _logger_props = {
     "format": "{time} {level} {message}",
     "enqueue": True,
-    "rotation": "500 MB"
+    "rotation": "500 MB",
 }
 
 
@@ -27,7 +27,7 @@ class DEHBBase:
     def __init__(self, cs=None, f=None, dimensions=None, mutation_factor=None,
                  crossover_prob=None, strategy=None, min_fidelity=None,
                  max_fidelity=None, eta=None, min_clip=None, max_clip=None, seed=None,
-                 boundary_fix_type='random', max_age=np.inf, **kwargs):
+                 boundary_fix_type="random", max_age=np.inf, resume=False, **kwargs):
         # Check for deprecated parameters
         if "max_budget" in kwargs or "min_budget" in kwargs:
             raise TypeError("Parameters min_budget and max_budget have been deprecated since " \
@@ -43,7 +43,7 @@ class DEHBBase:
         self.rng = np.random.default_rng(self._original_seed)
 
         # Miscellaneous
-        self._setup_logger(kwargs)
+        self._setup_logger(resume, kwargs)
         self.config_repository = ConfigRepository()
 
         # Benchmark related variables
@@ -104,13 +104,15 @@ class DEHBBase:
         self.inc_config = None
         self.history = []
 
-    def _setup_logger(self, kwargs):
+    def _setup_logger(self, resume, kwargs):
         """Sets up the logger."""
         log_level = kwargs["log_level"] if "log_level" in kwargs else "INFO"
         logger.configure(handlers=[{"sink": sys.stdout, "level": log_level}])
         self.output_path = Path(kwargs["output_path"]) if "output_path" in kwargs else Path("./")
         self.output_path.mkdir(parents=True, exist_ok=True)
         self.logger = logger
+        # Only append to log if resuming an optimization run, else overwrite
+        _logger_props["mode"] = "a" if resume else "w"
         self.log_filename = f"{self.output_path}/dehb.log"
         self.logger.add(
             self.log_filename,
@@ -200,7 +202,7 @@ class DEHB(DEHBBase):
                          crossover_prob=crossover_prob, strategy=strategy, min_fidelity=min_fidelity,
                          max_fidelity=max_fidelity, eta=eta, min_clip=min_clip, max_clip=max_clip, 
                          seed=seed, configspace=configspace, boundary_fix_type=boundary_fix_type,
-                         max_age=max_age, **kwargs)
+                         max_age=max_age, resume=resume, **kwargs)
         self.de_params.update({"async_strategy": async_strategy})
         self.iteration_counter = -1
         self.de = {}
