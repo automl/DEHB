@@ -54,7 +54,8 @@ dev = [
   "pre-commit",
 ]
 examples = [
-  "scikit-learn"
+  "scikit-learn",
+  "matplotlib",
 ]
 
 [tool.pytest.ini_options]
