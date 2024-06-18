@@ -106,7 +106,8 @@ class DEHBBase:
 
     def _setup_logger(self, resume, kwargs):
         """Sets up the logger."""
-        log_level = kwargs["log_level"] if "log_level" in kwargs else "INFO"
+        log_level = kwargs["log_level"] if "log_level" in kwargs else "WARNING"
+        _logger_props["level"] = log_level
         logger.configure(handlers=[{"sink": sys.stdout, "level": log_level}])
         self.output_path = Path(kwargs["output_path"]) if "output_path" in kwargs else Path("./")
         self.output_path.mkdir(parents=True, exist_ok=True)
@@ -484,7 +485,7 @@ class DEHB(DEHBBase):
         else:
             return 1
 
-    def _is_worker_available(self, verbose=False):
+    def _is_worker_available(self):
         """Checks if at least one worker is available to run a job."""
         if self.n_workers == 1 or self.client is None or not isinstance(self.client, Client):
             # in the synchronous case, one worker is always available
@@ -858,11 +859,11 @@ class DEHB(DEHBBase):
         except Exception as e:
             self.logger.warning(f"History not saved: {e!r}")
 
-    def _verbosity_debug(self):
+    def _log_debug(self):
         for bracket in self.active_brackets:
             self.logger.debug(f"Bracket ID {bracket.bracket_id}:\n{bracket!s}")
 
-    def _verbosity_runtime(self, fevals, brackets, total_cost):
+    def _log_runtime(self, fevals, brackets, total_cost):
         if fevals is not None:
             remaining = (len(self.traj), fevals, "function evaluation(s) done")
         elif brackets is not None:
@@ -873,6 +874,17 @@ class DEHB(DEHBBase):
             remaining = (elapsed, total_cost, "seconds elapsed")
         self.logger.info(
             f"{remaining[0]}/{remaining[1]} {remaining[2]}",
+        )
+
+    def _log_job_submission(self, job_info: dict):
+        fidelity = job_info["fidelity"]
+        config_id = job_info["config_id"]
+        self.logger.info(
+            "Evaluating configuration {} with fidelity {} under "
+            "bracket ID {}".format(config_id, fidelity, job_info["bracket_id"]),
+        )
+        self.logger.info(
+            f"Best score seen/Incumbent score: {self.inc_score}",
         )
 
     def _load_checkpoint(self, run_dir: str):
@@ -1033,7 +1045,7 @@ class DEHB(DEHBBase):
 
     @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None, single_node_with_gpus=False,
-            verbose=False, debug=False, **kwargs) -> Tuple[np.array, np.array, np.array]:
+            debug=False, **kwargs) -> Tuple[np.array, np.array, np.array]:
         """Main interface to run optimization by DEHB.
 
         This function waits on workers and if a worker is free, asks for a configuration and a
@@ -1057,7 +1069,6 @@ class DEHB(DEHBBase):
             brackets (int, optional): Number of brackets to run. Defaults to None.
             total_cost (int, optional): Wallclock budget in seconds. Defaults to None.
             single_node_with_gpus (bool): Workers get assigned different GPUs. Default to False.
-            verbose (bool): Activate verbose output. Defaults to False.
             debug (bool): Activate debug output. Defaults to False.
 
         Returns:
@@ -1072,6 +1083,11 @@ class DEHB(DEHBBase):
                            "where the state and logs should be saved.")
             raise TypeError("Used deprecated parameters 'save_history', 'save_intermediate' " \
                             "and/or 'name'. Please check the logs for more information.")
+        if "verbose" in kwargs:
+            logger.warning("The run parameters 'verbose' is deprecated since the changes in v0.1.2. "\
+                           "Please use the 'log_level' parameter when initializing DEHB.")
+            raise TypeError("Used deprecated parameter 'verbose'. "\
+                            "Please check the logs for more information.")
         # check if run has already been called before
         if self.start is not None:
             logger.warning("DEHB has already been run. Calling 'run' twice could lead to unintended"
@@ -1092,11 +1108,10 @@ class DEHB(DEHBBase):
             self._distribute_gpus()
 
         self.start = self.start = time.time()
-        if verbose:
-            print("\nLogging at {} for optimization starting at {}\n".format(
-                Path.cwd() / self.log_filename,
-                time.strftime("%x %X %Z", time.localtime(self.start)),
-            ))
+        self.logger.info("\nLogging at {} for optimization starting at {}\n".format(
+            Path.cwd() / self.log_filename,
+            time.strftime("%x %X %Z", time.localtime(self.start)),
+        ))
         if debug:
             logger.configure(handlers=[{"sink": sys.stdout}])
 
@@ -1134,34 +1149,25 @@ class DEHB(DEHBBase):
                     job_info = self.ask()
                     # Submit job_info to a worker for execution
                     self._submit_job(job_info, **kwargs)
-                    if verbose:
-                        fidelity = job_info["fidelity"]
-                        config_id = job_info["config_id"]
-                        self._verbosity_runtime(fevals, brackets, total_cost)
-                        self.logger.info(
-                            "Evaluating configuration {} with fidelity {} under "
-                            "bracket ID {}".format(config_id, fidelity, job_info["bracket_id"]),
-                        )
-                        self.logger.info(
-                            f"Best score seen/Incumbent score: {self.inc_score}",
-                        )
-                        self._verbosity_debug()
+                    self._log_runtime(fevals, brackets, total_cost)
+                    self._log_job_submission(job_info)
+                    self._log_debug()
             self._fetch_results_from_workers()
             self._clean_inactive_brackets()
         # end of while
-        if verbose:
-            time_taken = time.time() - self.start
-            self.logger.info("End of optimisation! Total duration: {}; Total fevals: {}\n".format(
-                time_taken, len(self.traj),
-            ))
-            self.logger.info(f"Incumbent score: {self.inc_score}")
-            self.logger.info("Incumbent config: ")
-            if self.use_configspace:
-                config = self.vector_to_configspace(self.inc_config)
-                for k, v in config.get_dictionary().items():
-                    self.logger.info(f"{k}: {v}")
-            else:
-                self.logger.info(f"{self.inc_config}")
+        time_taken = time.time() - self.start
+        self.logger.info("End of optimisation! Total duration: {}; Total fevals: {}\n".format(
+            time_taken, len(self.traj),
+        ))
+        self.logger.info(f"Incumbent score: {self.inc_score}")
+        self.logger.info("Incumbent config: ")
+        if self.use_configspace:
+            config = self.vector_to_configspace(self.inc_config)
+            for k, v in config.get_dictionary().items():
+                self.logger.info(f"{k}: {v}")
+        else:
+            self.logger.info(f"{self.inc_config}")
+
         self.save()
         # cancel timer
         if self._runtime_budget_timer:
