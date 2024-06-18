@@ -3,7 +3,7 @@
 #SBATCH -o logs/%A[%a].%N.out       # STDOUT  (the folder log has to exist) %A will be replaced by the SLURM_ARRAY_JOB_ID value
 #SBATCH -e logs/%A[%a].%N.err       # STDERR  (the folder log has to exist) %A will be replaced by the SLURM_ARRAY_JOB_ID value
 #SBATCH -J DEHB_benchmarking              # sets the job name. 
-#SBATCH -a 1-4 # array size
+#SBATCH -a 1-3 # array size
 #SBATCH -t 0-00:30:00
 #SBATCH --mem 16GB
 
@@ -26,19 +26,12 @@ then
     python benchmarking/generate_summary.py
 elif [ 2 -eq $SLURM_ARRAY_TASK_ID ]
 then
-    conda activate dehb_jahs
-
-    python benchmarking/mfpbench_benchmark.py --seed 0 --n_seeds 10 --fevals $BUDGET --benchmarks jahs --output_path logs/jahs
-
-    python benchmarking/generate_summary.py
-elif [ 3 -eq $SLURM_ARRAY_TASK_ID ]
-then
     conda activate dehb_hpo
 
     python benchmarking/hpobench_benchmark.py --seed 0 --n_seeds 10 --fevals $BUDGET --benchmarks tab_nn tab_rf tab_svm tab_lr surrogate nasbench201 --output_path logs/hpob
 
     python benchmarking/generate_summary.py
-elif [ 4 -eq $SLURM_ARRAY_TASK_ID ]
+elif [ 3 -eq $SLURM_ARRAY_TASK_ID ]
 then
     conda activate dehb_pd1 # CountingOnes works with any dependencies, since it is only dependent on numpy
 
