@@ -1098,6 +1098,7 @@ class DEHB(DEHBBase):
             logger.warning("DEHB has already been run. Calling 'run' twice could lead to unintended"
                            + " behavior. Please restart DEHB with an increased compute budget"
                            + " instead of calling 'run' twice.")
+            self._time_budget_exhausted = False
 
         # checks if a Dask client exists
         if len(kwargs) > 0 and self.n_workers > 1 and isinstance(self.client, Client):
