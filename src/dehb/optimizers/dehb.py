@@ -1064,6 +1064,11 @@ class DEHB(DEHBBase):
             Please note, that `run` uses `tell` under the hood, therefore please have a
             look at the documentation of `tell` for more information e.g. about the result format.
 
+        !!! note "Adjusting verbosity"
+
+            The verbosity of DEHB logs can be adjusted via adding the `log_level` parameter to DEHBs
+            initialization. As we use loguru, the logging levels can be found on [their website](https://loguru.readthedocs.io/en/stable/api/logger.html#levels).
+
         Args:
             fevals (int, optional): Number of functions evaluations to run. Defaults to None.
             brackets (int, optional): Number of brackets to run. Defaults to None.
