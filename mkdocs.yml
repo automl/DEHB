@@ -7,7 +7,8 @@ nav:
     - DEHBs Hyperparameters: getting_started/dehb_hps.md
     - Single Worker: getting_started/single_worker.md
     - Parallel: getting_started/parallel.md
-    - Ask & Tell: getting_started/ask_tell.md
+    - Running DEHB: getting_started/running_dehb.md
+    - Logging: getting_started/logging.md
   - Examples:
     - Interfacing DEHB: examples/00_interfacing_DEHB.ipynb
     - Optimizing RandomForest using DEHB: examples/01.1_Optimizing_RandomForest_using_DEHB.ipynb
