@@ -126,16 +126,16 @@ To render the documentation locally for debugging and review:
 
 1. Install the required `dev` dependencies:
 
-```bash
-pip install -e .[dev]
-```
+    ```bash
+    pip install -e .[dev]
+    ```
 
 2. Use `mike` to deploy and serve the documentation locally:
 
-```bash
-mike deploy --update-aliases 2.0.0 latest
-mike serve
-```
+    ```bash
+    mike deploy --update-aliases 2.0.0 latest
+    mike serve
+    ```
 
 3. The docs should now be viewable on http://localhost:8000/. If not, check your command prompt for any errors (or different local server adress).
 
