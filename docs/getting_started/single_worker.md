@@ -43,7 +43,7 @@ optimizer = DEHB(
 )
 
 # Run optimization for 1 bracket. Output files will be saved to ./logs
-traj, runtime, history = optimizer.run(brackets=1, verbose=True)
+traj, runtime, history = optimizer.run(brackets=1)
 config_id, config, fitness, runtime, fidelity, _ = history[0]
 print("config id", config_id)
 print("config", config)

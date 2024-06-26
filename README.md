@@ -38,7 +38,7 @@ optimizer.tell(job_info, result)
 
 ##### Using run()
 # Run optimization for 1 bracket. Output files will be saved to ./logs
-traj, runtime, history = optimizer.run(brackets=1, verbose=True)
+traj, runtime, history = optimizer.run(brackets=1)
 ```
 
 #### Running DEHB in a parallel setting

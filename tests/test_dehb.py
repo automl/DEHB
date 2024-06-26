@@ -168,7 +168,7 @@ class TestConfigID:
             num_initial_configs += len(de_inst.population)
 
         # run for a single bracket
-        dehb.run(brackets=1, verbose=True)
+        dehb.run(brackets=1)
 
         # for the first bracket, we only mutate on the lowest fidelity and then promote the best
         # configs to the next fidelity. Please note, that this is only the case for the first
