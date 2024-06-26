@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../../assets/automl_org.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.22">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.27">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.732c4fb1.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6543a935.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -189,7 +189,7 @@
       
     </form>
     <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
             Initializing search
@@ -2132,7 +2132,7 @@ dehb = DEHB(
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:35.627</span> | <span class="ansi-yellow-intense-fg ansi-bold">WARNING </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">__init__</span>:<span class="ansi-cyan-fg">243</span> - <span class="ansi-yellow-intense-fg ansi-bold">A checkpoint already exists, results could potentially be overwritten.</span>
+<pre><span class="ansi-green-fg">2024-06-26 11:10:03.063</span> | <span class="ansi-yellow-intense-fg ansi-bold">WARNING </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">__init__</span>:<span class="ansi-cyan-fg">243</span> - <span class="ansi-yellow-intense-fg ansi-bold">A checkpoint already exists, results could potentially be overwritten.</span>
 </pre>
 </div>
 </div>
@@ -2222,14 +2222,21 @@ history = dehb.history</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:35.644</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+<pre><span class="ansi-green-fg">2024-06-26 11:10:03.082</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:35.694</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+<pre><span class="ansi-green-fg">2024-06-26 11:10:03.093</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre><span class="ansi-green-fg">2024-06-26 11:10:03.209</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
 </pre>
 </div>
 </div>
@@ -2337,19 +2344,19 @@ print(f"{best_config} got an accuracy of {test_accuracy} on the test set.")</div
 
 Last evaluated configuration, 
 Configuration(values={
-  'max_depth': 4,
-  'max_features': 0.40027224132209205,
-  'min_samples_leaf': 12,
-  'min_samples_split': 5,
+  'max_depth': 9,
+  'max_features': 0.37454241292069557,
+  'min_samples_leaf': 3,
+  'min_samples_split': 46,
 })got a score of -0.9444444444444444, was evaluated at a fidelity of 16.67 and took 0.017 seconds to run.
-The additional info attached: {'test_score': 0.8888888888888888, 'fidelity': 16.666666666666664}
+The additional info attached: {'test_score': 0.9444444444444444, 'fidelity': 16.666666666666664}
 
 Best evaluated configuration, 
 Configuration(values={
-  'max_depth': 15,
-  'max_features': 0.6903963245856286,
-  'min_samples_leaf': 4,
-  'min_samples_split': 3,
+  'max_depth': 4,
+  'max_features': 0.721053102821033,
+  'min_samples_leaf': 7,
+  'min_samples_split': 25,
 }) got an accuracy of 1.0 on the test set.
 </pre>
 </div>
@@ -2489,31 +2496,31 @@ print(f"{best_config} got an accuracy of {test_accuracy} on the test set.")</div
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:46.748</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+<pre><span class="ansi-green-fg">2024-06-26 11:10:14.169</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>465 465 465
+<pre>466 466 466
 
 Last evaluated configuration, 
 Configuration(values={
-  'max_depth': 7,
-  'max_features': 0.6144501097807947,
-  'min_samples_leaf': 11,
-  'min_samples_split': 4,
-})got a score of -1.0, was evaluated at a fidelity of 5.56 and took 0.007 seconds to run.
+  'max_depth': 14,
+  'max_features': 0.659788527864656,
+  'min_samples_leaf': 9,
+  'min_samples_split': 11,
+})got a score of -0.9722222222222222, was evaluated at a fidelity of 5.56 and took 0.007 seconds to run.
 The additional info attached: {'test_score': 0.9444444444444444, 'fidelity': 5.555555555555555}
 
 Best evaluated configuration, 
 Configuration(values={
-  'max_depth': 15,
-  'max_features': 0.3278529624014336,
+  'max_depth': 10,
+  'max_features': 0.5393985470927832,
   'min_samples_leaf': 9,
-  'min_samples_split': 4,
-}) got an accuracy of 1.0 on the test set.
+  'min_samples_split': 2,
+}) got an accuracy of 0.9444444444444444 on the test set.
 </pre>
 </div>
 </div>
@@ -2671,7 +2678,7 @@ Configuration(values={
     <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "content.code.copy", "navigation.footer", "navigation.tabs", "navigation.tabs.sticky", "toc.follow", "header.autohide", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.5cfa9459.min.js"></script>
+      <script src="../../assets/javascripts/bundle.ad660dcc.min.js"></script>
       
         <script src="../../assets/_markdown_exec_pyodide.js"></script>
       

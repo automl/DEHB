@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../../assets/automl_org.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.22">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.27">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.732c4fb1.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6543a935.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -189,7 +189,7 @@
       
     </form>
     <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
             Initializing search
@@ -1059,9 +1059,9 @@
 
 
 
-  <div class="doc doc-contents first">
+    <div class="doc doc-contents first">
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1077,21 +1077,21 @@
 
 
 <h2 id="dehb.utils.bracket_manager.SHBracketManager" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">SHBracketManager</span><span class="p">(</span><span class="n">n_configs</span><span class="p">,</span> <span class="n">fidelities</span><span class="p">,</span> <span class="n">bracket_id</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+              <code class="highlight language-python"><span class="n">SHBracketManager</span><span class="p">(</span><span class="n">n_configs</span><span class="p">,</span> <span class="n">fidelities</span><span class="p">,</span> <span class="n">bracket_id</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 <a href="#dehb.utils.bracket_manager.SHBracketManager" class="headerlink" title="Permanent link">#</a></h2>
 
 
-  <div class="doc doc-contents ">
-          <p class="doc doc-class-bases">
-            Bases: <code>object</code></p>
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code>object</code></p>
 
-  
+
       <p>Synchronous Successive Halving utilities</p>
 
-                <details class="quote">
-                  <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
-                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-7"> 7</a></span>
+                  <details class="quote">
+                    <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-7"> 7</a></span>
 <span class="normal"><a href="#__codelineno-0-8"> 8</a></span>
 <span class="normal"><a href="#__codelineno-0-9"> 9</a></span>
 <span class="normal"><a href="#__codelineno-0-10">10</a></span>
@@ -1129,12 +1129,11 @@
 <a id="__codelineno-0-24" name="__codelineno-0-24"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">n_rungs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fidelities</span><span class="p">)</span>
 <a id="__codelineno-0-25" name="__codelineno-0-25"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">current_rung</span> <span class="o">=</span> <span class="mi">0</span>
 </code></pre></div></td></tr></table></div>
-                </details>
+                  </details>
 
-  
+
 
   <div class="doc doc-children">
-
 
 
 
@@ -1147,21 +1146,20 @@
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.bracket_manager.SHBracketManager.get_fidelity" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">get_fidelity</span><span class="p">(</span><span class="n">rung</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">get_fidelity</span><span class="p">(</span><span class="n">rung</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 <a href="#dehb.utils.bracket_manager.SHBracketManager.get_fidelity" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Returns the exact fidelity that rung is pointing to.</p>
 <p>Returns current rung's fidelity if no rung is passed.</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-27">27</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-27">27</a></span>
 <span class="normal"><a href="#__codelineno-0-28">28</a></span>
 <span class="normal"><a href="#__codelineno-0-29">29</a></span>
 <span class="normal"><a href="#__codelineno-0-30">30</a></span>
@@ -1177,29 +1175,27 @@
 <a id="__codelineno-0-33" name="__codelineno-0-33"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span><span class="p">[</span><span class="n">rung</span><span class="p">]</span>
 <a id="__codelineno-0-34" name="__codelineno-0-34"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_rung</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.bracket_manager.SHBracketManager.get_lower_fidelity_promotions" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">get_lower_fidelity_promotions</span><span class="p">(</span><span class="n">fidelity</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">get_lower_fidelity_promotions</span><span class="p">(</span><span class="n">fidelity</span><span class="p">)</span></code>
 
 <a href="#dehb.utils.bracket_manager.SHBracketManager.get_lower_fidelity_promotions" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Returns the immediate lower fidelity and the number of configs to be promoted from there</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-36">36</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-36">36</a></span>
 <span class="normal"><a href="#__codelineno-0-37">37</a></span>
 <span class="normal"><a href="#__codelineno-0-38">38</a></span>
 <span class="normal"><a href="#__codelineno-0-39">39</a></span>
@@ -1217,29 +1213,27 @@
 <a id="__codelineno-0-43" name="__codelineno-0-43"></a>    <span class="n">num_promote_configs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_configs</span><span class="p">[</span><span class="n">rung</span><span class="p">]</span>
 <a id="__codelineno-0-44" name="__codelineno-0-44"></a>    <span class="k">return</span> <span class="n">lower_fidelity</span><span class="p">,</span> <span class="n">num_promote_configs</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.bracket_manager.SHBracketManager.get_next_job_fidelity" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">get_next_job_fidelity</span><span class="p">()</span></code>
+            <code class="highlight language-python"><span class="n">get_next_job_fidelity</span><span class="p">()</span></code>
 
 <a href="#dehb.utils.bracket_manager.SHBracketManager.get_next_job_fidelity" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Returns the fidelity that will be selected if current_rung is incremented by 1</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-46">46</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-46">46</a></span>
 <span class="normal"><a href="#__codelineno-0-47">47</a></span>
 <span class="normal"><a href="#__codelineno-0-48">48</a></span>
 <span class="normal"><a href="#__codelineno-0-49">49</a></span>
@@ -1273,32 +1267,30 @@
 <a id="__codelineno-0-61" name="__codelineno-0-61"></a>            <span class="k">pass</span>
 <a id="__codelineno-0-62" name="__codelineno-0-62"></a>        <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.bracket_manager.SHBracketManager.register_job" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">register_job</span><span class="p">(</span><span class="n">fidelity</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">register_job</span><span class="p">(</span><span class="n">fidelity</span><span class="p">)</span></code>
 
 <a href="#dehb.utils.bracket_manager.SHBracketManager.register_job" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Registers the allocation of a configuration for the fidelity and updates current rung</p>
 <p>This function must be called when scheduling a job in order to allow the bracket manager
 to continue job and fidelity allocation without waiting for jobs to finish and return
 results necessarily. This feature can be leveraged to run brackets asynchronously.</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-64">64</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-64">64</a></span>
 <span class="normal"><a href="#__codelineno-0-65">65</a></span>
 <span class="normal"><a href="#__codelineno-0-66">66</a></span>
 <span class="normal"><a href="#__codelineno-0-67">67</a></span>
@@ -1324,32 +1316,30 @@ results necessarily. This feature can be leveraged to run brackets asynchronousl
 <a id="__codelineno-0-75" name="__codelineno-0-75"></a>        <span class="c1"># increment current rung if no jobs left in the rung</span>
 <a id="__codelineno-0-76" name="__codelineno-0-76"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">current_rung</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_rung</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_rungs</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.bracket_manager.SHBracketManager.complete_job" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">complete_job</span><span class="p">(</span><span class="n">fidelity</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">complete_job</span><span class="p">(</span><span class="n">fidelity</span><span class="p">)</span></code>
 
 <a href="#dehb.utils.bracket_manager.SHBracketManager.complete_job" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Notifies the bracket that a job for a fidelity has been completed</p>
 <p>This function must be called when a config for a fidelity has finished evaluation to inform
 the Bracket Manager that no job needs to be waited for and the next rung can begin for the
 synchronous Successive Halving case.</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-78">78</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-78">78</a></span>
 <span class="normal"><a href="#__codelineno-0-79">79</a></span>
 <span class="normal"><a href="#__codelineno-0-80">80</a></span>
 <span class="normal"><a href="#__codelineno-0-81">81</a></span>
@@ -1371,29 +1361,27 @@ synchronous Successive Halving case.</p>
 <a id="__codelineno-0-87" name="__codelineno-0-87"></a>    <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sh_bracket</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">_max_configs</span>
 <a id="__codelineno-0-88" name="__codelineno-0-88"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_sh_bracket</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.bracket_manager.SHBracketManager.previous_rung_waits" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">previous_rung_waits</span><span class="p">()</span></code>
+            <code class="highlight language-python"><span class="n">previous_rung_waits</span><span class="p">()</span></code>
 
 <a href="#dehb.utils.bracket_manager.SHBracketManager.previous_rung_waits" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Returns True if none of the rungs &lt; current rung is waiting for results</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-105">105</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-105">105</a></span>
 <span class="normal"><a href="#__codelineno-0-106">106</a></span>
 <span class="normal"><a href="#__codelineno-0-107">107</a></span>
 <span class="normal"><a href="#__codelineno-0-108">108</a></span>
@@ -1407,29 +1395,27 @@ synchronous Successive Halving case.</p>
 <a id="__codelineno-0-110" name="__codelineno-0-110"></a>            <span class="k">return</span> <span class="kc">True</span>
 <a id="__codelineno-0-111" name="__codelineno-0-111"></a>    <span class="k">return</span> <span class="kc">False</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.bracket_manager.SHBracketManager.is_bracket_done" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">is_bracket_done</span><span class="p">()</span></code>
+            <code class="highlight language-python"><span class="n">is_bracket_done</span><span class="p">()</span></code>
 
 <a href="#dehb.utils.bracket_manager.SHBracketManager.is_bracket_done" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Returns True if all configs in all rungs in the bracket have been allocated</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-113">113</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-113">113</a></span>
 <span class="normal"><a href="#__codelineno-0-114">114</a></span>
 <span class="normal"><a href="#__codelineno-0-115">115</a></span>
 <span class="normal"><a href="#__codelineno-0-116">116</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-113" name="__codelineno-0-113"></a><span class="k">def</span> <span class="nf">is_bracket_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1437,29 +1423,27 @@ synchronous Successive Halving case.</p>
 <a id="__codelineno-0-115" name="__codelineno-0-115"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-116" name="__codelineno-0-116"></a>    <span class="k">return</span> <span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">is_pending</span><span class="p">()</span> <span class="ow">and</span> <span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">is_waiting</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.bracket_manager.SHBracketManager.is_pending" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">is_pending</span><span class="p">()</span></code>
+            <code class="highlight language-python"><span class="n">is_pending</span><span class="p">()</span></code>
 
 <a href="#dehb.utils.bracket_manager.SHBracketManager.is_pending" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Returns True if any of the rungs/fidelities have still a configuration to submit</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-118">118</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-118">118</a></span>
 <span class="normal"><a href="#__codelineno-0-119">119</a></span>
 <span class="normal"><a href="#__codelineno-0-120">120</a></span>
 <span class="normal"><a href="#__codelineno-0-121">121</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-118" name="__codelineno-0-118"></a><span class="k">def</span> <span class="nf">is_pending</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1467,29 +1451,27 @@ synchronous Successive Halving case.</p>
 <a id="__codelineno-0-120" name="__codelineno-0-120"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-121" name="__codelineno-0-121"></a>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_rung_pending</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span><span class="p">)])</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.bracket_manager.SHBracketManager.is_waiting" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">is_waiting</span><span class="p">()</span></code>
+            <code class="highlight language-python"><span class="n">is_waiting</span><span class="p">()</span></code>
 
 <a href="#dehb.utils.bracket_manager.SHBracketManager.is_waiting" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Returns True if any of the rungs/fidelities have a configuration pending/running</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-123">123</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-123">123</a></span>
 <span class="normal"><a href="#__codelineno-0-124">124</a></span>
 <span class="normal"><a href="#__codelineno-0-125">125</a></span>
 <span class="normal"><a href="#__codelineno-0-126">126</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-123" name="__codelineno-0-123"></a><span class="k">def</span> <span class="nf">is_waiting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1497,29 +1479,27 @@ synchronous Successive Halving case.</p>
 <a id="__codelineno-0-125" name="__codelineno-0-125"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-126" name="__codelineno-0-126"></a>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_rung_waiting</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fidelities</span><span class="p">)])</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.bracket_manager.SHBracketManager.reset_waiting_jobs" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">reset_waiting_jobs</span><span class="p">()</span></code>
+            <code class="highlight language-python"><span class="n">reset_waiting_jobs</span><span class="p">()</span></code>
 
 <a href="#dehb.utils.bracket_manager.SHBracketManager.reset_waiting_jobs" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Resets all waiting jobs and updates the current_rung pointer accordingly.</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-128">128</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/bracket_manager.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-128">128</a></span>
 <span class="normal"><a href="#__codelineno-0-129">129</a></span>
 <span class="normal"><a href="#__codelineno-0-130">130</a></span>
 <span class="normal"><a href="#__codelineno-0-131">131</a></span>
@@ -1543,8 +1523,8 @@ synchronous Successive Halving case.</p>
 <a id="__codelineno-0-138" name="__codelineno-0-138"></a>        <span class="c1"># reset waiting jobs</span>
 <a id="__codelineno-0-139" name="__codelineno-0-139"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">sh_bracket</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span> <span class="o">+=</span> <span class="n">waiting</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
@@ -1552,8 +1532,7 @@ synchronous Successive Halving case.</p>
 
   </div>
 
-  </div>
-
+    </div>
 
 </div>
 
@@ -1562,7 +1541,7 @@ synchronous Successive Halving case.</p>
 
   </div>
 
-  </div>
+    </div>
 
 </div>
 
@@ -1654,7 +1633,7 @@ synchronous Successive Halving case.</p>
     <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "content.code.copy", "navigation.footer", "navigation.tabs", "navigation.tabs.sticky", "toc.follow", "header.autohide", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.5cfa9459.min.js"></script>
+      <script src="../../assets/javascripts/bundle.ad660dcc.min.js"></script>
       
         <script src="../../assets/_markdown_exec_pyodide.js"></script>
       

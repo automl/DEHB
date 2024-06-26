@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../../assets/automl_org.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.22">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.27">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.732c4fb1.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6543a935.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -189,7 +189,7 @@
       
     </form>
     <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
             Initializing search
@@ -1155,9 +1155,9 @@
 
 
 
-  <div class="doc doc-contents first">
+    <div class="doc doc-contents first">
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1173,17 +1173,17 @@
 
 
 <h2 id="dehb.optimizers.dehb.DEHBBase" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">DEHBBase</span><span class="p">(</span><span class="n">cs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mutation_factor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crossover_prob</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_fidelity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_fidelity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_clip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_clip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">boundary_fix_type</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+              <code class="highlight language-python"><span class="n">DEHBBase</span><span class="p">(</span><span class="n">cs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mutation_factor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crossover_prob</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_fidelity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_fidelity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_clip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_clip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">boundary_fix_type</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#dehb.optimizers.dehb.DEHBBase" class="headerlink" title="Permanent link">#</a></h2>
 
 
-  <div class="doc doc-contents ">
+    <div class="doc doc-contents ">
 
 
-                <details class="quote">
-                  <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-27">27</a></span>
+                  <details class="quote">
+                    <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-27">27</a></span>
 <span class="normal"><a href="#__codelineno-0-28">28</a></span>
 <span class="normal"><a href="#__codelineno-0-29">29</a></span>
 <span class="normal"><a href="#__codelineno-0-30">30</a></span>
@@ -1319,12 +1319,11 @@
 <a id="__codelineno-0-93" name="__codelineno-0-93"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">inc_config</span> <span class="o">=</span> <span class="kc">None</span>
 <a id="__codelineno-0-94" name="__codelineno-0-94"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
 </code></pre></div></td></tr></table></div>
-                </details>
+                  </details>
 
-  
+
 
   <div class="doc doc-children">
-
 
 
 
@@ -1337,15 +1336,14 @@
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.optimizers.dehb.DEHBBase.get_next_iteration" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">get_next_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">get_next_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span></code>
 
 <a href="#dehb.optimizers.dehb.DEHBBase.get_next_iteration" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Computes the Successive Halving spacing.</p>
 <p>Given the iteration index, computes the fidelity spacing to be used and
 the number of configurations to be used for the SH iterations.</p>
@@ -1358,9 +1356,9 @@ clip : int, {1, 2, 3, ..., None}
 <p>ns : array
 fidelities : array</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-133">133</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-133">133</a></span>
 <span class="normal"><a href="#__codelineno-0-134">134</a></span>
 <span class="normal"><a href="#__codelineno-0-135">135</a></span>
 <span class="normal"><a href="#__codelineno-0-136">136</a></span>
@@ -1422,29 +1420,27 @@ fidelities : array</p>
 <a id="__codelineno-0-162" name="__codelineno-0-162"></a>
 <a id="__codelineno-0-163" name="__codelineno-0-163"></a>    <span class="k">return</span> <span class="n">ns</span><span class="p">,</span> <span class="n">fidelities</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.optimizers.dehb.DEHBBase.get_incumbents" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">get_incumbents</span><span class="p">()</span></code>
+            <code class="highlight language-python"><span class="n">get_incumbents</span><span class="p">()</span></code>
 
 <a href="#dehb.optimizers.dehb.DEHBBase.get_incumbents" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Returns a tuple of the (incumbent configuration, incumbent score/fitness).</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-165">165</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-165">165</a></span>
 <span class="normal"><a href="#__codelineno-0-166">166</a></span>
 <span class="normal"><a href="#__codelineno-0-167">167</a></span>
 <span class="normal"><a href="#__codelineno-0-168">168</a></span>
@@ -1454,8 +1450,8 @@ fidelities : array</p>
 <a id="__codelineno-0-168" name="__codelineno-0-168"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_to_configspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inc_config</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">inc_score</span>
 <a id="__codelineno-0-169" name="__codelineno-0-169"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inc_config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inc_score</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
@@ -1463,8 +1459,7 @@ fidelities : array</p>
 
   </div>
 
-  </div>
-
+    </div>
 
 </div>
 
@@ -1473,19 +1468,19 @@ fidelities : array</p>
 
 
 <h2 id="dehb.optimizers.dehb.DEHB" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">DEHB</span><span class="p">(</span><span class="n">cs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mutation_factor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">crossover_prob</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;rand1_bin&#39;</span><span class="p">,</span> <span class="n">min_fidelity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_fidelity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">min_clip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_clip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">configspace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">boundary_fix_type</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">n_workers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">async_strategy</span><span class="o">=</span><span class="s1">&#39;immediate&#39;</span><span class="p">,</span> <span class="n">save_freq</span><span class="o">=</span><span class="s1">&#39;incumbent&#39;</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+              <code class="highlight language-python"><span class="n">DEHB</span><span class="p">(</span><span class="n">cs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mutation_factor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">crossover_prob</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;rand1_bin&#39;</span><span class="p">,</span> <span class="n">min_fidelity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_fidelity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">min_clip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_clip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">configspace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">boundary_fix_type</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">n_workers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">async_strategy</span><span class="o">=</span><span class="s1">&#39;immediate&#39;</span><span class="p">,</span> <span class="n">save_freq</span><span class="o">=</span><span class="s1">&#39;incumbent&#39;</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#dehb.optimizers.dehb.DEHB" class="headerlink" title="Permanent link">#</a></h2>
 
 
-  <div class="doc doc-contents ">
-          <p class="doc doc-class-bases">
-            Bases: <code><a class="autorefs autorefs-internal" title="dehb.optimizers.dehb.DEHBBase" href="#dehb.optimizers.dehb.DEHBBase">DEHBBase</a></code></p>
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="dehb.optimizers.dehb.DEHBBase" href="#dehb.optimizers.dehb.DEHBBase">DEHBBase</a></code></p>
 
 
-                <details class="quote">
-                  <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-179">179</a></span>
+                  <details class="quote">
+                    <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-179">179</a></span>
 <span class="normal"><a href="#__codelineno-0-180">180</a></span>
 <span class="normal"><a href="#__codelineno-0-181">181</a></span>
 <span class="normal"><a href="#__codelineno-0-182">182</a></span>
@@ -1627,9 +1622,9 @@ fidelities : array</p>
 <a id="__codelineno-0-248" name="__codelineno-0-248"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_configspace</span><span class="p">:</span>
 <a id="__codelineno-0-249" name="__codelineno-0-249"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">cs_random_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cs</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">get_state</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
-                </details>
+                  </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1641,24 +1636,22 @@ fidelities : array</p>
 
 
 
-
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.optimizers.dehb.DEHB.__getstate__" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">__getstate__</span><span class="p">()</span></code>
+            <code class="highlight language-python"><span class="n">__getstate__</span><span class="p">()</span></code>
 
 <a href="#dehb.optimizers.dehb.DEHB.__getstate__" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Allows the object to picklable while having Dask client as a class attribute.</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-251">251</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-251">251</a></span>
 <span class="normal"><a href="#__codelineno-0-252">252</a></span>
 <span class="normal"><a href="#__codelineno-0-253">253</a></span>
 <span class="normal"><a href="#__codelineno-0-254">254</a></span>
@@ -1670,29 +1663,27 @@ fidelities : array</p>
 <a id="__codelineno-0-255" name="__codelineno-0-255"></a>    <span class="n">d</span><span class="p">[</span><span class="s2">&quot;logger&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># hack to allow logger object to be a class attribute</span>
 <a id="__codelineno-0-256" name="__codelineno-0-256"></a>    <span class="k">return</span> <span class="n">d</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.optimizers.dehb.DEHB.__del__" class="doc doc-heading">
-          <code class="highlight language-python"><span class="fm">__del__</span><span class="p">()</span></code>
+            <code class="highlight language-python"><span class="fm">__del__</span><span class="p">()</span></code>
 
 <a href="#dehb.optimizers.dehb.DEHB.__del__" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Ensures a clean kill of the Dask client and frees up a port.</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-258">258</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-258">258</a></span>
 <span class="normal"><a href="#__codelineno-0-259">259</a></span>
 <span class="normal"><a href="#__codelineno-0-260">260</a></span>
 <span class="normal"><a href="#__codelineno-0-261">261</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-258" name="__codelineno-0-258"></a><span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1700,33 +1691,31 @@ fidelities : array</p>
 <a id="__codelineno-0-260" name="__codelineno-0-260"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;client&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Client</span><span class="p">):</span>
 <a id="__codelineno-0-261" name="__codelineno-0-261"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.optimizers.dehb.DEHB.distribute_gpus" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">distribute_gpus</span><span class="p">()</span></code>
+            <code class="highlight language-python"><span class="n">distribute_gpus</span><span class="p">()</span></code>
 
 <a href="#dehb.optimizers.dehb.DEHB.distribute_gpus" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Function to create a GPU usage tracker dict.</p>
 <p>The idea is to extract the exact GPU device IDs available. During job submission, each
 submitted job is given a preference of a GPU device ID based on the GPU device with the
 least number of active running jobs. On retrieval of the result, this gpu usage dict is
 updated for the device ID that the finished job was mapped to.</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-314">314</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-314">314</a></span>
 <span class="normal"><a href="#__codelineno-0-315">315</a></span>
 <span class="normal"><a href="#__codelineno-0-316">316</a></span>
 <span class="normal"><a href="#__codelineno-0-317">317</a></span>
@@ -1764,29 +1753,27 @@ updated for the device ID that the finished job was mapped to.</p>
 <a id="__codelineno-0-331" name="__codelineno-0-331"></a>    <span class="k">for</span> <span class="n">_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_gpus</span><span class="p">:</span>
 <a id="__codelineno-0-332" name="__codelineno-0-332"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">gpu_usage</span><span class="p">[</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.optimizers.dehb.DEHB.clean_inactive_brackets" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">clean_inactive_brackets</span><span class="p">()</span></code>
+            <code class="highlight language-python"><span class="n">clean_inactive_brackets</span><span class="p">()</span></code>
 
 <a href="#dehb.optimizers.dehb.DEHB.clean_inactive_brackets" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Removes brackets from the active list if it is done as communicated by Bracket Manager.</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-377">377</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-377">377</a></span>
 <span class="normal"><a href="#__codelineno-0-378">378</a></span>
 <span class="normal"><a href="#__codelineno-0-379">379</a></span>
 <span class="normal"><a href="#__codelineno-0-380">380</a></span>
@@ -1802,29 +1789,27 @@ updated for the device ID that the finished job was mapped to.</p>
 <a id="__codelineno-0-383" name="__codelineno-0-383"></a>    <span class="p">]</span>
 <a id="__codelineno-0-384" name="__codelineno-0-384"></a>    <span class="k">return</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.optimizers.dehb.DEHB.is_worker_available" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">is_worker_available</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">is_worker_available</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 <a href="#dehb.optimizers.dehb.DEHB.is_worker_available" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Checks if at least one worker is available to run a job.</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-448">448</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-448">448</a></span>
 <span class="normal"><a href="#__codelineno-0-449">449</a></span>
 <span class="normal"><a href="#__codelineno-0-450">450</a></span>
 <span class="normal"><a href="#__codelineno-0-451">451</a></span>
@@ -1850,85 +1835,81 @@ updated for the device ID that the finished job was mapped to.</p>
 <a id="__codelineno-0-459" name="__codelineno-0-459"></a>        <span class="k">return</span> <span class="kc">False</span>
 <a id="__codelineno-0-460" name="__codelineno-0-460"></a>    <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.optimizers.dehb.DEHB.ask" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">ask</span><span class="p">(</span><span class="n">n_configs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">ask</span><span class="p">(</span><span class="n">n_configs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code>
 
 <a href="#dehb.optimizers.dehb.DEHB.ask" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Get the next configuration to run from the optimizer.</p>
 <p>The retrieved configuration can then be evaluated by the user.
 After evaluation use <code>tell</code> to report the results back to the optimizer.
 For more information, please refer to the description of <code>tell</code>.</p>
 
 
-
-  <table>
-    <thead>
-      <tr>
-        <th><span class="doc-section-title">PARAMETER</span></th>
-        <th><span>DESCRIPTION</span></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td><code>n_configs</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>Number of configs to ask for. Defaults to 1.</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>1</code>
-                </span>
-            </p>
-          </td>
+<table>
+      <thead>
+        <tr>
+          <th><span class="doc-section-title">PARAMETER</span></th>
+          <th><span>DESCRIPTION</span></th>
         </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>n_configs</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                <p>Number of configs to ask for. Defaults to 1.</p>
+              </div>
+              <p>
+                  <span class="doc-param-annotation">
+                    <b>TYPE:</b>
+                      <code>int</code>
+                  </span>
+                  <span class="doc-param-default">
+                    <b>DEFAULT:</b>
+                      <code>1</code>
+                  </span>
+              </p>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
-
-  <table>
-    <thead>
-      <tr>
-        <th><span class="doc-section-title">RETURNS</span></th>
-        <th><span>DESCRIPTION</span></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td>
-          </td>
-          <td class="doc-returns-details">
-            <div class="doc-md-description">
-              <p>dict or list of dict: Job info(s) of next configuration to evaluate.</p>
-            </div>
-          </td>
+<table>
+      <thead>
+        <tr>
+          <th><span class="doc-section-title">RETURNS</span></th>
+          <th><span>DESCRIPTION</span></th>
         </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+            </td>
+            <td class="doc-returns-details">
+              <div class="doc-md-description">
+                <p>dict or list of dict: Job info(s) of next configuration to evaluate.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-643">643</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-643">643</a></span>
 <span class="normal"><a href="#__codelineno-0-644">644</a></span>
 <span class="normal"><a href="#__codelineno-0-645">645</a></span>
 <span class="normal"><a href="#__codelineno-0-646">646</a></span>
@@ -1980,29 +1961,27 @@ For more information, please refer to the description of <code>tell</code>.</p>
 <a id="__codelineno-0-667" name="__codelineno-0-667"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">cs_random_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cs</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">get_state</span><span class="p">()</span>
 <a id="__codelineno-0-668" name="__codelineno-0-668"></a>    <span class="k">return</span> <span class="n">jobs</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.optimizers.dehb.DEHB.submit_job" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">submit_job</span><span class="p">(</span><span class="n">job_info</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">submit_job</span><span class="p">(</span><span class="n">job_info</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#dehb.optimizers.dehb.DEHB.submit_job" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Asks a free worker to run the objective function on config and fidelity.</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-686">686</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-686">686</a></span>
 <span class="normal"><a href="#__codelineno-0-687">687</a></span>
 <span class="normal"><a href="#__codelineno-0-688">688</a></span>
 <span class="normal"><a href="#__codelineno-0-689">689</a></span>
@@ -2030,24 +2009,22 @@ For more information, please refer to the description of <code>tell</code>.</p>
 <a id="__codelineno-0-698" name="__codelineno-0-698"></a>        <span class="c1"># skipping scheduling to Dask worker to avoid added overheads in the synchronous case</span>
 <a id="__codelineno-0-699" name="__codelineno-0-699"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_f_objective</span><span class="p">(</span><span class="n">job_info</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.optimizers.dehb.DEHB.tell" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">tell</span><span class="p">(</span><span class="n">job_info</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">replay</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">tell</span><span class="p">(</span><span class="n">job_info</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">replay</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 <a href="#dehb.optimizers.dehb.DEHB.tell" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Feed a result back to the optimizer.</p>
 <p>In order to correctly interpret the results, the <code>job_info</code> dict, retrieved by <code>ask</code>,
 has to be given. Moreover, the <code>result</code> dict has to contain the keys <code>fitness</code> and <code>cost</code>.
@@ -2055,49 +2032,48 @@ It is also possible to add the field <code>info</code> to the <code>result</code
 user-specific information.</p>
 
 
-
-  <table>
-    <thead>
-      <tr>
-        <th><span class="doc-section-title">PARAMETER</span></th>
-        <th><span>DESCRIPTION</span></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td><code>job_info</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>Job info returned by ask().</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>dict</code>
-                </span>
-            </p>
-          </td>
+<table>
+      <thead>
+        <tr>
+          <th><span class="doc-section-title">PARAMETER</span></th>
+          <th><span>DESCRIPTION</span></th>
         </tr>
-        <tr class="doc-section-item">
-          <td><code>result</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>Result dictionary with mandatory keys <code>fitness</code> and <code>cost</code>.</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>dict</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>job_info</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                <p>Job info returned by ask().</p>
+              </div>
+              <p>
+                  <span class="doc-param-annotation">
+                    <b>TYPE:</b>
+                      <code>dict</code>
+                  </span>
+              </p>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>result</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                <p>Result dictionary with mandatory keys <code>fitness</code> and <code>cost</code>.</p>
+              </div>
+              <p>
+                  <span class="doc-param-annotation">
+                    <b>TYPE:</b>
+                      <code>dict</code>
+                  </span>
+              </p>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-965"> 965</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-965"> 965</a></span>
 <span class="normal"><a href="#__codelineno-0-966"> 966</a></span>
 <span class="normal"><a href="#__codelineno-0-967"> 967</a></span>
 <span class="normal"><a href="#__codelineno-0-968"> 968</a></span>
@@ -2235,24 +2211,22 @@ user-specific information.</p>
 <a id="__codelineno-0-1032" name="__codelineno-0-1032"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_freq</span> <span class="o">==</span> <span class="s2">&quot;step&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">replay</span><span class="p">:</span>
 <a id="__codelineno-0-1033" name="__codelineno-0-1033"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.optimizers.dehb.DEHB.run" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">run</span><span class="p">(</span><span class="n">fevals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">brackets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">total_cost</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">single_node_with_gpus</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">run</span><span class="p">(</span><span class="n">fevals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">brackets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">total_cost</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">single_node_with_gpus</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#dehb.optimizers.dehb.DEHB.run" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Main interface to run optimization by DEHB.</p>
 <p>This function waits on workers and if a worker is free, asks for a configuration and a
 fidelity to evaluate on and submits it to the worker. In each loop, it checks if a job
@@ -2264,9 +2238,9 @@ than one are specified, DEHB selects only one in the priority order (high to low
 2) Number of Successive Halving brackets run under Hyperband (brackets)
 3) Total computational cost (in seconds) aggregated by all function evaluations (total_cost)</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1035">1035</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/optimizers/dehb.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1035">1035</a></span>
 <span class="normal"><a href="#__codelineno-0-1036">1036</a></span>
 <span class="normal"><a href="#__codelineno-0-1037">1037</a></span>
 <span class="normal"><a href="#__codelineno-0-1038">1038</a></span>
@@ -2488,8 +2462,8 @@ than one are specified, DEHB selects only one in the priority order (high to low
 <a id="__codelineno-0-1144" name="__codelineno-0-1144"></a>            <span class="n">active_bracket</span><span class="o">.</span><span class="n">reset_waiting_jobs</span><span class="p">()</span>
 <a id="__codelineno-0-1145" name="__codelineno-0-1145"></a>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traj</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runtime</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
@@ -2497,8 +2471,7 @@ than one are specified, DEHB selects only one in the priority order (high to low
 
   </div>
 
-  </div>
-
+    </div>
 
 </div>
 
@@ -2507,7 +2480,7 @@ than one are specified, DEHB selects only one in the priority order (high to low
 
   </div>
 
-  </div>
+    </div>
 
 </div>
 
@@ -2599,7 +2572,7 @@ than one are specified, DEHB selects only one in the priority order (high to low
     <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "content.code.copy", "navigation.footer", "navigation.tabs", "navigation.tabs.sticky", "toc.follow", "header.autohide", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.5cfa9459.min.js"></script>
+      <script src="../../assets/javascripts/bundle.ad660dcc.min.js"></script>
       
         <script src="../../assets/_markdown_exec_pyodide.js"></script>
       

@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../../assets/automl_org.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.22">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.27">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.732c4fb1.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6543a935.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -189,7 +189,7 @@
       
     </form>
     <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
             Initializing search
@@ -2132,7 +2132,7 @@ dehb = DEHB(
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:25:32.264</span> | <span class="ansi-yellow-intense-fg ansi-bold">WARNING </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">__init__</span>:<span class="ansi-cyan-fg">243</span> - <span class="ansi-yellow-intense-fg ansi-bold">A checkpoint already exists, results could potentially be overwritten.</span>
+<pre><span class="ansi-green-fg">2024-06-26 11:08:59.645</span> | <span class="ansi-yellow-intense-fg ansi-bold">WARNING </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">__init__</span>:<span class="ansi-cyan-fg">243</span> - <span class="ansi-yellow-intense-fg ansi-bold">A checkpoint already exists, results could potentially be overwritten.</span>
 </pre>
 </div>
 </div>
@@ -2194,21 +2194,14 @@ dehb = DEHB(
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:25:32.282</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+<pre><span class="ansi-green-fg">2024-06-26 11:08:59.663</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:25:32.293</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:25:42.282</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+<pre><span class="ansi-green-fg">2024-06-26 11:09:09.656</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
 </pre>
 </div>
 </div>
@@ -2268,16 +2261,16 @@ print("The additional info attached: {}".format(_info))</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>432 432 432
+<pre>422 422 422
 
 Last evaluated configuration, 
 Configuration(values={
-  'max_depth': 3,
-  'max_features': 0.33656544240334685,
-  'min_samples_leaf': 1,
-  'min_samples_split': 4,
-})got a score of -1.0, was evaluated at a fidelity of 16.67 and took 0.017 seconds to run.
-The additional info attached: {'test_score': 1.0, 'fidelity': 16.666666666666664}
+  'max_depth': 9,
+  'max_features': 0.602510957286243,
+  'min_samples_leaf': 5,
+  'min_samples_split': 6,
+})got a score of -0.9444444444444444, was evaluated at a fidelity of 5.56 and took 0.007 seconds to run.
+The additional info attached: {'test_score': 0.9444444444444444, 'fidelity': 5.555555555555555}
 </pre>
 </div>
 </div>
@@ -2398,48 +2391,9 @@ for i in range(runs):
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:25:42.322</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">reset</span>:<span class="ansi-cyan-fg">128</span> - <span class="ansi-bold">
+<pre><span class="ansi-green-fg">2024-06-26 11:09:09.694</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">reset</span>:<span class="ansi-cyan-fg">128</span> - <span class="ansi-bold">
 
-RESET at 05/14/24 14:25:42 UTC
-
-</span>
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:25:42.335</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:25:42.364</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:25:42.393</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:25:52.383</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:25:52.465</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">reset</span>:<span class="ansi-cyan-fg">128</span> - <span class="ansi-bold">
-
-RESET at 05/14/24 14:25:52 UTC
+RESET at 06/26/24 11:09:09 UTC
 
 </span>
 </pre>
@@ -2448,44 +2402,30 @@ RESET at 05/14/24 14:25:52 UTC
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:25:52.477</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+<pre><span class="ansi-green-fg">2024-06-26 11:09:09.708</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:25:52.489</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+<pre><span class="ansi-green-fg">2024-06-26 11:09:09.728</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:25:52.509</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+<pre><span class="ansi-green-fg">2024-06-26 11:09:19.730</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:25:52.556</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:02.517</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:02.595</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">reset</span>:<span class="ansi-cyan-fg">128</span> - <span class="ansi-bold">
+<pre><span class="ansi-green-fg">2024-06-26 11:09:19.810</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">reset</span>:<span class="ansi-cyan-fg">128</span> - <span class="ansi-bold">
 
-RESET at 05/14/24 14:26:02 UTC
+RESET at 06/26/24 11:09:19 UTC
 
 </span>
 </pre>
@@ -2494,62 +2434,30 @@ RESET at 05/14/24 14:26:02 UTC
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:02.607</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+<pre><span class="ansi-green-fg">2024-06-26 11:09:19.823</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:02.635</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+<pre><span class="ansi-green-fg">2024-06-26 11:09:19.835</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:12.623</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+<pre><span class="ansi-green-fg">2024-06-26 11:09:29.823</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:12.702</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">reset</span>:<span class="ansi-cyan-fg">128</span> - <span class="ansi-bold">
+<pre><span class="ansi-green-fg">2024-06-26 11:09:29.901</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">reset</span>:<span class="ansi-cyan-fg">128</span> - <span class="ansi-bold">
 
-RESET at 05/14/24 14:26:12 UTC
-
-</span>
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:12.715</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:12.778</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:22.713</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:22.793</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">reset</span>:<span class="ansi-cyan-fg">128</span> - <span class="ansi-bold">
-
-RESET at 05/14/24 14:26:22 UTC
+RESET at 06/26/24 11:09:29 UTC
 
 </span>
 </pre>
@@ -2558,21 +2466,99 @@ RESET at 05/14/24 14:26:22 UTC
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:22.806</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+<pre><span class="ansi-green-fg">2024-06-26 11:09:29.914</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:22.817</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+<pre><span class="ansi-green-fg">2024-06-26 11:09:29.935</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-05-14 14:26:32.805</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+<pre><span class="ansi-green-fg">2024-06-26 11:09:39.951</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre><span class="ansi-green-fg">2024-06-26 11:09:40.030</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">reset</span>:<span class="ansi-cyan-fg">128</span> - <span class="ansi-bold">
+
+RESET at 06/26/24 11:09:40 UTC
+
+</span>
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre><span class="ansi-green-fg">2024-06-26 11:09:40.042</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre><span class="ansi-green-fg">2024-06-26 11:09:40.080</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre><span class="ansi-green-fg">2024-06-26 11:09:50.078</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre><span class="ansi-green-fg">2024-06-26 11:09:50.155</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">reset</span>:<span class="ansi-cyan-fg">128</span> - <span class="ansi-bold">
+
+RESET at 06/26/24 11:09:50 UTC
+
+</span>
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre><span class="ansi-green-fg">2024-06-26 11:09:50.167</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre><span class="ansi-green-fg">2024-06-26 11:09:50.197</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre><span class="ansi-green-fg">2024-06-26 11:09:50.244</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre><span class="ansi-green-fg">2024-06-26 11:09:50.266</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre><span class="ansi-green-fg">2024-06-26 11:10:00.164</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">save</span>:<span class="ansi-cyan-fg">960</span> - <span class="ansi-bold">Saving state to disk...</span>
 </pre>
 </div>
 </div>
@@ -2661,37 +2647,37 @@ Std. dev. of score across trials:  0.0
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Configuration(values={
   'max_depth': 5,
-  'max_features': 0.6768810544038864,
+  'max_features': 0.6052520571898125,
   'min_samples_leaf': 3,
-  'min_samples_split': 21,
-}) got an accuracy of 1.0 on the test set.
-
-Configuration(values={
-  'max_depth': 9,
-  'max_features': 0.5845736891980853,
-  'min_samples_leaf': 12,
-  'min_samples_split': 10,
+  'min_samples_split': 12,
 }) got an accuracy of 1.0 on the test set.
 
 Configuration(values={
   'max_depth': 12,
-  'max_features': 0.6129324023710133,
-  'min_samples_leaf': 4,
+  'max_features': 0.6405930765881862,
+  'min_samples_leaf': 11,
+  'min_samples_split': 15,
+}) got an accuracy of 1.0 on the test set.
+
+Configuration(values={
+  'max_depth': 7,
+  'max_features': 0.6381968306511858,
+  'min_samples_leaf': 10,
   'min_samples_split': 6,
 }) got an accuracy of 1.0 on the test set.
 
 Configuration(values={
-  'max_depth': 8,
-  'max_features': 0.5870380152915827,
-  'min_samples_leaf': 1,
-  'min_samples_split': 23,
+  'max_depth': 4,
+  'max_features': 0.32269723392950955,
+  'min_samples_leaf': 3,
+  'min_samples_split': 19,
 }) got an accuracy of 1.0 on the test set.
 
 Configuration(values={
-  'max_depth': 2,
-  'max_features': 0.3688003316953692,
-  'min_samples_leaf': 12,
-  'min_samples_split': 9,
+  'max_depth': 7,
+  'max_features': 0.4685533974459857,
+  'min_samples_leaf': 7,
+  'min_samples_split': 16,
 }) got an accuracy of 1.0 on the test set.
 
 </pre>
@@ -2824,7 +2810,7 @@ Configuration(values={
     <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "content.code.copy", "navigation.footer", "navigation.tabs", "navigation.tabs.sticky", "toc.follow", "header.autohide", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.5cfa9459.min.js"></script>
+      <script src="../../assets/javascripts/bundle.ad660dcc.min.js"></script>
       
         <script src="../../assets/_markdown_exec_pyodide.js"></script>
       

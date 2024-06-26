@@ -14,7 +14,7 @@
       
       
       <link rel="icon" href="../../assets/automl_org.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.22">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.27">
     
     
       
@@ -22,7 +22,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.732c4fb1.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6543a935.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -187,7 +187,7 @@
       
     </form>
     <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
             Initializing search
@@ -1039,9 +1039,9 @@
 
 
 
-  <div class="doc doc-contents first">
+    <div class="doc doc-contents first">
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1057,8 +1057,8 @@
 
 
 <h2 id="dehb.utils.config_repository.ConfigItem" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">ConfigItem</span><span class="p">(</span><span class="n">config_id</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span></code>
-  
+              <code class="highlight language-python"><span class="n">ConfigItem</span><span class="p">(</span><span class="n">config_id</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span></code>
+
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
   </span>
@@ -1066,15 +1066,15 @@
 <a href="#dehb.utils.config_repository.ConfigItem" class="headerlink" title="Permanent link">#</a></h2>
 
 
-  <div class="doc doc-contents ">
+    <div class="doc doc-contents ">
 
-  
+
       <p>Data class to store information regarding a specific configuration.</p>
 <p>The results for this configuration are stored in the <code>results</code> dict, using the fidelity it has
 been evaluated on as keys.</p>
 
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1090,8 +1090,7 @@ been evaluated on as keys.</p>
 
   </div>
 
-  </div>
-
+    </div>
 
 </div>
 
@@ -1100,8 +1099,8 @@ been evaluated on as keys.</p>
 
 
 <h2 id="dehb.utils.config_repository.ResultItem" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">ResultItem</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">cost</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span></code>
-  
+              <code class="highlight language-python"><span class="n">ResultItem</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">cost</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span></code>
+
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
   </span>
@@ -1109,13 +1108,13 @@ been evaluated on as keys.</p>
 <a href="#dehb.utils.config_repository.ResultItem" class="headerlink" title="Permanent link">#</a></h2>
 
 
-  <div class="doc doc-contents ">
+    <div class="doc doc-contents ">
 
-  
+
       <p>Data class storing the result information of a specific configuration + fidelity.</p>
 
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1131,8 +1130,7 @@ been evaluated on as keys.</p>
 
   </div>
 
-  </div>
-
+    </div>
 
 </div>
 
@@ -1141,25 +1139,25 @@ been evaluated on as keys.</p>
 
 
 <h2 id="dehb.utils.config_repository.ConfigRepository" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">ConfigRepository</span><span class="p">()</span></code>
+              <code class="highlight language-python"><span class="n">ConfigRepository</span><span class="p">()</span></code>
 
 <a href="#dehb.utils.config_repository.ConfigRepository" class="headerlink" title="Permanent link">#</a></h2>
 
 
-  <div class="doc doc-contents ">
+    <div class="doc doc-contents ">
 
-  
+
       <p>Bookkeeps all configurations used throughout the course of the optimization.</p>
 <p>Keeps track of the configurations and their results on the different fidelitites.
 A new configuration is announced via <code>announce_config</code>. After evaluating the configuration
 on the specified fidelity, use <code>tell_result</code> to log the achieved performance, cost etc.</p>
 <p>The configurations are stored in a list of <code>ConfigItem</code>.</p>
-  
+
       <p>Initializes the class by calling <code>self.reset</code>.</p>
 
-                <details class="quote">
-                  <summary>Source code in <code>src/dehb/utils/config_repository.py</code></summary>
-                  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-38">38</a></span>
+                  <details class="quote">
+                    <summary>Source code in <code>src/dehb/utils/config_repository.py</code></summary>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-38">38</a></span>
 <span class="normal"><a href="#__codelineno-0-39">39</a></span>
 <span class="normal"><a href="#__codelineno-0-40">40</a></span>
 <span class="normal"><a href="#__codelineno-0-41">41</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -1167,9 +1165,9 @@ on the specified fidelity, use <code>tell_result</code> to log the achieved perf
 <a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">configs</span> <span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ConfigItem</span><span class="p">]</span>
 <a id="__codelineno-0-41" name="__codelineno-0-41"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
-                </details>
+                  </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1181,129 +1179,123 @@ on the specified fidelity, use <code>tell_result</code> to log the achieved perf
 
 
 
-
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.config_repository.ConfigRepository.reset" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">reset</span><span class="p">()</span></code>
+            <code class="highlight language-python"><span class="n">reset</span><span class="p">()</span></code>
 
 <a href="#dehb.utils.config_repository.ConfigRepository.reset" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Resets the config repository, clearing all collected configurations and results.</p>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/config_repository.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-43">43</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/config_repository.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-43">43</a></span>
 <span class="normal"><a href="#__codelineno-0-44">44</a></span>
 <span class="normal"><a href="#__codelineno-0-45">45</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Resets the config repository, clearing all collected configurations and results.&quot;&quot;&quot;</span>
 <a id="__codelineno-0-45" name="__codelineno-0-45"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">configs</span> <span class="o">=</span> <span class="p">[]</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.config_repository.ConfigRepository.announce_config" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">announce_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">fidelity</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">announce_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">fidelity</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 <a href="#dehb.utils.config_repository.ConfigRepository.announce_config" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Announces a new configuration with the respective fidelity it should be evaluated on.</p>
 <p>The configuration is then added to the list of so far seen configurations and the ID of the
 configuration is returned.</p>
 
 
-
-  <table>
-    <thead>
-      <tr>
-        <th><span class="doc-section-title">PARAMETER</span></th>
-        <th><span>DESCRIPTION</span></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td><code>config</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>New configuration</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="numpy.ndarray">ndarray</span></code>
-                </span>
-            </p>
-          </td>
+<table>
+      <thead>
+        <tr>
+          <th><span class="doc-section-title">PARAMETER</span></th>
+          <th><span>DESCRIPTION</span></th>
         </tr>
-        <tr class="doc-section-item">
-          <td><code>fidelity</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>Fidelity on which <code>config</code> is evaluated or None.
-                        Defaults to None.</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>float</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>None</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-
-  <table>
-    <thead>
-      <tr>
-        <th><span class="doc-section-title">RETURNS</span></th>
-        <th><span>DESCRIPTION</span></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td>
-              <code>int</code>
-          </td>
-          <td class="doc-returns-details">
-            <div class="doc-md-description">
-              <p>ID of configuration</p>
-            </div>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>config</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                <p>New configuration</p>
+              </div>
               <p>
-                <span class="doc-returns-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
+                  <span class="doc-param-annotation">
+                    <b>TYPE:</b>
+                      <code><span title="numpy.ndarray">ndarray</span></code>
+                  </span>
               </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>fidelity</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                <p>Fidelity on which <code>config</code> is evaluated or None.
+                        Defaults to None.</p>
+              </div>
+              <p>
+                  <span class="doc-param-annotation">
+                    <b>TYPE:</b>
+                      <code>float</code>
+                  </span>
+                  <span class="doc-param-default">
+                    <b>DEFAULT:</b>
+                      <code>None</code>
+                  </span>
+              </p>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/config_repository.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-47">47</a></span>
+
+<table>
+      <thead>
+        <tr>
+          <th><span class="doc-section-title">RETURNS</span></th>
+          <th><span>DESCRIPTION</span></th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>int</code>
+            </td>
+            <td class="doc-returns-details">
+              <div class="doc-md-description">
+                <p>ID of configuration</p>
+              </div>
+                <p>
+                  <span class="doc-returns-annotation">
+                    <b>TYPE:</b>
+                      <code>int</code>
+                  </span>
+                </p>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/config_repository.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-47">47</a></span>
 <span class="normal"><a href="#__codelineno-0-48">48</a></span>
 <span class="normal"><a href="#__codelineno-0-49">49</a></span>
 <span class="normal"><a href="#__codelineno-0-50">50</a></span>
@@ -1347,100 +1339,96 @@ configuration is returned.</p>
 <a id="__codelineno-0-67" name="__codelineno-0-67"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config_item</span><span class="p">)</span>
 <a id="__codelineno-0-68" name="__codelineno-0-68"></a>    <span class="k">return</span> <span class="n">config_id</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.config_repository.ConfigRepository.announce_population" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">announce_population</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">fidelity</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">announce_population</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">fidelity</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 <a href="#dehb.utils.config_repository.ConfigRepository.announce_population" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Announce population, retrieving ids for the population.</p>
 
 
+<table>
+      <thead>
+        <tr>
+          <th><span class="doc-section-title">PARAMETER</span></th>
+          <th><span>DESCRIPTION</span></th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>population</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                <p>Population to announce</p>
+              </div>
+              <p>
+                  <span class="doc-param-annotation">
+                    <b>TYPE:</b>
+                      <code><span title="numpy.ndarray">ndarray</span></code>
+                  </span>
+              </p>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>fidelity</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                <p>Fidelity on which pop is evaluated or None.
+                        Defaults to None.</p>
+              </div>
+              <p>
+                  <span class="doc-param-annotation">
+                    <b>TYPE:</b>
+                      <code>float</code>
+                  </span>
+                  <span class="doc-param-default">
+                    <b>DEFAULT:</b>
+                      <code>None</code>
+                  </span>
+              </p>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-  <table>
-    <thead>
-      <tr>
-        <th><span class="doc-section-title">PARAMETER</span></th>
-        <th><span>DESCRIPTION</span></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td><code>population</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>Population to announce</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
+
+<table>
+      <thead>
+        <tr>
+          <th><span class="doc-section-title">RETURNS</span></th>
+          <th><span>DESCRIPTION</span></th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <span class="doc-returns-annotation">
                     <code><span title="numpy.ndarray">ndarray</span></code>
                 </span>
-            </p>
-          </td>
-        </tr>
-        <tr class="doc-section-item">
-          <td><code>fidelity</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>Fidelity on which pop is evaluated or None.
-                        Defaults to None.</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>float</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>None</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
+            </td>
+            <td class="doc-returns-details">
+              <div class="doc-md-description">
+                <p>np.ndarray: population ids</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-
-
-  <table>
-    <thead>
-      <tr>
-        <th><span class="doc-section-title">RETURNS</span></th>
-        <th><span>DESCRIPTION</span></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td>
-              <span class="doc-returns-annotation">
-                  <code><span title="numpy.ndarray">ndarray</span></code>
-              </span>
-          </td>
-          <td class="doc-returns-details">
-            <div class="doc-md-description">
-              <p>np.ndarray: population ids</p>
-            </div>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/config_repository.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-70">70</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/config_repository.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-70">70</a></span>
 <span class="normal"><a href="#__codelineno-0-71">71</a></span>
 <span class="normal"><a href="#__codelineno-0-72">72</a></span>
 <span class="normal"><a href="#__codelineno-0-73">73</a></span>
@@ -1472,73 +1460,70 @@ configuration is returned.</p>
 <a id="__codelineno-0-84" name="__codelineno-0-84"></a>        <span class="n">population_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">conf_id</span><span class="p">)</span>
 <a id="__codelineno-0-85" name="__codelineno-0-85"></a>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">population_ids</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.config_repository.ConfigRepository.announce_fidelity" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">announce_fidelity</span><span class="p">(</span><span class="n">config_id</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">announce_fidelity</span><span class="p">(</span><span class="n">config_id</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">)</span></code>
 
 <a href="#dehb.utils.config_repository.ConfigRepository.announce_fidelity" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Announce the evaluation of a new fidelity for a given config.</p>
 <p>This function may only be used if the config already exists in the repository.
 Note: This function is currently unused, but might be used later in order to
 allow for continuation.</p>
 
 
-
-  <table>
-    <thead>
-      <tr>
-        <th><span class="doc-section-title">PARAMETER</span></th>
-        <th><span>DESCRIPTION</span></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td><code>config_id</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>ID of Configuration</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-            </p>
-          </td>
+<table>
+      <thead>
+        <tr>
+          <th><span class="doc-section-title">PARAMETER</span></th>
+          <th><span>DESCRIPTION</span></th>
         </tr>
-        <tr class="doc-section-item">
-          <td><code>fidelity</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>Fidelity on which the config will be evaluated</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>float</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>config_id</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                <p>ID of Configuration</p>
+              </div>
+              <p>
+                  <span class="doc-param-annotation">
+                    <b>TYPE:</b>
+                      <code>int</code>
+                  </span>
+              </p>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>fidelity</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                <p>Fidelity on which the config will be evaluated</p>
+              </div>
+              <p>
+                  <span class="doc-param-annotation">
+                    <b>TYPE:</b>
+                      <code>float</code>
+                  </span>
+              </p>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/config_repository.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-87"> 87</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/config_repository.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-87"> 87</a></span>
 <span class="normal"><a href="#__codelineno-0-88"> 88</a></span>
 <span class="normal"><a href="#__codelineno-0-89"> 89</a></span>
 <span class="normal"><a href="#__codelineno-0-90"> 90</a></span>
@@ -1578,112 +1563,109 @@ allow for continuation.</p>
 <a id="__codelineno-0-105" name="__codelineno-0-105"></a>        <span class="p">}</span>
 <a id="__codelineno-0-106" name="__codelineno-0-106"></a>    <span class="n">config_item</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span> <span class="o">=</span> <span class="n">result_item</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.config_repository.ConfigRepository.tell_result" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">tell_result</span><span class="p">(</span><span class="n">config_id</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">cost</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">tell_result</span><span class="p">(</span><span class="n">config_id</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">cost</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span></code>
 
 <a href="#dehb.utils.config_repository.ConfigRepository.tell_result" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Logs the achieved performance, cost etc. of a specific configuration-fidelity pair.</p>
 
 
+<table>
+      <thead>
+        <tr>
+          <th><span class="doc-section-title">PARAMETER</span></th>
+          <th><span>DESCRIPTION</span></th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>config_id</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                <p>ID of evaluated configuration</p>
+              </div>
+              <p>
+                  <span class="doc-param-annotation">
+                    <b>TYPE:</b>
+                      <code>int</code>
+                  </span>
+              </p>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>fidelity</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                <p>Fidelity on which configuration has been evaluated.</p>
+              </div>
+              <p>
+                  <span class="doc-param-annotation">
+                    <b>TYPE:</b>
+                      <code>float</code>
+                  </span>
+              </p>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>score</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                <p>Achieved score, given by objective function</p>
+              </div>
+              <p>
+                  <span class="doc-param-annotation">
+                    <b>TYPE:</b>
+                      <code>float</code>
+                  </span>
+              </p>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>cost</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                <p>Cost, given by objective function</p>
+              </div>
+              <p>
+                  <span class="doc-param-annotation">
+                    <b>TYPE:</b>
+                      <code>float</code>
+                  </span>
+              </p>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>info</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                <p>Run info, given by objective function</p>
+              </div>
+              <p>
+                  <span class="doc-param-annotation">
+                    <b>TYPE:</b>
+                      <code>dict</code>
+                  </span>
+              </p>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-  <table>
-    <thead>
-      <tr>
-        <th><span class="doc-section-title">PARAMETER</span></th>
-        <th><span>DESCRIPTION</span></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td><code>config_id</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>ID of evaluated configuration</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr class="doc-section-item">
-          <td><code>fidelity</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>Fidelity on which configuration has been evaluated.</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>float</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr class="doc-section-item">
-          <td><code>score</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>Achieved score, given by objective function</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>float</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr class="doc-section-item">
-          <td><code>cost</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>Cost, given by objective function</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>float</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr class="doc-section-item">
-          <td><code>info</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>Run info, given by objective function</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>dict</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/config_repository.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-108">108</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/config_repository.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-108">108</a></span>
 <span class="normal"><a href="#__codelineno-0-109">109</a></span>
 <span class="normal"><a href="#__codelineno-0-110">110</a></span>
 <span class="normal"><a href="#__codelineno-0-111">111</a></span>
@@ -1729,81 +1711,77 @@ allow for continuation.</p>
 <a id="__codelineno-0-129" name="__codelineno-0-129"></a>        <span class="n">config_item</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span><span class="o">.</span><span class="n">cost</span> <span class="o">=</span> <span class="n">cost</span>
 <a id="__codelineno-0-130" name="__codelineno-0-130"></a>        <span class="n">config_item</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">fidelity</span><span class="p">]</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="n">info</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.config_repository.ConfigRepository.get" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">get</span><span class="p">(</span><span class="n">config_id</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">get</span><span class="p">(</span><span class="n">config_id</span><span class="p">)</span></code>
 
 <a href="#dehb.utils.config_repository.ConfigRepository.get" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Get the configuration with the given ID.</p>
 
 
+<table>
+      <thead>
+        <tr>
+          <th><span class="doc-section-title">PARAMETER</span></th>
+          <th><span>DESCRIPTION</span></th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>config_id</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                <p>ID of config</p>
+              </div>
+              <p>
+                  <span class="doc-param-annotation">
+                    <b>TYPE:</b>
+                      <code>int</code>
+                  </span>
+              </p>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-  <table>
-    <thead>
-      <tr>
-        <th><span class="doc-section-title">PARAMETER</span></th>
-        <th><span>DESCRIPTION</span></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td><code>config_id</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>ID of config</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
+
+<table>
+      <thead>
+        <tr>
+          <th><span class="doc-section-title">RETURNS</span></th>
+          <th><span>DESCRIPTION</span></th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <span class="doc-returns-annotation">
+                    <code><span title="numpy.ndarray">ndarray</span></code>
                 </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
+            </td>
+            <td class="doc-returns-details">
+              <div class="doc-md-description">
+                <p>np.ndarray: Config in hypercube representation</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-
-
-  <table>
-    <thead>
-      <tr>
-        <th><span class="doc-section-title">RETURNS</span></th>
-        <th><span>DESCRIPTION</span></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td>
-              <span class="doc-returns-annotation">
-                  <code><span title="numpy.ndarray">ndarray</span></code>
-              </span>
-          </td>
-          <td class="doc-returns-details">
-            <div class="doc-md-description">
-              <p>np.ndarray: Config in hypercube representation</p>
-            </div>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/config_repository.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-132">132</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/config_repository.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-132">132</a></span>
 <span class="normal"><a href="#__codelineno-0-133">133</a></span>
 <span class="normal"><a href="#__codelineno-0-134">134</a></span>
 <span class="normal"><a href="#__codelineno-0-135">135</a></span>
@@ -1831,56 +1809,53 @@ allow for continuation.</p>
 <a id="__codelineno-0-144" name="__codelineno-0-144"></a>        <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;Config with the given ID can not be found.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
 <a id="__codelineno-0-145" name="__codelineno-0-145"></a>    <span class="k">return</span> <span class="n">config_item</span><span class="o">.</span><span class="n">config</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="dehb.utils.config_repository.ConfigRepository.save_state" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">save_state</span><span class="p">(</span><span class="n">save_path</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">save_state</span><span class="p">(</span><span class="n">save_path</span><span class="p">)</span></code>
 
 <a href="#dehb.utils.config_repository.ConfigRepository.save_state" class="headerlink" title="Permanent link">#</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
+
       <p>Saves the current state to <code>save_path</code>.</p>
 
 
-
-  <table>
-    <thead>
-      <tr>
-        <th><span class="doc-section-title">PARAMETER</span></th>
-        <th><span>DESCRIPTION</span></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td><code>save_path</code></td>
-          <td class="doc-param-details">
-            <div class="doc-md-description">
-              <p>Path where the state should be saved to.</p>
-            </div>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="pathlib.Path">Path</span></code>
-                </span>
-            </p>
-          </td>
+<table>
+      <thead>
+        <tr>
+          <th><span class="doc-section-title">PARAMETER</span></th>
+          <th><span>DESCRIPTION</span></th>
         </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>save_path</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                <p>Path where the state should be saved to.</p>
+              </div>
+              <p>
+                  <span class="doc-param-annotation">
+                    <b>TYPE:</b>
+                      <code><span title="pathlib.Path">Path</span></code>
+                  </span>
+              </p>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-          <details class="quote">
-            <summary>Source code in <code>src/dehb/utils/config_repository.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-147">147</a></span>
+            <details class="quote">
+              <summary>Source code in <code>src/dehb/utils/config_repository.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-147">147</a></span>
 <span class="normal"><a href="#__codelineno-0-148">148</a></span>
 <span class="normal"><a href="#__codelineno-0-149">149</a></span>
 <span class="normal"><a href="#__codelineno-0-150">150</a></span>
@@ -1906,8 +1881,8 @@ allow for continuation.</p>
 <a id="__codelineno-0-158" name="__codelineno-0-158"></a>            <span class="n">serialized_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">serialized_config</span><span class="p">)</span>
 <a id="__codelineno-0-159" name="__codelineno-0-159"></a>        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">serialized_data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
@@ -1915,8 +1890,7 @@ allow for continuation.</p>
 
   </div>
 
-  </div>
-
+    </div>
 
 </div>
 
@@ -1925,7 +1899,7 @@ allow for continuation.</p>
 
   </div>
 
-  </div>
+    </div>
 
 </div>
 
@@ -2001,7 +1975,7 @@ allow for continuation.</p>
     <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "content.code.copy", "navigation.footer", "navigation.tabs", "navigation.tabs.sticky", "toc.follow", "header.autohide", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.5cfa9459.min.js"></script>
+      <script src="../../assets/javascripts/bundle.ad660dcc.min.js"></script>
       
         <script src="../../assets/_markdown_exec_pyodide.js"></script>
       
