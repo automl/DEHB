@@ -1045,7 +1045,7 @@ class DEHB(DEHBBase):
 
     @logger.catch
     def run(self, fevals=None, brackets=None, total_cost=None, single_node_with_gpus=False,
-            debug=False, **kwargs) -> Tuple[np.array, np.array, np.array]:
+            **kwargs) -> Tuple[np.array, np.array, np.array]:
         """Main interface to run optimization by DEHB.
 
         This function waits on workers and if a worker is free, asks for a configuration and a
@@ -1074,7 +1074,6 @@ class DEHB(DEHBBase):
             brackets (int, optional): Number of brackets to run. Defaults to None.
             total_cost (int, optional): Wallclock budget in seconds. Defaults to None.
             single_node_with_gpus (bool): Workers get assigned different GPUs. Default to False.
-            debug (bool): Activate debug output. Defaults to False.
 
         Returns:
             Trajectory, runtime and optimization history.
@@ -1118,8 +1117,6 @@ class DEHB(DEHBBase):
             Path.cwd() / self.log_filename,
             time.strftime("%x %X %Z", time.localtime(self.start)),
         ))
-        if debug:
-            logger.configure(handlers=[{"sink": sys.stdout}])
 
         delimiters = [fevals, brackets, total_cost]
         delim_sum = sum(x is not None for x in delimiters)
