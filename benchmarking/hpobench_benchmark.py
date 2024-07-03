@@ -3,10 +3,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from hpobench.benchmarks.ml.lr_benchmark import LRBenchmark
-from hpobench.benchmarks.ml.nn_benchmark import NNBenchmark
-from hpobench.benchmarks.ml.rf_benchmark import RandomForestBenchmark
-from hpobench.benchmarks.ml.svm_benchmark import SVMBenchmark
+from hpobench.benchmarks.ml.tabular_benchmark import TabularBenchmark
 from hpobench.benchmarks.nas.nasbench_201 import Cifar10ValidNasBench201BenchmarkOriginal
 from hpobench.benchmarks.surrogates.paramnet_benchmark import ParamNetReducedAdultOnStepsBenchmark
 from utils import DEHBOptimizerBase
@@ -28,42 +25,49 @@ class DEHBOptimizerHPOBench(DEHBOptimizerBase):
     def _get_config_space(self, seed):
         return self.benchmark.get_configuration_space(seed=seed)
 
-    def _get_fidelity_range(self, benchmark, fidelity_name, seed):
+    def _get_fidelity_range(self, benchmark, fidelity_name, seed, tabular):
         fidelity_space = benchmark.get_fidelity_space(seed)
         fidelity_param = fidelity_space.get_hyperparameter(fidelity_name)
-        min_fidelity = fidelity_param.lower
-        max_fidelity = fidelity_param.upper
+        if tabular:
+            min_fidelity = fidelity_param.sequence[0]
+            max_fidelity = fidelity_param.sequence[-1]
+        else:
+            min_fidelity = fidelity_param.lower
+            max_fidelity = fidelity_param.upper
         return min_fidelity, max_fidelity
 
     def _get_benchmark_and_fidelities(self, benchmark_name, seed):
+        tabular = True
         if benchmark_name == "tab_nn":
-            benchmark = NNBenchmark(rng=seed, task_id=31)
+            benchmark = TabularBenchmark(model="nn", rng=seed, task_id=31)
             fidelity_name = "iter"
             fidelity_type = int
         elif benchmark_name == "tab_lr":
-            benchmark = LRBenchmark(rng=seed, task_id=31)
+            benchmark = TabularBenchmark(model="lr", rng=seed, task_id=31)
             fidelity_name = "iter"
             fidelity_type = int
         elif benchmark_name == "tab_rf":
-            benchmark = RandomForestBenchmark(rng=seed, task_id=31)
+            benchmark = TabularBenchmark(model="rf", rng=seed, task_id=31)
             fidelity_name = "n_estimators"
             fidelity_type = int
         elif benchmark_name == "tab_svm":
-            benchmark = SVMBenchmark(rng=seed, task_id=31)
+            benchmark = TabularBenchmark(model="svm", rng=seed, task_id=31)
             fidelity_name = "subsample"
             fidelity_type = float
         elif benchmark_name == "nasbench201":
             benchmark = Cifar10ValidNasBench201BenchmarkOriginal(rng=seed)
             fidelity_name = "epoch"
             fidelity_type = int
+            tabular = False
         elif benchmark_name == "surrogate":
             benchmark = ParamNetReducedAdultOnStepsBenchmark(rng=seed)
             fidelity_name = "step"
             fidelity_type = int
+            tabular = False
         else:
             raise ValueError(f"No benchmark '{benchmark_name}' found.")
 
-        min_fidelity, max_fidelity = self._get_fidelity_range(benchmark, fidelity_name, seed)
+        min_fidelity, max_fidelity = self._get_fidelity_range(benchmark, fidelity_name, seed, tabular)
         return benchmark, fidelity_name, (min_fidelity, max_fidelity), fidelity_type
 
 def input_arguments():

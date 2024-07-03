@@ -50,7 +50,7 @@ pip install -e .[benchmarking,hpobench_benchmark]
 The benchmarking script is highly configurable and lets you choose between the budget types (`fevals`, `brackets` and `total_cost`), the execution setup (`run`(default), `ask_tell` and `restart`), the benchmarks used (`tab_nn`, `tab_rf`, `tab_svm`, `tab_lr`, `surrogate`, `nasbench201`) and the seeds used for each benchmark run (default: [0]).
 
 ```shell
-python3.8 benchmarking/hpobench_benchmark.py --fevals 300 --ask_tell --restart --benchmarks tab_nn tab_rf tab_svm tab_lr surrogate nasbench201 --seed 0 --n_seeds 10 --output_path logs/hpobench_benchmarking
+python3.8 benchmarking/hpobench_benchmark.py --fevals 300 --benchmarks tab_nn tab_rf tab_svm tab_lr surrogate nasbench201 --seed 0 --n_seeds 10 --output_path logs/hpobench_benchmarking
 ```
 
 ## Installation Guide MFPBench
@@ -89,7 +89,7 @@ python -m mfpbench download --benchmark jahs
 The setup is similar as in the HPOBench section, however under this installation only the `jahs` (joint architecture and hyperparameter search), `mfh3` and `mfh6` benchmarks are available.
 
 ```shell
-python3.8 benchmarking/mfpbench_benchmark.py --fevals 300 --ask_tell --restart --benchmarks jahs mfh3 mfh6 --seed 0 --n_seeds 10 --output_path logs/jahs_benchmarking
+python3.8 benchmarking/mfpbench_benchmark.py --fevals 300 --benchmarks jahs mfh3 mfh6 --seed 0 --n_seeds 10 --output_path logs/jahs_benchmarking
 ```
 
 ## PD1 Benchmark
@@ -124,7 +124,7 @@ python -m mfpbench download --benchmark pd1
 We currently support and use the PD1 benchmarks `cifar100_wideresnet_2048`, `imagenet_resnet_512`, `lm1b_transformer_2048` and `translatewmt_xformer_64`. Moreover, the `mfh3` and `mfh6` benchmarks are available.
 
 ```shell
-python3.8 benchmarking/mfpbench_benchmark.py --fevals 300 --ask_tell --restart --benchmarks cifar100_wideresnet_2048 imagenet_resnet_512 lm1b_transformer_2048 translatewmt_xformer_64 mfh3 mfh6 --seed 0 --n_seeds 10 --output_path logs/pd1_benchmarks
+python3.8 benchmarking/mfpbench_benchmark.py --fevals 300 --benchmarks cifar100_wideresnet_2048 imagenet_resnet_512 lm1b_transformer_2048 translatewmt_xformer_64 mfh3 mfh6 --seed 0 --n_seeds 10 --output_path logs/pd1_benchmarks
 ```
 
 ## CountingOnes Benchmark
