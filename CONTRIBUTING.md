@@ -133,7 +133,7 @@ To render the documentation locally for debugging and review:
 2. Use `mike` to deploy and serve the documentation locally:
 
     ```bash
-    mike deploy --update-aliases 2.0.0 latest
+    mike deploy --update-aliases 2.0.0 latest --ignore
     mike serve
     ```
 
