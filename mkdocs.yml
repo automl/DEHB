@@ -4,9 +4,11 @@ repo_url: https://github.com/automl/DEHB/
 nav:
   - Home: index.md
   - Getting Started:
+    - DEHBs Hyperparameters: getting_started/dehb_hps.md
     - Single Worker: getting_started/single_worker.md
     - Parallel: getting_started/parallel.md
-    - Ask & Tell: getting_started/ask_tell.md
+    - Running DEHB: getting_started/running_dehb.md
+    - Logging: getting_started/logging.md
   - Examples:
     - Interfacing DEHB: examples/00_interfacing_DEHB.ipynb
     - Optimizing RandomForest using DEHB: examples/01.1_Optimizing_RandomForest_using_DEHB.ipynb
@@ -18,6 +20,7 @@ nav:
     - DE: references/de.md
     - Bracket Manager: references/bracket_manager.md
     - Configuration Repository: references/config_repository.md
+  - Contributing: CONTRIBUTING.md
 
 theme:
   name: material
@@ -25,6 +28,19 @@ theme:
   favicon: assets/automl_org.png
   icon:
     repo: fontawesome/brands/github
+    admonition:
+      note: octicons/tag-16
+      abstract: octicons/checklist-16
+      info: octicons/info-16
+      tip: octicons/squirrel-16
+      success: octicons/check-16
+      question: octicons/question-16
+      warning: octicons/alert-16
+      failure: octicons/x-circle-16
+      danger: octicons/zap-16
+      bug: octicons/bug-16
+      example: octicons/beaker-16
+      quote: octicons/quote-16
   features:
     - content.code.annotate
     - content.code.copy

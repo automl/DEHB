@@ -10,6 +10,7 @@ Thank you for considering contributing to DEHB! We welcome contributions from th
 - [Code Contributions](#code-contributions)
 - [Submitting a Pull Request](#submitting-a-pull-request)
 - [Code Style and Guidelines](#code-style-and-guidelines)
+- [Documentation](#documentation)
 - [Community Guidelines](#community-guidelines)
 
 ## How to Contribute
@@ -77,6 +78,66 @@ To maintain consistency and readability, we follow a set of code style and guide
 - Keep lines of code within a reasonable length (recommended maximum: 100 characters).
 - Write comprehensive and meaningful commit messages.
 - Write unit tests for new features and ensure existing tests pass.
+
+## Documentation
+Proper documentation is crucial for the maintainability and usability of the DEHB project. Here are the guidelines for documenting your code:
+
+### General Guidelines
+
+- **New Features:** All new features must include documentation.
+- **Docstrings:** All public functions must include docstrings that follow the [Google style guide](https://google.github.io/styleguide/pyguide.html).
+- **Comments:** Use comments to explain the logic behind complex code, special cases, or non-obvious implementations.
+- **Clarity:** Ensure that your comments and docstrings are clear, concise, and informative.
+
+### Docstring Requirements
+
+For each public function, the docstring should include:
+
+1. **Summary:** A brief description of the function's purpose.
+2. **Parameters:** A list of all parameters with descriptions, including types and any default values.
+3. **Returns:** A description of the return values, including types.
+4. **Raises:** A list of any exceptions that the function might raise.
+
+### Example Docstring
+
+```python
+def example_function(param1: int, param2: str = "default") -> bool:
+    """
+    This is an example function that demonstrates how to write a proper docstring.
+
+    Args:
+        param1 (int): The first parameter, an integer.
+        param2 (str, optional): The second parameter, a string. Defaults to "default".
+
+    Returns:
+        bool: The return value. True if successful, False otherwise.
+
+    Raises:
+        ValueError: If `param1` is negative.
+    """
+    if param1 < 0:
+        raise ValueError("param1 must be non-negative")
+    return True
+```
+
+### Rendering Documentation Locally
+
+To render the documentation locally for debugging and review:
+
+1. Install the required `dev` dependencies:
+
+    ```bash
+    pip install -e .[dev]
+    ```
+
+2. Use `mike` to deploy and serve the documentation locally:
+
+    ```bash
+    mike deploy --update-aliases 2.0.0 latest --ignore
+    mike serve
+    ```
+
+3. The docs should now be viewable on http://localhost:8000/. If not, check your command prompt for any errors (or different local server adress).
 
 ## Community Guidelines
 

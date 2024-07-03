@@ -11,6 +11,8 @@ dependencies = [
   "dask>=2.27.0",
   "distributed>=2.27.0",
   "ConfigSpace>=0.4.16",
+  "pandas>=1.4.4",
+  "pyarrow>=16.1.0"
 ]
 classifiers = [
   "Programming Language :: Python :: 3.8",

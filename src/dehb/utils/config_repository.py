@@ -43,6 +43,7 @@ class ConfigRepository:
     def reset(self) -> None:
         """Resets the config repository, clearing all collected configurations and results."""
         self.configs = []
+        self.initial_configs = []
 
     def announce_config(self, config: np.ndarray, fidelity=None) -> int:
         """Announces a new configuration with the respective fidelity it should be evaluated on.
@@ -56,7 +57,7 @@ class ConfigRepository:
                                         Defaults to None.
 
         Returns:
-            int: ID of configuration
+            ID of configuration
         """
         config_id = len(self.configs)
         fidelity = float(fidelity or 0)
@@ -76,7 +77,7 @@ class ConfigRepository:
                                         Defaults to None.
 
         Returns:
-            np.ndarray: population ids
+            population ids
         """
         population_ids = []
         for indiv in population:
@@ -136,7 +137,7 @@ class ConfigRepository:
             config_id (int): ID of config
 
         Returns:
-            np.ndarray: Config in hypercube representation
+            Config in hypercube representation
         """
         try:
             config_item = self.configs[config_id]
@@ -144,6 +145,21 @@ class ConfigRepository:
             raise IndexError("Config with the given ID can not be found.") from e
         return config_item.config
 
+    def serialize_configs(self, configs) -> list:
+        """Returns the configurations in logging format.
+
+        Args:
+            configs (list): Configs to parse into logging format
+
+        Returns:
+            Configs in logging format
+        """
+        serialized_data = []
+        for config in configs:
+            serialized_config = asdict(config)
+            serialized_config["config"] = serialized_config["config"].tolist()
+            serialized_data.append(serialized_config)
+        return serialized_data
     def save_state(self, save_path: Path):
         """Saves the current state to `save_path`.
 
@@ -151,9 +167,9 @@ class ConfigRepository:
             save_path (Path): Path where the state should be saved to.
         """
         with save_path.open("w") as f:
-            serialized_data = []
-            for config in self.configs:
-                serialized_config = asdict(config)
-                serialized_config["config"] = serialized_config["config"].tolist()
-                serialized_data.append(serialized_config)
+            serialized_data = self.serialize_configs(self.configs)
             json.dump(serialized_data, f, indent=2)
+
+    def get_serialized_initial_configs(self):
+        """Returns the initial configs in a format, that can be JSON serialized."""
+        return self.serialize_configs(self.initial_configs)
