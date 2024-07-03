@@ -37,7 +37,7 @@ def main():
     args = input_arguments()
     results_dict = defaultdict(lambda: defaultdict(pd.DataFrame))
     base_result_path = Path("benchmarking/results")
-    for file_path in base_result_path.glob("**/traj.parquet.gzip"):
+    for file_path in sorted(base_result_path.glob("**/traj.parquet.gzip")):
         version = file_path.parts[-3]
         benchmark = file_path.parts[-2]
 

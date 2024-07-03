@@ -1,4 +1,5 @@
 import argparse
+import random
 from pathlib import Path
 
 import mfpbench
@@ -122,6 +123,8 @@ def main():
         trajectories = []
         for seed in seeds:
             print(f"Running benchmark {benchmark_name} on seed {seed}")
+            np.random.seed(seed)
+            random.seed(seed)
             dehb_params["seed"] = int(seed)
             dehb_optimizer = DEHBOptimizerMFPBench(
                 dehb_params=dehb_params,
