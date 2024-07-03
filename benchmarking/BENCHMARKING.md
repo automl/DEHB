@@ -41,7 +41,6 @@ cd ..
 There are some additional dependencies needed for plotting and table generation, therefore please install DEHB with the benchmarking options:
 
 ```shell
-cd DEHB
 pip install -e .[benchmarking,hpobench_benchmark]
 ```
 
