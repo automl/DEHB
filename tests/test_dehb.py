@@ -1,6 +1,7 @@
 import builtins
 import io
 import os
+import time
 import typing
 
 import ConfigSpace
@@ -23,7 +24,6 @@ def patch_open(open_func, files):
                          opener=opener)
     return open_patched
 
-
 @pytest.fixture(autouse=True)
 def cleanup_files(monkeypatch):
     """This fixture automatically cleans up all files that have been written by the tests after
@@ -32,10 +32,26 @@ def cleanup_files(monkeypatch):
     files = []
     monkeypatch.setattr(builtins, "open", patch_open(builtins.open, files))
     monkeypatch.setattr(io, "open", patch_open(io.open, files))
-    logger.remove()
+
     yield
+
+    # Ensure all Loguru handlers are removed and closed
+    logger.remove()
+
+    # Retry mechanism for file deletion
+    def delete_file_with_retry(file, retries=5, delay=1):
+        for i in range(retries):
+            try:
+                os.remove(file)
+                return
+            except PermissionError as e:
+                if i < retries - 1:
+                    time.sleep(delay)
+                else:
+                    raise e
+
     for file in files:
-        os.remove(file)
+        delete_file_with_retry(file)
 
 def create_toy_searchspace():
     """Creates a toy searchspace with a single hyperparameter.
