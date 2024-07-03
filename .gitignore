@@ -14,9 +14,8 @@ __pycache__/
 */*/__pycache__/
 
 
-# folders as artefacts
+# folders as artifacts
 .idea/
-results/
 plots/
 workflow/
 dask-worker-space/
@@ -24,7 +23,7 @@ dehb/examples/*/results
 dehb/examples/*/*/results
 .ipynb_checkpoints/
 data/
-benchmarking/results
+logs/
 *.err
 
 

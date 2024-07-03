@@ -9,6 +9,7 @@ from dehb import DEHB
 def create_plot_for_benchmark(results: dict, output_path: Path,
                               benchmark_name: str):
     plt.clf()
+    results = dict(reversed(sorted(results.items())))
     for version, data in results.items():
         mean_trajectory = data["mean_trajectory"]
         std_trajectory = data["std_trajectory"]
@@ -33,7 +34,7 @@ def create_table_for_benchmark(results: dict) -> list:
         traj_length = len(results[arbitrary_key]["mean_trajectory"])
         header.append(str(int(budget * traj_length)))
     table.append(header)
-    results = dict(sorted(results.items()))
+    results = dict(reversed(sorted(results.items())))
     for version in results:
         row = [version]
         mean_traj = results[version]["mean_trajectory"]

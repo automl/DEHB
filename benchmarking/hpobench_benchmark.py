@@ -88,7 +88,7 @@ def input_arguments():
         "--benchmarks",
         type=str,
         nargs="*",
-        default=["tab_nn"],
+        default=["tab_nn", "tab_lr", "tab_rf", "tab_svm", "surrogate", "nasbench201"],
         help="Benchmarks to run DEHB on.",
         choices=["tab_nn", "tab_lr", "tab_rf", "tab_svm", "surrogate", "nasbench201"],
     )
