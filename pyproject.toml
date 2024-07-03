@@ -59,6 +59,28 @@ examples = [
   "scikit-learn",
   "matplotlib",
 ]
+benchmarking = [
+  "matplotlib",
+  "markdown_table_generator",
+]
+hpobench_benchmark = [
+  "scikit-learn==0.23.2",
+  "numpy==1.20.0",
+  "tqdm",
+  "pandas==1.2.4",
+  "openml==0.12.2",
+  "ConfigSpace<0.7.1", # ConfigSpace>0.7 is not backward compatible regarding json loading
+  "pillow==10.3.0", # matplotlib would otherwise throw an error related to numpy
+]
+
+jahs_benchmark = [
+  "typing_extensions", # Keep this in for now, until it is properly integrated in mf-prior-bench
+  "mf-prior-bench[jahs-bench]==1.9.0"
+]
+
+pd1_benchmark = [
+  "mf-prior-bench[pd1]==1.9.0"
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]                   # path to the test directory

@@ -67,6 +67,16 @@ When submitting a pull request, please ensure the following:
 - Ensure your code follows the project's code style and guidelines.
 - Be responsive to any feedback or questions during the review process.
 
+Additonally, we ask you to run specific benchmarks, depending on the depth of your changes:
+
+1. Style changes.
+
+    If your changes only consist of style modifications, such as renaming or adding docstrings, and do not interfere with DEHB's interface, functionality, or algorithm, it is sufficient for all test cases to pass.
+
+2. Changes to DEHB's interface and functionality or the algorithm itself.
+
+    If your changes affect the interface, functionality, or algorithm of DEHB, please also run the synthetic benchmarks (MFH3, MFH6 of MFPBench, and the CountingOnes benchmark). This will help determine whether any changes introduced bugs or significantly altered DEHB's performance. However, at the reviewer's discretion, you may also be asked to run your changes on real-world benchmarks if deemed necessary. For instructions on how to install and run the benchmarks, please have a look at our [benchmarking instructions](./benchmarking/BENCHMARKING.md). Please use the same budget for your benchmark runs as we specified in the instructions.
+
 ## Code Style and Guidelines
 
 To maintain consistency and readability, we follow a set of code style and guidelines. Please make sure that your code adheres to these standards:
