@@ -7,6 +7,7 @@ import ConfigSpace
 import numpy as np
 import pandas as pd
 import pytest
+from loguru import logger
 from src.dehb.optimizers.dehb import DEHB
 
 
@@ -31,6 +32,7 @@ def cleanup_files(monkeypatch):
     files = []
     monkeypatch.setattr(builtins, "open", patch_open(builtins.open, files))
     monkeypatch.setattr(io, "open", patch_open(io.open, files))
+    logger.remove()
     yield
     for file in files:
         os.remove(file)
