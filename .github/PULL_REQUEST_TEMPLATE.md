@@ -8,7 +8,7 @@ Thank you for your contribution! Before submitting this PR, please make sure you
 - [ ] Add new unit tests to cover the changes.
 - [ ] Verify that your code follows the project's coding standards.
 - [ ] Add documentation for your code if necessary.
-- [ ] Check below, if your changes require you to run benchmarks
+- [ ] Check below, if your changes require you to run benchmarks.
 
 #### When Do I Need To Run Benchmarks?
 
