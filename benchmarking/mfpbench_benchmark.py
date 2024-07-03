@@ -74,12 +74,6 @@ def input_arguments():
         help="Number of CPU workers for DEHB to distribute function evaluations to.",
     ),
     parser.add_argument(
-        "--verbose",
-        action="store_true",
-        default=False,
-        help="Decides verbosity of DEHB optimization.",
-    )
-    parser.add_argument(
         "--brackets",
         type=int,
         default=None,
@@ -128,7 +122,7 @@ def main():
         trajectories = []
         for seed in seeds:
             print(f"Running benchmark {benchmark_name} on seed {seed}")
-            dehb_params["seed"] = seed
+            dehb_params["seed"] = int(seed)
             dehb_optimizer = DEHBOptimizerMFPBench(
                 dehb_params=dehb_params,
                 fevals=args.fevals,
@@ -137,7 +131,6 @@ def main():
                 use_ask_tell=args.ask_tell,
                 use_restart=args.restart,
                 benchmark_name=benchmark_name,
-                verbose=args.verbose,
             )
             traj = dehb_optimizer.run()
             trajectories.append(traj)

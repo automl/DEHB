@@ -48,8 +48,7 @@ def create_table_for_benchmark(results: dict) -> list:
 
 class DEHBOptimizerBase():
     def __init__(self, dehb_params, fevals, brackets, walltime, use_ask_tell, use_restart,
-                 benchmark_name, verbose) -> None:
-        self.verbose = verbose
+                 benchmark_name) -> None:
         self.fevals = fevals
         self.brackets = brackets
         self.walltime = walltime
@@ -104,7 +103,7 @@ class DEHBOptimizerBase():
             return self.dehb.traj
 
         traj,_ ,_ = self.dehb.run(fevals=fevals, brackets=brackets,
-                                  total_cost=walltime, verbose=self.verbose)
+                                  total_cost=walltime)
         return traj
     def _run_with_restart(self):
         pre_restart_brackets, post_restart_brackets = None, None

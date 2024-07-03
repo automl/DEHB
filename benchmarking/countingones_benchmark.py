@@ -1,4 +1,5 @@
 import argparse
+import random
 from pathlib import Path
 
 import numpy as np
@@ -9,12 +10,12 @@ from utils import DEHBOptimizerBase
 
 class DEHBOptimizerCountingOnes(DEHBOptimizerBase):
     def __init__(self, dehb_params, fevals, brackets, walltime, use_ask_tell, use_restart,
-                 benchmark_name, verbose, n_continuous, n_categorical) -> None:
+                 benchmark_name, n_continuous, n_categorical) -> None:
         self.n_continuous = n_continuous
         self.n_categorical = n_categorical
         super().__init__(dehb_params=dehb_params, fevals=fevals, brackets=brackets,
                          walltime=walltime, use_ask_tell=use_ask_tell, use_restart=use_restart,
-                         benchmark_name=benchmark_name, verbose=verbose)
+                         benchmark_name=benchmark_name)
 
     def _objective_function(self, config, fidelity):
         res = self.benchmark.objective_function(config,
@@ -83,12 +84,6 @@ def input_arguments():
         help="Number of CPU workers for DEHB to distribute function evaluations to.",
     ),
     parser.add_argument(
-        "--verbose",
-        action="store_true",
-        default=True,
-        help="Decides verbosity of DEHB optimization.",
-    )
-    parser.add_argument(
         "--brackets",
         type=int,
         default=None,
@@ -137,7 +132,9 @@ def main():
     trajectories = []
     for seed in seeds:
         print(f"Running benchmark {benchmark_name} on seed {seed}")
-        dehb_params["seed"] = seed
+        np.random.seed(seed)
+        random.seed(seed)
+        dehb_params["seed"] = int(seed)
         dehb_optimizer = DEHBOptimizerCountingOnes(
             dehb_params=dehb_params,
             fevals=args.fevals,
@@ -146,7 +143,6 @@ def main():
             use_ask_tell=args.ask_tell,
             use_restart=args.restart,
             benchmark_name=benchmark_name,
-            verbose=args.verbose,
             n_continuous=args.n_continuous,
             n_categorical=args.n_categorical,
         )
