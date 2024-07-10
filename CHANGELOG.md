@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2024-07-10
+
+### Added
+- Improved logging by making log level parameterizable (#85)
+- Improved respecting of runtime budget (#30)
+- Improved seeding/rng generation + seeding config space (#83)
+- Add warning messages when using deprecated `run` parameters
+- Add benchmarking suite + instructions
+
+### Changes
+- Add requirement for numpy<2.0 as ConfigSpace does not support numpy 2.0 yet
+
 ## [0.1.1] - 2024-04-01
 
 ### Added
@@ -77,7 +89,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial project release and push to PyPI
 
-[unreleased]: https://github.com/automl/DEHB/compare/v0.1.1...master
+[unreleased]: https://github.com/automl/DEHB/compare/v0.1.2...master
+[0.1.2]: https://github.com/automl/DEHB/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/automl/DEHB/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/automl/DEHB/compare/v0.0.7...v0.1.0
 [0.0.7]: https://github.com/automl/DEHB/compare/v0.0.6...v0.0.7
