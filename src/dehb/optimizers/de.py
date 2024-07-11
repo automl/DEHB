@@ -15,9 +15,16 @@ class DEBase():
     '''
     def __init__(self, cs=None, f=None, dimensions=None, pop_size=None, max_age=None,
                  mutation_factor=None, crossover_prob=None, strategy=None,
-                 boundary_fix_type='random', config_repository=None, seed=None, rng=None, **kwargs):
-        # Rng, either uses the rng passed by user/DEHB or creates its own
-        self.rng = rng if rng is not None else np.random.default_rng(seed)
+                 boundary_fix_type='random', config_repository=None, seed=None, **kwargs):
+        if seed is None:
+            seed = int(np.random.default_rng().integers(0, 2**32 - 1))
+        elif isinstance(seed, np.random.Generator):
+            seed = int(seed.integers(0, 2**32 - 1))
+
+        assert isinstance(seed, int)
+
+        self._original_seed = seed
+        self.rng = np.random.default_rng(self._original_seed)
 
         # Benchmark related variables
         self.cs = cs
@@ -39,6 +46,7 @@ class DEBase():
         self.configspace = True if isinstance(self.cs, ConfigSpace.ConfigurationSpace) else False
         self.hps = dict()
         if self.configspace:
+            self.cs.seed(self._original_seed)
             for i, hp in enumerate(cs.get_hyperparameters()):
                 # maps hyperparameter name to positional index in vector form
                 self.hps[hp.name] = i
@@ -61,7 +69,7 @@ class DEBase():
         self.history : list[object]
         self.reset()
 
-    def reset(self):
+    def reset(self, *, reset_seeds: bool = True):
         self.inc_score = np.inf
         self.inc_config = None
         self.inc_id = -1
@@ -69,6 +77,12 @@ class DEBase():
         self.population_ids = None
         self.fitness = None
         self.age = None
+
+        if reset_seeds:
+            if isinstance(self.cs, ConfigSpace.ConfigurationSpace):
+                self.cs.seed(self._original_seed)
+            self.rng = np.random.default_rng(self._original_seed)
+
         self.history = []
 
     def _shuffle_pop(self):
@@ -248,10 +262,10 @@ class DEBase():
 class DE(DEBase):
     def __init__(self, cs=None, f=None, dimensions=None, pop_size=20, max_age=np.inf,
                  mutation_factor=None, crossover_prob=None, strategy='rand1_bin', encoding=False,
-                 dim_map=None, seed=None, rng=None, config_repository=None, **kwargs):
+                 dim_map=None, seed=None, config_repository=None, **kwargs):
         super().__init__(cs=cs, f=f, dimensions=dimensions, pop_size=pop_size, max_age=max_age,
                          mutation_factor=mutation_factor, crossover_prob=crossover_prob,
-                         strategy=strategy, seed=seed, rng=rng, config_repository=config_repository,
+                         strategy=strategy, seed=seed, config_repository=config_repository,
                          **kwargs)
         if self.strategy is not None:
             self.mutation_strategy = self.strategy.split('_')[0]
@@ -276,8 +290,8 @@ class DE(DEBase):
         if hasattr(self, "client") and isinstance(self.client, Client):
             self.client.close()
 
-    def reset(self):
-        super().reset()
+    def reset(self, *, reset_seeds: bool = True):
+        super().reset(reset_seeds=reset_seeds)
         self.traj = []
         self.runtime = []
         self.history = []
