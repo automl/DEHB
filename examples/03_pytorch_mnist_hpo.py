@@ -26,7 +26,7 @@ import os
 import pickle
 import time
 
-import ConfigSpace as CS
+import ConfigSpace
 import ConfigSpace.hyperparameters as CSH
 import numpy as np
 import torch
@@ -97,31 +97,25 @@ class Model(nn.Module):
 
 
 def get_configspace(seed=None):
-    cs = CS.ConfigurationSpace(seed)
-
     # Hyperparameter defining first Conv layer
     kernel1 = CSH.OrdinalHyperparameter("kernel_1", sequence=[3, 5, 7], default_value=5)
     channels1 = CSH.UniformIntegerHyperparameter("channels_1", lower=3, upper=64,
                                                  default_value=32)
     stride1 = CSH.UniformIntegerHyperparameter("stride_1", lower=1, upper=2, default_value=1)
-    cs.add_hyperparameters([kernel1, channels1, stride1])
 
     # Hyperparameter defining second Conv layer
     kernel2 = CSH.OrdinalHyperparameter("kernel_2", sequence=[3, 5, 7], default_value=5)
     channels2 = CSH.UniformIntegerHyperparameter("channels_2", lower=3, upper=64,
                                                  default_value=32)
     stride2 = CSH.UniformIntegerHyperparameter("stride_2", lower=1, upper=2, default_value=1)
-    cs.add_hyperparameters([kernel2, channels2, stride2])
 
     # Hyperparameter for FC layer
     hidden = CSH.UniformIntegerHyperparameter(
         "hidden", lower=32, upper=256, log=True, default_value=128
     )
-    cs.add_hyperparameter(hidden)
 
     # Regularization Hyperparameter
     dropout = CSH.UniformFloatHyperparameter("dropout", lower=0, upper=0.5, default_value=0.1)
-    cs.add_hyperparameter(dropout)
 
     # Training Hyperparameters
     batch_size = CSH.OrdinalHyperparameter(
@@ -129,7 +123,21 @@ def get_configspace(seed=None):
     )
     lr = CSH.UniformFloatHyperparameter("lr", lower=1e-6, upper=0.1, log=True,
                                         default_value=1e-3)
-    cs.add_hyperparameters([batch_size, lr])
+
+    cs = ConfigSpace.ConfigurationSpace(seed)
+    cs.add_hyperparameters([
+        kernel1,
+        channels1,
+        stride1,
+        kernel2,
+        channels2,
+        stride2,
+        hidden,
+        dropout,
+        batch_size,
+        lr,
+    ])
+
     return cs
 
 
@@ -203,7 +211,7 @@ def objective_function(config, fidelity, **kwargs):
     start = time.time()  # measuring wallclock time
     for _epoch in range(1, int(fidelity)+1):
         train(model, device, train_loader, optimizer)
-    loss = evaluate(model, device, valid_loader)
+    valid_loss = evaluate(model, device, valid_loader)
     cost = time.time() - start
 
     # not including test score computation in the `cost`
@@ -211,9 +219,9 @@ def objective_function(config, fidelity, **kwargs):
 
     # dict representation that DEHB requires
     res = {
-        "fitness": loss,
+        "fitness": valid_loss,
         "cost": cost,
-        "info": {"test_loss": test_loss, "fidelity": fidelity}
+        "info": {"test_loss": test_loss, "fidelity": fidelity},
     }
     return res
 
@@ -297,12 +305,19 @@ def main():
     # DEHB optimisation block #
     ###########################
     np.random.seed(args.seed)
-    dehb = DEHB(f=objective_function, cs=cs, dimensions=dimensions, min_fidelity=args.min_fidelity,
-                max_fidelity=args.max_fidelity, eta=args.eta, output_path=args.output_path,
-                seed=args.seed, log_level="INFO",
+    dehb = DEHB(f=objective_function,
+                cs=cs,
+                dimensions=dimensions,
+                min_fidelity=args.min_fidelity,
+                max_fidelity=args.max_fidelity,
+                eta=args.eta,
+                output_path=args.output_path,
+                seed=args.seed,
+                log_level="INFO",
                 # if client is not None and of type Client, n_workers is ignored
                 # if client is None, a Dask client with n_workers is set up
                 client=client, n_workers=args.n_workers)
+
     traj, runtime, history = dehb.run(total_cost=args.runtime,
                                       # arguments below are part of **kwargs shared across workers
                                       train_set=train_set, valid_set=valid_set, test_set=test_set,
