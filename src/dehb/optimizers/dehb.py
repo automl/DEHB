@@ -269,6 +269,7 @@ class DEHB(DEHBBase):
         d = dict(self.__dict__)
         d["client"] = None  # hack to allow Dask client to be a class attribute
         d["logger"] = None  # hack to allow logger object to be a class attribute
+        d["_runtime_budget_timer"] = None # hack to allow timer object to be a class attribute
         return d
 
     def __del__(self):
