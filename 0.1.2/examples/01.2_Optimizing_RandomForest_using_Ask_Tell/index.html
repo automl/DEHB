@@ -2252,7 +2252,7 @@ dehb = DEHB(
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-07-11 12:02:46.388</span> | <span class="ansi-yellow-intense-fg ansi-bold">WARNING </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">__init__</span>:<span class="ansi-cyan-fg">264</span> - <span class="ansi-yellow-intense-fg ansi-bold">A checkpoint already exists, results could potentially be overwritten.</span>
+<pre><span class="ansi-green-fg">2024-07-11 12:14:28.248</span> | <span class="ansi-yellow-intense-fg ansi-bold">WARNING </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">__init__</span>:<span class="ansi-cyan-fg">264</span> - <span class="ansi-yellow-intense-fg ansi-bold">A checkpoint already exists, results could potentially be overwritten.</span>
 </pre>
 </div>
 </div>
@@ -2437,19 +2437,19 @@ print(f"{best_config} got an accuracy of {test_accuracy} on the test set.")</div
 
 Last evaluated configuration, 
 Configuration(values={
-  'max_depth': 12,
-  'max_features': 0.4884842168238548,
-  'min_samples_leaf': 1,
-  'min_samples_split': 8,
-})got a score of -1.0, was evaluated at a fidelity of 16.67 and took 0.018 seconds to run.
+  'max_depth': 14,
+  'max_features': 0.3627994312896865,
+  'min_samples_leaf': 4,
+  'min_samples_split': 3,
+})got a score of -0.9722222222222222, was evaluated at a fidelity of 16.67 and took 0.017 seconds to run.
 The additional info attached: {'test_score': 1.0, 'fidelity': 16.666666666666664}
 
 Best evaluated configuration, 
 Configuration(values={
-  'max_depth': 13,
-  'max_features': 0.637903147092347,
-  'min_samples_leaf': 1,
-  'min_samples_split': 2,
+  'max_depth': 14,
+  'max_features': 0.322339339294176,
+  'min_samples_leaf': 8,
+  'min_samples_split': 4,
 }) got an accuracy of 1.0 on the test set.
 </pre>
 </div>
@@ -2585,30 +2585,30 @@ print(f"{best_config} got an accuracy of {test_accuracy} on the test set.")</div
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-07-11 12:02:57.491</span> | <span class="ansi-yellow-intense-fg ansi-bold">WARNING </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">_timeout_handler</span>:<span class="ansi-cyan-fg">351</span> - <span class="ansi-yellow-intense-fg ansi-bold">Runtime budget exhausted. Saving optimization checkpoint now.</span>
+<pre><span class="ansi-green-fg">2024-07-11 12:14:39.334</span> | <span class="ansi-yellow-intense-fg ansi-bold">WARNING </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">_timeout_handler</span>:<span class="ansi-cyan-fg">351</span> - <span class="ansi-yellow-intense-fg ansi-bold">Runtime budget exhausted. Saving optimization checkpoint now.</span>
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>480 480 480
+<pre>497 497 497
 
 Last evaluated configuration, 
 Configuration(values={
-  'max_depth': 7,
-  'max_features': 0.7073004673379342,
-  'min_samples_leaf': 2,
-  'min_samples_split': 61,
-})got a score of -0.6666666666666666, was evaluated at a fidelity of 50.00 and took 0.059 seconds to run.
-The additional info attached: {'test_score': 0.4444444444444444, 'fidelity': 50.0}
+  'max_depth': 5,
+  'max_features': 0.871826398741931,
+  'min_samples_leaf': 6,
+  'min_samples_split': 22,
+})got a score of -0.9722222222222222, was evaluated at a fidelity of 50.00 and took 0.064 seconds to run.
+The additional info attached: {'test_score': 1.0, 'fidelity': 50.0}
 
 Best evaluated configuration, 
 Configuration(values={
   'max_depth': 4,
-  'max_features': 0.5597315303331494,
-  'min_samples_leaf': 2,
-  'min_samples_split': 12,
+  'max_features': 0.33423101248919773,
+  'min_samples_leaf': 12,
+  'min_samples_split': 7,
 }) got an accuracy of 1.0 on the test set.
 </pre>
 </div>

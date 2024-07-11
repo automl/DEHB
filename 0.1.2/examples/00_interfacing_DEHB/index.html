@@ -1936,7 +1936,7 @@ cs.sample_configuration()</div>
 <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>Configuration(values={
-  'x0': 5.009962497162792,
+  'x0': 3.0695719039963647,
 })</pre>
 </div>
 </div>
@@ -2158,7 +2158,7 @@ print(dehb.vector_to_configspace(dehb.inc_config))</div>
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Configuration(values={
-  'x0': 6.3241387478408395,
+  'x0': 6.08003857623764,
 })
 </pre>
 </div>
@@ -2219,8 +2219,8 @@ print(dehb.get_incumbents())</div>
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>(Configuration(values={
-  'x0': 6.438583255297998,
-}), 0.0220979806266709)
+  'x0': 4.788064031799392,
+}), 0.05713714262377678)
 </pre>
 </div>
 </div>
@@ -2279,7 +2279,7 @@ print(dehb.get_incumbents())</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-07-11 12:01:33.827</span> | <span class="ansi-yellow-intense-fg ansi-bold">WARNING </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">_timeout_handler</span>:<span class="ansi-cyan-fg">351</span> - <span class="ansi-yellow-intense-fg ansi-bold">Runtime budget exhausted. Saving optimization checkpoint now.</span>
+<pre><span class="ansi-green-fg">2024-07-11 12:13:15.788</span> | <span class="ansi-yellow-intense-fg ansi-bold">WARNING </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">_timeout_handler</span>:<span class="ansi-cyan-fg">351</span> - <span class="ansi-yellow-intense-fg ansi-bold">Runtime budget exhausted. Saving optimization checkpoint now.</span>
 </pre>
 </div>
 </div>
@@ -2287,8 +2287,8 @@ print(dehb.get_incumbents())</div>
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>(Configuration(values={
-  'x0': 9.358064595427141,
-}), 0.00243105717096892)
+  'x0': 4.496142512279378,
+}), 0.020862437885136753)
 </pre>
 </div>
 </div>
@@ -2366,16 +2366,16 @@ print(dehb.get_incumbents())</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-07-11 12:01:36.751</span> | <span class="ansi-yellow-intense-fg ansi-bold">WARNING </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">__init__</span>:<span class="ansi-cyan-fg">264</span> - <span class="ansi-yellow-intense-fg ansi-bold">A checkpoint already exists, results could potentially be overwritten.</span>
+<pre><span class="ansi-green-fg">2024-07-11 12:13:18.654</span> | <span class="ansi-yellow-intense-fg ansi-bold">WARNING </span> | <span class="ansi-cyan-fg">dehb.optimizers.dehb</span>:<span class="ansi-cyan-fg">__init__</span>:<span class="ansi-cyan-fg">264</span> - <span class="ansi-yellow-intense-fg ansi-bold">A checkpoint already exists, results could potentially be overwritten.</span>
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>2024-07-11 12:01:36,763 - distributed.protocol.pickle - ERROR - Failed to serialize &lt;ToPickle: HighLevelGraph with 1 layers.
-&lt;dask.highlevelgraph.HighLevelGraph object at 0x7f3e2cf29cf0&gt;
- 0. 139905018784064
+<pre>2024-07-11 12:13:18,665 - distributed.protocol.pickle - ERROR - Failed to serialize &lt;ToPickle: HighLevelGraph with 1 layers.
+&lt;dask.highlevelgraph.HighLevelGraph object at 0x7f64c0735d20&gt;
+ 0. 140070702269760
 &gt;.
 Traceback (most recent call last):
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/distributed/protocol/pickle.py", line 63, in dumps
@@ -2405,15 +2405,15 @@ TypeError: cannot pickle '_thread.lock' object
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-green-fg">2024-07-11 12:01:36.765</span> | <span class="ansi-red-intense-fg ansi-bold">ERROR   </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">&lt;module&gt;</span>:<span class="ansi-cyan-fg">10</span> - <span class="ansi-red-intense-fg ansi-bold">An error has been caught in function '&lt;module&gt;', process 'MainProcess' (1876), thread 'MainThread' (139906653662080):</span>
+<pre><span class="ansi-green-fg">2024-07-11 12:13:18.668</span> | <span class="ansi-red-intense-fg ansi-bold">ERROR   </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">&lt;module&gt;</span>:<span class="ansi-cyan-fg">10</span> - <span class="ansi-red-intense-fg ansi-bold">An error has been caught in function '&lt;module&gt;', process 'MainProcess' (1919), thread 'MainThread' (140072118713216):</span>
 <span class="ansi-yellow-intense-fg ansi-bold">Traceback (most recent call last):</span>
 
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/distributed/protocol/pickle.py", line 63, in dumps
     result = pickle.dumps(x, **dump_kwargs)
-             │      │     │    └ {'protocol': 5, 'buffer_callback': &lt;built-in method append of list object at 0x7f3e3560ed80&gt;}
+             │      │     │    └ {'protocol': 5, 'buffer_callback': &lt;built-in method append of list object at 0x7f64c073f800&gt;}
              │      │     └ &lt;ToPickle: HighLevelGraph with 1 layers.
-             │      │       &lt;dask.highlevelgraph.HighLevelGraph object at 0x7f3e2cf29cf0&gt;
-             │      │        0. 139905018784064
+             │      │       &lt;dask.highlevelgraph.HighLevelGraph object at 0x7f64c0735d20&gt;
+             │      │        0. 140070702269760
              │      │       &gt;
              │      └ &lt;built-in function dumps&gt;
              └ &lt;module 'pickle' from '/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/pickle.py'&gt;
@@ -2429,11 +2429,11 @@ TypeError: cannot pickle '_thread.lock' object
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/distributed/protocol/pickle.py", line 68, in dumps
     pickler.dump(x)
     │       │    └ &lt;ToPickle: HighLevelGraph with 1 layers.
-    │       │      &lt;dask.highlevelgraph.HighLevelGraph object at 0x7f3e2cf29cf0&gt;
-    │       │       0. 139905018784064
+    │       │      &lt;dask.highlevelgraph.HighLevelGraph object at 0x7f64c0735d20&gt;
+    │       │       0. 140070702269760
     │       │      &gt;
     │       └ &lt;method 'dump' of '_pickle.Pickler' objects&gt;
-    └ &lt;distributed.protocol.pickle._DaskPickler object at 0x7f3e368f3340&gt;
+    └ &lt;distributed.protocol.pickle._DaskPickler object at 0x7f64c10fb640&gt;
 
 <span class="ansi-red-intense-fg ansi-bold">TypeError</span>:<span class="ansi-bold"> cannot pickle '_thread.lock' object</span>
 
@@ -2446,44 +2446,44 @@ TypeError: cannot pickle '_thread.lock' object
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/distributed/protocol/serialize.py", line 363, in serialize
     header, frames = dumps(x, context=context) if wants_context else dumps(x)
                      │     │          │           │                  │     └ &lt;ToPickle: HighLevelGraph with 1 layers.
-                     │     │          │           │                  │       &lt;dask.highlevelgraph.HighLevelGraph object at 0x7f3e2cf29cf0&gt;
-                     │     │          │           │                  │        0. 139905018784064
+                     │     │          │           │                  │       &lt;dask.highlevelgraph.HighLevelGraph object at 0x7f64c0735d20&gt;
+                     │     │          │           │                  │        0. 140070702269760
                      │     │          │           │                  │       &gt;
-                     │     │          │           │                  └ &lt;function pickle_dumps at 0x7f3e42ca20e0&gt;
+                     │     │          │           │                  └ &lt;function pickle_dumps at 0x7f64c94a60e0&gt;
                      │     │          │           └ True
                      │     │          └ None
                      │     └ &lt;ToPickle: HighLevelGraph with 1 layers.
-                     │       &lt;dask.highlevelgraph.HighLevelGraph object at 0x7f3e2cf29cf0&gt;
-                     │        0. 139905018784064
+                     │       &lt;dask.highlevelgraph.HighLevelGraph object at 0x7f64c0735d20&gt;
+                     │        0. 140070702269760
                      │       &gt;
-                     └ &lt;function pickle_dumps at 0x7f3e42ca20e0&gt;
+                     └ &lt;function pickle_dumps at 0x7f64c94a60e0&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/distributed/protocol/serialize.py", line 78, in pickle_dumps
     frames[0] = pickle.dumps(
-    │           │      └ &lt;function dumps at 0x7f3e42c94160&gt;
+    │           │      └ &lt;function dumps at 0x7f64c9498160&gt;
     │           └ &lt;module 'distributed.protocol.pickle' from '/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/distributed/...
     └ [None]
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/distributed/protocol/pickle.py", line 81, in dumps
     result = cloudpickle.dumps(x, **dump_kwargs)
-             │           │     │    └ {'protocol': 5, 'buffer_callback': &lt;built-in method append of list object at 0x7f3e3560ed80&gt;}
+             │           │     │    └ {'protocol': 5, 'buffer_callback': &lt;built-in method append of list object at 0x7f64c073f800&gt;}
              │           │     └ &lt;ToPickle: HighLevelGraph with 1 layers.
-             │           │       &lt;dask.highlevelgraph.HighLevelGraph object at 0x7f3e2cf29cf0&gt;
-             │           │        0. 139905018784064
+             │           │       &lt;dask.highlevelgraph.HighLevelGraph object at 0x7f64c0735d20&gt;
+             │           │        0. 140070702269760
              │           │       &gt;
-             │           └ &lt;function dumps at 0x7f3e43102290&gt;
+             │           └ &lt;function dumps at 0x7f64c98da290&gt;
              └ &lt;module 'cloudpickle' from '/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/cloudpickle/__init__.py'&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/cloudpickle/cloudpickle.py", line 1479, in dumps
     cp.dump(obj)
     │  │    └ &lt;ToPickle: HighLevelGraph with 1 layers.
-    │  │      &lt;dask.highlevelgraph.HighLevelGraph object at 0x7f3e2cf29cf0&gt;
-    │  │       0. 139905018784064
+    │  │      &lt;dask.highlevelgraph.HighLevelGraph object at 0x7f64c0735d20&gt;
+    │  │       0. 140070702269760
     │  │      &gt;
-    │  └ &lt;function Pickler.dump at 0x7f3e431020e0&gt;
-    └ &lt;cloudpickle.cloudpickle.Pickler object at 0x7f3e368f3580&gt;
+    │  └ &lt;function Pickler.dump at 0x7f64c98da0e0&gt;
+    └ &lt;cloudpickle.cloudpickle.Pickler object at 0x7f64c10fb340&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/cloudpickle/cloudpickle.py", line 1245, in dump
     return super().dump(obj)
                         └ &lt;ToPickle: HighLevelGraph with 1 layers.
-                          &lt;dask.highlevelgraph.HighLevelGraph object at 0x7f3e2cf29cf0&gt;
-                           0. 139905018784064
+                          &lt;dask.highlevelgraph.HighLevelGraph object at 0x7f64c0735d20&gt;
+                           0. 140070702269760
                           &gt;
 
 <span class="ansi-red-intense-fg ansi-bold">TypeError</span>:<span class="ansi-bold"> cannot pickle '_thread.lock' object</span>
@@ -2497,37 +2497,37 @@ TypeError: cannot pickle '_thread.lock' object
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/runpy.py", line 196, in _run_module_as_main
     return _run_code(code, main_globals, None,
            │         │     └ {'__name__': '__main__', '__doc__': 'Entry point for launching an IPython kernel.\n\nThis is separate from the ipykernel pack...
-           │         └ &lt;code object &lt;module&gt; at 0x7f3e8d97f100, file "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel...
-           └ &lt;function _run_code at 0x7f3e8d98b370&gt;
+           │         └ &lt;code object &lt;module&gt; at 0x7f651417f100, file "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel...
+           └ &lt;function _run_code at 0x7f651418b370&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/runpy.py", line 86, in _run_code
     exec(code, run_globals)
          │     └ {'__name__': '__main__', '__doc__': 'Entry point for launching an IPython kernel.\n\nThis is separate from the ipykernel pack...
-         └ &lt;code object &lt;module&gt; at 0x7f3e8d97f100, file "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel...
+         └ &lt;code object &lt;module&gt; at 0x7f651417f100, file "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel...
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel_launcher.py", line 18, in &lt;module&gt;
     app.launch_new_instance()
     │   └ &lt;bound method Application.launch_instance of &lt;class 'ipykernel.kernelapp.IPKernelApp'&gt;&gt;
     └ &lt;module 'ipykernel.kernelapp' from '/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelapp....
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/traitlets/config/application.py", line 1075, in launch_instance
     app.start()
-    │   └ &lt;function IPKernelApp.start at 0x7f3e8b31e5f0&gt;
-    └ &lt;ipykernel.kernelapp.IPKernelApp object at 0x7f3e8d915ed0&gt;
+    │   └ &lt;function IPKernelApp.start at 0x7f6511afe5f0&gt;
+    └ &lt;ipykernel.kernelapp.IPKernelApp object at 0x7f6514115ea0&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelapp.py", line 739, in start
     self.io_loop.start()
-    │    │       └ &lt;function BaseAsyncIOLoop.start at 0x7f3e8b31f1c0&gt;
-    │    └ &lt;tornado.platform.asyncio.AsyncIOMainLoop object at 0x7f3e8b155930&gt;
-    └ &lt;ipykernel.kernelapp.IPKernelApp object at 0x7f3e8d915ed0&gt;
+    │    │       └ &lt;function BaseAsyncIOLoop.start at 0x7f6511aff1c0&gt;
+    │    └ &lt;tornado.platform.asyncio.AsyncIOMainLoop object at 0x7f65119358a0&gt;
+    └ &lt;ipykernel.kernelapp.IPKernelApp object at 0x7f6514115ea0&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/tornado/platform/asyncio.py", line 205, in start
     self.asyncio_loop.run_forever()
-    │    │            └ &lt;function BaseEventLoop.run_forever at 0x7f3e8ca06ef0&gt;
+    │    │            └ &lt;function BaseEventLoop.run_forever at 0x7f65131eaef0&gt;
     │    └ &lt;_UnixSelectorEventLoop running=True closed=False debug=False&gt;
-    └ &lt;tornado.platform.asyncio.AsyncIOMainLoop object at 0x7f3e8b155930&gt;
+    └ &lt;tornado.platform.asyncio.AsyncIOMainLoop object at 0x7f65119358a0&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/asyncio/base_events.py", line 603, in run_forever
     self._run_once()
-    │    └ &lt;function BaseEventLoop._run_once at 0x7f3e8ca08a60&gt;
+    │    └ &lt;function BaseEventLoop._run_once at 0x7f65131eca60&gt;
     └ &lt;_UnixSelectorEventLoop running=True closed=False debug=False&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/asyncio/base_events.py", line 1909, in _run_once
     handle._run()
-    │      └ &lt;function Handle._run at 0x7f3e8cbb8430&gt;
+    │      └ &lt;function Handle._run at 0x7f65133b8430&gt;
     └ &lt;Handle Task.task_wakeup(&lt;Future finis...}')&gt;, ...],))&gt;)&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/asyncio/events.py", line 80, in _run
     self._context.run(self._callback, *self._args)
@@ -2539,107 +2539,107 @@ TypeError: cannot pickle '_thread.lock' object
     └ &lt;Handle Task.task_wakeup(&lt;Future finis...}')&gt;, ...],))&gt;)&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelbase.py", line 545, in dispatch_queue
     await self.process_one()
-          │    └ &lt;function Kernel.process_one at 0x7f3e8b2dca60&gt;
-          └ &lt;ipykernel.ipkernel.IPythonKernel object at 0x7f3e8b155f00&gt;
+          │    └ &lt;function Kernel.process_one at 0x7f6511abca60&gt;
+          └ &lt;ipykernel.ipkernel.IPythonKernel object at 0x7f6511935e70&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelbase.py", line 534, in process_one
     await dispatch(*args)
-          │         └ ([&lt;zmq.Frame(b'b463f564-83f'...33B)&gt;, &lt;zmq.Frame(b'&lt;IDS|MSG&gt;')&gt;, &lt;zmq.Frame(b'a373ee1a0704'...64B)&gt;, &lt;zmq.Frame(b'{"msg_id": ...
-          └ &lt;bound method Kernel.dispatch_shell of &lt;ipykernel.ipkernel.IPythonKernel object at 0x7f3e8b155f00&gt;&gt;
+          │         └ ([&lt;zmq.Frame(b'9cc5ce70-1a1'...33B)&gt;, &lt;zmq.Frame(b'&lt;IDS|MSG&gt;')&gt;, &lt;zmq.Frame(b'de24dbc99425'...64B)&gt;, &lt;zmq.Frame(b'{"msg_id": ...
+          └ &lt;bound method Kernel.dispatch_shell of &lt;ipykernel.ipkernel.IPythonKernel object at 0x7f6511935e70&gt;&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelbase.py", line 437, in dispatch_shell
     await result
-          └ &lt;coroutine object IPythonKernel.execute_request at 0x7f3e36772030&gt;
+          └ &lt;coroutine object IPythonKernel.execute_request at 0x7f64c0f5a0a0&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/ipkernel.py", line 362, in execute_request
     await super().execute_request(stream, ident, parent)
-                                  │       │      └ {'header': {'msg_id': 'b463f564-83fdd56f2542e732e3c89fdf_1871_13', 'msg_type': 'execute_request', 'username': 'runner', 'sess...
-                                  │       └ [b'b463f564-83fdd56f2542e732e3c89fdf']
-                                  └ &lt;zmq.eventloop.zmqstream.ZMQStream object at 0x7f3e8b155660&gt;
+                                  │       │      └ {'header': {'msg_id': '9cc5ce70-1a1c77e92b622e9be9502f68_1910_13', 'msg_type': 'execute_request', 'username': 'runner', 'sess...
+                                  │       └ [b'9cc5ce70-1a1c77e92b622e9be9502f68']
+                                  └ &lt;zmq.eventloop.zmqstream.ZMQStream object at 0x7f65119355d0&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelbase.py", line 778, in execute_request
     reply_content = await reply_content
-                          └ &lt;coroutine object IPythonKernel.do_execute at 0x7f3e36771d90&gt;
+                          └ &lt;coroutine object IPythonKernel.do_execute at 0x7f64c0f59d90&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/ipkernel.py", line 449, in do_execute
     res = shell.run_cell(
-          │     └ &lt;function ZMQInteractiveShell.run_cell at 0x7f3e8b307b50&gt;
-          └ &lt;ipykernel.zmqshell.ZMQInteractiveShell object at 0x7f3e80ca9900&gt;
+          │     └ &lt;function ZMQInteractiveShell.run_cell at 0x7f6511ae7b50&gt;
+          └ &lt;ipykernel.zmqshell.ZMQInteractiveShell object at 0x7f650c4d18a0&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/zmqshell.py", line 549, in run_cell
     return super().run_cell(*args, **kwargs)
                              │       └ {'store_history': True, 'silent': False, 'cell_id': None}
                              └ ('dehb = DEHB(\n    f=target_function,\n    dimensions=dimensions,\n    cs=cs,\n    min_fidelity=min_fidelity,\n    max_fidel...
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py", line 3075, in run_cell
     result = self._run_cell(
-             │    └ &lt;function InteractiveShell._run_cell at 0x7f3e8be36050&gt;
-             └ &lt;ipykernel.zmqshell.ZMQInteractiveShell object at 0x7f3e80ca9900&gt;
+             │    └ &lt;function InteractiveShell._run_cell at 0x7f6512606050&gt;
+             └ &lt;ipykernel.zmqshell.ZMQInteractiveShell object at 0x7f650c4d18a0&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py", line 3130, in _run_cell
     result = runner(coro)
-             │      └ &lt;coroutine object InteractiveShell.run_cell_async at 0x7f3e367720a0&gt;
-             └ &lt;function _pseudo_sync_runner at 0x7f3e8be1d990&gt;
+             │      └ &lt;coroutine object InteractiveShell.run_cell_async at 0x7f64c0f5a030&gt;
+             └ &lt;function _pseudo_sync_runner at 0x7f65125ed990&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/async_helpers.py", line 128, in _pseudo_sync_runner
     coro.send(None)
     │    └ &lt;method 'send' of 'coroutine' objects&gt;
-    └ &lt;coroutine object InteractiveShell.run_cell_async at 0x7f3e367720a0&gt;
+    └ &lt;coroutine object InteractiveShell.run_cell_async at 0x7f64c0f5a030&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py", line 3334, in run_cell_async
     has_raised = await self.run_ast_nodes(code_ast.body, cell_name,
-                       │    │             │        │     └ '/tmp/ipykernel_1876/1264706599.py'
-                       │    │             │        └ [&lt;ast.Assign object at 0x7f3e35557fd0&gt;, &lt;ast.Assign object at 0x7f3e35556680&gt;, &lt;ast.Expr object at 0x7f3e35557520&gt;]
-                       │    │             └ &lt;ast.Module object at 0x7f3e35556a70&gt;
-                       │    └ &lt;function InteractiveShell.run_ast_nodes at 0x7f3e8be36320&gt;
-                       └ &lt;ipykernel.zmqshell.ZMQInteractiveShell object at 0x7f3e80ca9900&gt;
+                       │    │             │        │     └ '/tmp/ipykernel_1919/1264706599.py'
+                       │    │             │        └ [&lt;ast.Assign object at 0x7f64c0f61180&gt;, &lt;ast.Assign object at 0x7f64c0d41c30&gt;, &lt;ast.Expr object at 0x7f64c0d423e0&gt;]
+                       │    │             └ &lt;ast.Module object at 0x7f64c0f60d00&gt;
+                       │    └ &lt;function InteractiveShell.run_ast_nodes at 0x7f6512606320&gt;
+                       └ &lt;ipykernel.zmqshell.ZMQInteractiveShell object at 0x7f650c4d18a0&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py", line 3517, in run_ast_nodes
     if await self.run_code(code, result, async_=asy):
              │    │        │     │              └ False
-             │    │        │     └ &lt;ExecutionResult object at 7f3e43583c40, execution_count=12 error_before_exec=None error_in_exec=None info=&lt;ExecutionInfo obj...
-             │    │        └ &lt;code object &lt;module&gt; at 0x7f3e2cf21630, file "/tmp/ipykernel_1876/1264706599.py", line 1&gt;
-             │    └ &lt;function InteractiveShell.run_code at 0x7f3e8be363b0&gt;
-             └ &lt;ipykernel.zmqshell.ZMQInteractiveShell object at 0x7f3e80ca9900&gt;
+             │    │        │     └ &lt;ExecutionResult object at 7f64c0f60730, execution_count=12 error_before_exec=None error_in_exec=None info=&lt;ExecutionInfo obj...
+             │    │        └ &lt;code object &lt;module&gt; at 0x7f64c0731580, file "/tmp/ipykernel_1919/1264706599.py", line 1&gt;
+             │    └ &lt;function InteractiveShell.run_code at 0x7f65126063b0&gt;
+             └ &lt;ipykernel.zmqshell.ZMQInteractiveShell object at 0x7f650c4d18a0&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py", line 3577, in run_code
     exec(code_obj, self.user_global_ns, self.user_ns)
          │         │    │               │    └ {'__name__': '__main__', '__doc__': 'Automatically created module for IPython interactive environment', '__package__': None, ...
-         │         │    │               └ &lt;ipykernel.zmqshell.ZMQInteractiveShell object at 0x7f3e80ca9900&gt;
-         │         │    └ &lt;property object at 0x7f3e8be28450&gt;
-         │         └ &lt;ipykernel.zmqshell.ZMQInteractiveShell object at 0x7f3e80ca9900&gt;
-         └ &lt;code object &lt;module&gt; at 0x7f3e2cf21630, file "/tmp/ipykernel_1876/1264706599.py", line 1&gt;
+         │         │    │               └ &lt;ipykernel.zmqshell.ZMQInteractiveShell object at 0x7f650c4d18a0&gt;
+         │         │    └ &lt;property object at 0x7f65125f4540&gt;
+         │         └ &lt;ipykernel.zmqshell.ZMQInteractiveShell object at 0x7f650c4d18a0&gt;
+         └ &lt;code object &lt;module&gt; at 0x7f64c0731580, file "/tmp/ipykernel_1919/1264706599.py", line 1&gt;
 
-&gt; File "<span class="ansi-green-fg">/tmp/ipykernel_1876/</span><span class="ansi-green-intense-fg ansi-bold">1264706599.py</span>", line <span class="ansi-yellow-fg">10</span>, in <span class="ansi-magenta-fg">&lt;module&gt;</span>
+&gt; File "<span class="ansi-green-fg">/tmp/ipykernel_1919/</span><span class="ansi-green-intense-fg ansi-bold">1264706599.py</span>", line <span class="ansi-yellow-fg">10</span>, in <span class="ansi-magenta-fg">&lt;module&gt;</span>
     <span class="ansi-bold">trajectory</span><span class="ansi-bold">,</span> <span class="ansi-bold">runtime</span><span class="ansi-bold">,</span> <span class="ansi-bold">history</span> <span class="ansi-magenta-intense-fg ansi-bold">=</span> <span class="ansi-bold">dehb</span><span class="ansi-magenta-intense-fg ansi-bold">.</span><span class="ansi-bold">run</span><span class="ansi-bold">(</span>
-    <span class="ansi-cyan-fg">                               │    └ </span><span class="ansi-cyan-intense-fg ansi-bold">&lt;function DEHB.run at 0x7f3e36755000&gt;</span>
-    <span class="ansi-cyan-fg">                               └ </span><span class="ansi-cyan-intense-fg ansi-bold">&lt;dehb.optimizers.dehb.DEHB object at 0x7f3e35557ee0&gt;</span>
+    <span class="ansi-cyan-fg">                               │    └ </span><span class="ansi-cyan-intense-fg ansi-bold">&lt;function DEHB.run at 0x7f64c0f3d000&gt;</span>
+    <span class="ansi-cyan-fg">                               └ </span><span class="ansi-cyan-intense-fg ansi-bold">&lt;dehb.optimizers.dehb.DEHB object at 0x7f64c0d429e0&gt;</span>
 
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/dehb/optimizers/dehb.py", line 1154, in run
     self._submit_job(job_info, **kwargs)
     │    │           │           └ {}
     │    │           └ {'config': Configuration(values={
-    │    │               'x0': 7.202185294836375,
+    │    │               'x0': 5.184991785921508,
     │    │             }), 'config_id': 46, 'fidelity': 0.1111111111111111, 'parent_id'...
-    │    └ &lt;function DEHB._submit_job at 0x7f3e36754790&gt;
-    └ &lt;dehb.optimizers.dehb.DEHB object at 0x7f3e35557ee0&gt;
+    │    └ &lt;function DEHB._submit_job at 0x7f64c0f3c790&gt;
+    └ &lt;dehb.optimizers.dehb.DEHB object at 0x7f64c0d429e0&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/dehb/optimizers/dehb.py", line 732, in _submit_job
     self.client.submit(self._f_objective, job_info)
     │    │      │      │    │             └ {'config': Configuration(values={
-    │    │      │      │    │                 'x0': 7.202185294836375,
+    │    │      │      │    │                 'x0': 5.184991785921508,
     │    │      │      │    │               }), 'config_id': 46, 'fidelity': 0.1111111111111111, 'parent_id'...
-    │    │      │      │    └ &lt;function DEHB._f_objective at 0x7f3e3673f9a0&gt;
-    │    │      │      └ &lt;dehb.optimizers.dehb.DEHB object at 0x7f3e35557ee0&gt;
-    │    │      └ &lt;function Client.submit at 0x7f3e42a392d0&gt;
-    │    └ &lt;Client: 'tcp://127.0.0.1:43941' processes=2 threads=2, memory=15.61 GiB&gt;
-    └ &lt;dehb.optimizers.dehb.DEHB object at 0x7f3e35557ee0&gt;
+    │    │      │      │    └ &lt;function DEHB._f_objective at 0x7f64c0f279a0&gt;
+    │    │      │      └ &lt;dehb.optimizers.dehb.DEHB object at 0x7f64c0d429e0&gt;
+    │    │      └ &lt;function Client.submit at 0x7f64c91e92d0&gt;
+    │    └ &lt;Client: 'tcp://127.0.0.1:44631' processes=2 threads=2, memory=15.61 GiB&gt;
+    └ &lt;dehb.optimizers.dehb.DEHB object at 0x7f64c0d429e0&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/distributed/client.py", line 2029, in submit
     futures = self._graph_to_futures(
-              │    └ &lt;function Client._graph_to_futures at 0x7f3e42a39fc0&gt;
-              └ &lt;Client: 'tcp://127.0.0.1:43941' processes=2 threads=2, memory=15.61 GiB&gt;
+              │    └ &lt;function Client._graph_to_futures at 0x7f64c91e9fc0&gt;
+              └ &lt;Client: 'tcp://127.0.0.1:44631' processes=2 threads=2, memory=15.61 GiB&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/distributed/client.py", line 3239, in _graph_to_futures
     header, frames = serialize(ToPickle(dsk), on_error="raise")
                      │         │        └ HighLevelGraph with 1 layers.
-                     │         │          &lt;dask.highlevelgraph.HighLevelGraph object at 0x7f3e2cf29cf0&gt;
-                     │         │           0. 139905018784064
+                     │         │          &lt;dask.highlevelgraph.HighLevelGraph object at 0x7f64c0735d20&gt;
+                     │         │           0. 140070702269760
                      │         │          
                      │         └ &lt;class 'distributed.protocol.serialize.ToPickle'&gt;
-                     └ &lt;function serialize at 0x7f3e42ca2680&gt;
+                     └ &lt;function serialize at 0x7f64c94a6680&gt;
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/distributed/protocol/serialize.py", line 389, in serialize
     raise TypeError(msg, str_x) from exc
                     │    │           └ TypeError("cannot pickle '_thread.lock' object")
-                    │    └ '&lt;ToPickle: HighLevelGraph with 1 layers.\n&lt;dask.highlevelgraph.HighLevelGraph object at 0x7f3e2cf29cf0&gt;\n 0. 139905018784064...
+                    │    └ '&lt;ToPickle: HighLevelGraph with 1 layers.\n&lt;dask.highlevelgraph.HighLevelGraph object at 0x7f64c0735d20&gt;\n 0. 140070702269760...
                     └ 'Could not serialize object of type HighLevelGraph'
 
-<span class="ansi-red-intense-fg ansi-bold">TypeError</span>:<span class="ansi-bold"> ('Could not serialize object of type HighLevelGraph', '&lt;ToPickle: HighLevelGraph with 1 layers.\n&lt;dask.highlevelgraph.HighLevelGraph object at 0x7f3e2cf29cf0&gt;\n 0. 139905018784064\n&gt;')</span>
+<span class="ansi-red-intense-fg ansi-bold">TypeError</span>:<span class="ansi-bold"> ('Could not serialize object of type HighLevelGraph', '&lt;ToPickle: HighLevelGraph with 1 layers.\n&lt;dask.highlevelgraph.HighLevelGraph object at 0x7f64c0735d20&gt;\n 0. 140070702269760\n&gt;')</span>
 </pre>
 </div>
 </div>
