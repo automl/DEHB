@@ -7,6 +7,8 @@
 [![Static Badge](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20-blue)](https://pypi.org/project/dehb/)
 [![arXiv](https://img.shields.io/badge/arXiv-2105.09821-b31b1b.svg)](https://arxiv.org/abs/2105.09821)
 
+> **_NOTE:_**  Following the release of v0.1.2, this project will be maintained for stability and compatibility purposes but will no longer undergo active development. While new features will not be added, the repository will continue to receive necessary updates to ensure ongoing functionality. For any feature requests, please feel free to fork the repository and submit a pull request.
+
 Welcome to DEHB, an algorithm for Hyperparameter Optimization (HPO). DEHB uses Differential Evolution (DE) under-the-hood as an Evolutionary Algorithm to power the black-box optimization that HPO problems pose.
 
 `dehb` is a python package implementing the [DEHB](https://arxiv.org/abs/2105.09821) algorithm. It offers an intuitive interface to optimize user-defined problems using DEHB.

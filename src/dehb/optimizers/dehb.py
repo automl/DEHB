@@ -269,6 +269,7 @@ class DEHB(DEHBBase):
         d = dict(self.__dict__)
         d["client"] = None  # hack to allow Dask client to be a class attribute
         d["logger"] = None  # hack to allow logger object to be a class attribute
+        d["_runtime_budget_timer"] = None # hack to allow timer object to be a class attribute
         return d
 
     def __del__(self):
@@ -832,7 +833,7 @@ class DEHB(DEHBBase):
             res = {}
             if self.use_configspace:
                 config = self.vector_to_configspace(self.inc_config)
-                res["config"] = config.get_dictionary()
+                res["config"] = dict(config)
             else:
                 res["config"] = self.inc_config.tolist()
             res["score"] = self.inc_score
@@ -849,8 +850,11 @@ class DEHB(DEHBBase):
             return
         try:
             history_path = self.output_path / name
-            history_df = pd.DataFrame(self.history, columns=["config_id", "config", "fitness",
-                                                             "cost", "fidelity", "info"])
+            # Persist bracket_id to reconstruct serial replay order later
+            history_df = pd.DataFrame(
+                self.history,
+                columns=["bracket_id", "config_id", "config", "fitness", "cost", "fidelity", "info"],
+            )
             # Check if the 'info' column is empty or contains only None values
             if history_df["info"].apply(lambda x: (isinstance(x, dict) and len(x) == 0)).all():
                 # Drop the 'info' column
@@ -935,12 +939,20 @@ class DEHB(DEHBBase):
         history_path = run_dir / "history.parquet.gzip"
         history = pd.read_parquet(history_path)
 
-        # Replay history
+        # Sort history to emulate serial execution order if bracket_id available
+        if "bracket_id" in history.columns:
+            history = history.sort_values(by=["bracket_id", "fidelity", "config_id"]).reset_index(drop=True)
+        else:
+            # Fallback ordering for older checkpoints
+            history = history.sort_values(by=["fidelity", "config_id"]).reset_index(drop=True)
+
+        # Replay history in the chosen order
         for _, row in history.iterrows():
             job_info = {
                 "fidelity": row["fidelity"],
                 "config_id": row["config_id"],
                 "config": np.array(row["config"]),
+                **({"bracket_id": int(row["bracket_id"]) } if "bracket_id" in history.columns else {}),
             }
             result = {
                 "fitness": row["fitness"],
@@ -992,6 +1004,8 @@ class DEHB(DEHBBase):
             job_info_container["fidelity"] = job_info["fidelity"]
             job_info_container["config"] = job_info["config"]
             job_info_container["config_id"] = job_info["config_id"]
+            if "bracket_id" in job_info:
+                job_info_container["bracket_id"] = job_info["bracket_id"]
 
             # Update entry in ConfigRepository
             self.config_repository.configs[job_info["config_id"]].config = job_info["config"]
@@ -1035,8 +1049,16 @@ class DEHB(DEHBBase):
             inc_changed = True
         # book-keeping
         self._update_trackers(
-            traj=self.inc_score, runtime=cost, history=(
-                config_id, config.tolist(), float(fitness), float(cost), float(fidelity), info,
+            traj=self.inc_score,
+            runtime=cost,
+            history=(
+                bracket_id,
+                config_id,
+                config.tolist(),
+                float(fitness),
+                float(cost),
+                float(fidelity),
+                info,
             ),
         )
 
@@ -1166,7 +1188,7 @@ class DEHB(DEHBBase):
         self.logger.info("Incumbent config: ")
         if self.use_configspace:
             config = self.vector_to_configspace(self.inc_config)
-            for k, v in config.get_dictionary().items():
+            for k, v in dict(config).items():
                 self.logger.info(f"{k}: {v}")
         else:
             self.logger.info(f"{self.inc_config}")
